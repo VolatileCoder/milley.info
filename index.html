@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mark S. Milley</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="site.css" rel="stylesheet" >
+  </head>
+  <body>
+    <div class="page" id="intro">
+      <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" style="border-top: .20rem solid #444; border-bottom: .20rem solid #444; ">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" aria-label="Slide 4"></button>
+        
+        </div>
+        <div class="carousel-inner" >
+          <div class="carousel-item active" onclick="changePage('resume');">
+            <div class="d-flex no-select flex-column justify-content-center " style="background-image: url('img/resume.webp'); background-size: cover; background-position: center center;height:300px;padding: 0 15% 1rem 15%;color:white; ">                
+              <p class="display-3" style="text-shadow:2px 2px #222; text-align:left;margin-bottom:0;line-height:120%">My Resume:</p>
+              <p class="display-6" style="text-shadow:2px 2px #222; text-align:left;line-height:105%"><span style="text-wrap:nowrap">A History</span> <span style="text-wrap:nowrap">of Adaptability</span></p>
+            </div>
+          </div>
+
+          <div class="carousel-item " onclick="changePage('leadership');">
+            <div class="d-flex no-select flex-column justify-content-end " style="background-image: url('img/leadership.webp'); background-size: cover; background-position: center center;height:300px;padding: 0 15% 1rem 15%;color:white; ">                
+              <p class="display-3" style="text-shadow:2px 2px #222; margin-bottom:0;line-height:105%;">Lessons in Leadership:</p>
+              <p class="display-6" style="text-shadow:2px 2px #222; line-height:105%;">Crafting <span style="text-wrap: nowrap;">High-Performing</span> Teams</p>
+            </div>
+          </div>
+
+          <div class="carousel-item" onclick="changePage('architecture');">
+            <div class="d-flex no-select flex-column justify-content-end align-items-end" style="background-image: url('img/jungle.webp'); background-size: cover; background-position: center center;height:300px;padding: 0 15% 1rem 15%;color:white; ">                
+              <p class="display-3" style="text-shadow:2px 2px #222; text-align:right;margin-bottom:0;line-height:105%;">Agile Software:</p>
+              <p class="display-6" style="text-shadow:2px 2px #222; text-align:right;line-height:105%"><span style="text-wrap:nowrap">Is Architecture a</span> <span style="text-wrap:nowrap">Lost Art?</span></p>
+            </div>
+          </div>
+
+          <div class="carousel-item" onclick="changePage('bio');">
+            <div class="d-flex no-select flex-column justify-content-center align-items-end" style="background-image: url('img/road.webp'); background-size: cover; background-position: center center;height:300px;padding: 0 15% 1rem 15%;color:white; ">                
+              <p class="display-3" style="text-shadow:2px 2px #222; text-align:right;margin-bottom:0;line-height:105%">Beyond the Code:</p>
+              <p class="display-6" style="text-shadow:2px 2px #222; text-align:right;line-height:105%"><span style="text-wrap:nowrap">A Road</span> <span style="text-wrap:nowrap">Less Traveled</span></p>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+      <div class="container align-middle">
+
+        <div class="row">          
+          <div class="col-md-1 col-lg-2"></div>
+          <div class="col" style="align-self:flex-end; margin-top: 2em; ">
+            <h1>Hello World!</h1>
+            <img src="img/me.jpg" class="img-fluid" style="overflow: hidden; border:1px solid black; border-radius: 50%; float:right;margin:1em; max-width: 40%;" title="Yours truly!"/>
+            <p>"Hello World", the title of a developer's inaugural program, seems a fitting introduction to this digital space as well.</p>
+            <p>Welcome to my digital resume and portfolio. I'm Mark Milley, a professional software engineer since 1998 and a people leader since 2015.</p>
+            <p>I invite you to explore this website. You'll learn:</p>
+            <p style="margin-top:0; padding-left:2em;">
+              ● <span class="pseudolink" onclick="changePage('resume')">My full employment history</span>; one which reflects my ability to adapt to the needs of the business.<br/>
+              ● <span class="pseudolink" onclick="changePage('leadership')">My leadership style</span>, and how I maintain a high-performing, highly-engaged, team with minimal attrition.<br/>
+              ● <span class="pseudolink" onclick="changePage('architecture')">My approach to software architecture</span>, and why it still matters.<br/>
+              ● <span class="pseudolink" onclick="changePage('bio')">My background</span>, and how I've achieved so much without a formal degree.<br/>
+            </p>
+            
+          </div>
+          <div class="col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+    <div class="page" id="leadership">
+      <div class="d-flex no-select flex-column justify-content-end" style="background-image: url('img/leadership.webp'); background-size: cover; background-position: center center;height:200px;padding: 0 15% 1rem 15%;color:white; ">                
+        <p class="display-3" style="text-shadow:2px 2px #222; margin-bottom:0;line-height:105%;">Lessons in Leadership:</p>
+        <p class="display-6" style="text-shadow:2px 2px #222; line-height:105%"><span style="text-wrap:nowrap">Crafting <span style="text-wrap: nowrap;">High-Performing</span> Teams</span></p>
+      </div>
+      <div class="container">
+        <div class="row">          
+          <div class="col-md-1 col-lg-2"></div>
+          <div class="col" style="align-self:flex-end; margin-top: 2em;" >
+            <div style="width:90%;margin:auto; border:1px solid #444; border-radius:.25rem; overflow:hidden; padding:.5rem; background-color: #f9f9f9; margin-bottom: 2rem;">
+              <h5>Summary</h5>
+              <hr style="margin:0px;"/>
+              <p style="margin-bottom:0"> 
+                ● A team's culture is a reflection of its leadership.<br/>
+                ● How a leader chooses to excercise their authority can have a profound impact on productivity.<br/>
+                ● A leader should value flexibility over adhering to a plan and value tangible progress over statistical indicators.<br/>
+                ● Leaders should keep an eye on the future to prevent blockers.<br/>
+                ● A team's reputation is best improved through consistent, reliable delivery.<br/>
+                ● An environment of psychological safety is the foundation of a team's success.<br/>
+              </p> 
+            </div>
+            <h3>The Rhythm of a Team</h3>
+            <p>Leadership is an intricate dance, where every decision shapes the rhythm of the team. Whether by changing policies, updating procedures, or simply applying the right amount of pressure, finding the right cadence to keep a team in flow is the art of effective leadership.</p>
+            <p>Through the application of philosophy and psychology, I have earned a reputation for orchestrating high-performing, highly-engaged teams characterized by remarkable cohesion and minimal turnover. The lessons in leadership that follow are honed by real-world experience and reflect a journey marked by successes, setbacks turned into opportunities, and a perpetual cycle of improvement.</p>
+            <h3>Hire Well</h3>
+            <img class="img-right" src="img/handshake.png">
+            <p>Hiring is the most important task a leader undertakes. I've come to view the bond between team members as a sacred, delicate thing, and any change to the makeup of the group can have a profound impact on this synergy, for better or for worse.</p>
+            <p>The persistent pressure to quickly fill a vacancy can clash with the imperative to select the right candidate, but it's worth taking one's time.</p>
+            <p>I've found it's not about simply finding someone with the right buzzwords on their resume. While skills hold their merit, they can be gained over time. Character, on the other hand, has a direct impact on an individual’s ability to integrate with the rest of the team. I have come to value collaboration and cooperation over independent contributions.</p>
+            <p>Skills can always be taught; it's far more difficult to influence personal growth.</p>
+            <h3>Promote Work-Life Balance Through Flexibility</h3>
+            <img class="img-left" style="max-width:125px;margin-bottom:.5em;" src="img/balance.png">
+            <p>In the contemporary workplace, the traditional notion of basing an employee's value on their attendance is no longer reasonable. It is essential to prioritize execution over mere presence, particularly when dealing with a remote workforce.</p>
+            <p>Recognizing that employees juggle both personal and professional commitments, a leader should shift their focus from tracking hours to assessing contributions, granting team members the autonomy to manage their schedules according to their unique needs and work styles.</p>
+            <p>Embracing a philosophy of balance and flexibility is an admission that productivity is not confined to a rigid schedule.</p>
+            <p>However, with this flexibility comes responsibility. While team members are encouraged to manage their time as they see fit, a leader must remain vigilant for potential abuses of this policy or breaches of contract. Striking the right balance requires a blend of trust and accountability.</p>
+            <h3>The Application of Authority</h3>
+            <p>The authority granted to a leader is a powerful instrument, and how it is wielded shapes the team dynamics and, consequently, its success.</p>
+            <p>Leadership demands a nuanced approach—the direct exercise of authority should be a measured action, akin to a scalpel in the hands of a skilled surgeon. Wielding power like a cudgel, constantly demanding compliance through the use of brute force, is a surefire way to diminish employee engagement, resulting in an environment where collaboration falters and innovation stagnates.</p>
+            <p>Instead, it is better to guide the team with respect and understanding, fostering an atmosphere where individuals are empowered to contribute their best. This approach requires an investment of time and energy, as it involves assessing the unique strengths and challenges of each team member. It is a commitment to mentorship and guidance, allowing the team to flourish, rather than diminish under an authoritarian figure.</p>
+            <img class="img-right" src="img/lever.png">
+            <p>Leaders also have a pivotal role in managing the stress level within the team. Striking the right balance is essential; too little pressure results in complacency and a lack of progress, while excessive tension leads to burnout and high turnover. Like a fulcrum that can be moved until the right leverage is found, effective leaders understand the importance of finding a level of stress that motivates without being overwhelming. Once found, this baseline, background pressure keeps the team moving forward.</p>
+            <h3>Keep Raising the Bar</h3>
+            <img class="img-left" src="img/venus.png">
+            <p>Leaders can be a transformative influence on their teams.</p>
+            <p>Within the realm of psychology, the Pygmalion Effect reveals a profound truth about leadership dynamics. It describes a phenomenon where individuals, when presented with elevated expectations by their leaders, exhibit a remarkable propensity to ascend and meet those expectations.</p>
+            <p>The Pygmalion Effect, when harnessed effectively, becomes a self-perpetuating cycle of growth. As the team accomplishes their aspirational milestones, their confidence grows, setting them up for future success. The victories become more than just achievements; they become affirmations of the team's capabilities, fostering a culture where the next set of challenges are embraced rather than feared.</p>
+            <p>It is the alchemy of leadership—a continuous process of transformation where the team, under the influence of positive feedback, not only meets but exceeds their original expectations.</p>
+            <h3>Value Progress Over Statistics</h3>
+            <img class="img-right" src="img/burndown.png">
+            <p>The influx of agile methodologies and associated tools has ushered in an era of data-driven management. Charts, graphs, and metrics paint a vivid picture of a team's activities—burndown charts tracking task completion, velocity charts gauging productivity, lead time charts outlining workflow efficiency, and an array of other visualizations aimed at providing a comprehensive overview.</p>
+            <p>While these tools offer valuable insights, leaders must not be captivated by the allure of statistics alone. Immersing themselves too deeply in the world of charts, leaders can create a culture that values the perception of success over meaningful progress. For example, a relentless focus on burndown charts can lead to the stagnation of development resources near the end of a sprint as they wait for their stories to be marked complete by Quality Assurance or User Acceptance Testers rather than take on new work.</p>
+            <p>True leadership goes beyond the confines of statistical analysis. Attending scrum and agile ceremonies becomes not just a formality but a revealing engagement of the team's progress. It sheds light on the challenges faced by individual team members, presenting truths that cannot be captured by any chart.</p>
+            <p>Leaders must foster an environment where achievements are not reduced to mere data points but are celebrated as part of a broader culture that focuses on tangible progress.</p>
+            <h3>Keep Sprints Negotiable</h3>
+            <img class="img-left" src="img/lifesaver.png">
+            <p>Sprints are simply time boxes, and should not be treated as rigid constraints. Priorities can shift unexpectedly, so a responsive and customer-centric team must embrace a culture of flexibility.</p>
+            <p>In emergency situations, strict adherence to a preexisting plan can become a source of friction. Clients, particularly during urgent scenarios, are not amenable to hearing that their pressing concerns can't be addressed until the next sprint (or, worse, until the next program increment).</p>
+            <p>Remaining open to change does not imply a lack of structure; rather, it underscores a commitment to adaptability. In this spirit, late-breaking requirements introduced mid-sprint should be accommodated, recognizing the need for agility in response to evolving client demands. However, this flexibility comes with a caveat: an equal amount of previously planned work may need to be postponed.</p>
+            <p>It requires a balance between being responsive and maintaining a realistic workload; a leader must ensure that the team can effectively manage unexpected shifts without compromising the overall project timeline.</p>
+            <h3>Remove Impediments Early</h3>
+            <img class="img-right" src="img/binoculars.png">
+            <p>In an agile working environment, the regular sprint-by-sprint cadence moves teams forward at a steady, sustainable pace. This narrow focus on sprints can consume the attention of the team, but effective leadership requires a dual perspective—a simultaneous gaze at the present and a thoughtful look to the horizon.</p>
+            <p>Impediments such as the breakdown of a developer's machine or an unexpected absence may be forever unavoidable, but astute leaders can anticipate potential obstacles before they impact the team. For instance, if another team's collaboration is crucial for an upcoming sprint, discussions and coordination should commence weeks or even months in advance. If a firewall change is looming, a little foresight prompts the submission of the request well before the relevant sprint begins.</p>
+            <p>In essence, a leader's role is not only to manage the team's current workload but to also prepare for the future. A leader adept at looking to the horizon instills a forward-thinking culture within the team. This culture doesn't just react to impediments; it anticipates and mitigates them, ensuring that the team continually operates with agility and resilience. In the best-case scenario, the entire team becomes forward-focused, with each member collectively contributing to the sustained success.</p>
+            <h3>Don't be Interesting</h3>
+            <img class="img-left" src="img/peacock.png">
+            <p>Every team desires to have a good reputation. They want to be entrusted with more responsibility, granted more autonomy, and gain renown for getting things done. Unfortunately, in most organizations, it's easier to fall into disfavor with leadership than it is to earn respect.</p>
+            <p>Reputational risks are inherent in deadlines, whether they are hard or soft. While the team may embrace agility, the broader business environment may not share the same flexibility. These deadlines always receive significant attention when they appear, but there are other, less obvious time limits such as those tied to corporate training, surveys, expense reports, and timesheets, which all demand equal attention. Ensuring the punctual fulfillment of these commitments—big and small—is crucial to avoid team members being perceived as insubordinate.</p>
+            <p>The release of defects carries obvious reputational consequences, as bad news tends to spread faster—and higher—than good news. If leadership cringes every time the team deploys, it's a clear signal of underlying issues. Ideally, deployments should be frequent, smooth, fast, and stable—so routine that they no longer garner attention and just become a routine part of doing business.</p>
+            <p>In most cases, a team's reputation is built upon a foundation of consistent, reliable delivery. A track record of quietly and dependably meeting all commitments is the key to fostering a positive perception within an organization.</p>
+            <h3>Wait Before Implementing Change</h3>
+            <img class="img-right" src="img/rudder.png">
+            <p>Leaders are frequently exposed to upcoming plans earlier than individual contributors. Upper management often introduces ideas that may not come to fruition, and when they do, the final outcome may differ from the initial proposal.</p>
+            <p>In the face of these fluctuations, effective leaders understand the delicate balance between transparency and stability. Change, while inevitable, can be a disruptive force if not managed with care. It is, at the very least, a distraction that can divert the team's focus from their core objectives.</p>
+            <p>Rather than gossip about any rumored changes, a leader should embody a steady hand on the rudder, maintaining their composure and refraining from premature discussions until the decisions are finalized and the path forward is clear.</p>
+            <p>Silence during these periods isn't an evasion of responsibility but a strategic choice. It allows the team to concentrate on their work without unnecessary distractions. Constancy in leadership acts as a stabilizing force.</p>
+            <h3>Confidentiality is Key</h3>
+            <img class="img-left" src="img/lockbox.png">
+            <p>Trustworthiness stands as a cornerstone of effective leadership. Leaders often find themselves privy to sensitive information, with both the staff and upper management confiding in them about personal problems, financial matters, or simply venting frustrations about other employees. In these instances, the leader's role transforms into that of an active, respectful listener.</p>
+            <p>Ethics demands that the leader refrain from discussing these matters with anyone else, ensuring the utmost discretion, unless the situation necessitates intervention by Human Resources.</p>
+            <p>Confidentiality is the bedrock of trust and psychological safety in the workplace, essential elements for cultivating a high-performing team.</p>
+            <h3>Explode Up, Not Out</h3>
+            <img class="img-right" src="img/teapot.png">
+            <p>A team is composed of individuals, each with their own emotions, challenges, and daily frustrations. It's only human for these pressures to occasionally boil over, potentially causing harm to the team's collective reputation.</p>
+            <p>I consistently advocate for a specific channel to vent such frustrations—directly to me. I emphasize the importance of not conveying hostility towards colleagues, external teams, or, worse, clients. Customer service must come first; political capital is often easier to burn than to gain.</p>
+            <p>As a leader, I patiently listen to these frustrations then transform them into actionable initiatives. These could manifest through policy changes, strategic plan adjustments, or, when necessary, appropriate escalations to address underlying issues.</p>
+            <p>By providing a safe and confidential space for the team to express their concerns, a leader not only protects the team's reputation but also turns moments of frustration into opportunities for positive change and growth.</p>
+            <h3>Weeding the Garden: Knowing When To Let Go</h3>
+            <img class="img-left" src="img/weed.png">
+            <p>The culture of a team is a direct reflection of its leadership.</p>
+            <p>In an ideal scenario, team members trust one another, take pride in their contributions, and derive genuine enjoyment from their work. Unfortunately, this is not always the case, and there are times when a leader must intervene to address personnel issues. While I acknowledge that everyone may have an occasional bad day, the persistent contribution to a toxic work environment by an individual requires decisive action. In such cases, a leader must implement corrective measures and, if necessary, proactively remove an offending individual for the collective well-being of the team.</p>
+            <h3>Redirect Praise, Accept Blame</h3>
+            <p>When a team succeeds in their goals, it's not uncommon for a leader to receive praise from above. However, integrity demands the recognition that success is the product of collective effort, and it is only right to redirect that praise to the entire team.</p>
+            <img class="img-right" src="img/shield.png">
+            <p>Conversely, when faced with setbacks or failures, a leader's role is to shield the team from any external hostility. Instead of pointing fingers at individual team members, the leader must take any blame upon themselves. Adverse situations should trigger a process of introspection and improvement, with leaders channeling their focus towards policy changes and enhancements to the workflow to ensure a better outcome in the future.</p>
+            <h3>Fostering a Culture of Success</h3>
+            <p>Leadership involves not just managing the work, but the intentional creation of an environment where individuals can flourish, innovate, and exceed their own expectations.</p>
+            <p>Employee satisfaction is at the heart of a thriving workplace, and leadership is about laying the foundation for a culture where every team member feels valued, supported, and inspired. The art of leadership lies in fostering a culture where every individual thrives, and success is simply a way of being.</p>
+          </div>
+          <div class="col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="architecture">
+      <div class="d-flex no-select flex-column justify-content-end align-items-end" style="background-image: url('img/jungle.webp'); background-size: cover; background-position: center center;height:200px;padding: 0 15% 1rem 15%;color:white; ">                
+        <p class="display-3" style="text-shadow:2px 2px #222; text-align:right;margin-bottom:0;line-height:105%;">Agile Software:</p>
+        <p class="display-6" style="text-shadow:2px 2px #222; text-align:right;line-height:105%"><span style="text-wrap:nowrap">Is Architecture a</span> <span style="text-wrap:nowrap">Lost Art?</span></p>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-1 col-lg-2"></div>
+          <div class="col" style="align-self:flex-end; margin-top: 2em; ">
+            <div style="width:90%;margin:auto; border:1px solid #444; border-radius:.25rem; overflow:hidden; padding:.5rem; background-color: #f9f9f9; margin-bottom: 2rem;">
+              <h5>Summary</h5>
+              <hr style="margin:0px;"/>
+              <p style="margin-bottom:0"> 
+                ● To their detriment, most organizations do not formally define the role of software architect.<br/>
+                ● The agile methodology doesn't guarantee the creation of flexible software products.<br/>
+                ● The consistent application of development practices like SOLID, AOP, and TDD leads to reliable products that are easy to maintain and extend.<br/>
+                ● Software architecture is still an important concern despite embracing cloud-native architectures.
+              </p>
+            </div>
+            <h3>A Missing Role</h3>
+            <img class="img-right" style="max-width:100px;" src="img/compass.png">
+            <p>A Software Architect is responsible for overseeing the overall structure and design of a system, ensuring that it aligns with business goals and remains adaptable to evolving requirements. Unfortunately, in most organizations, this role is not formally defined.</p>
+            <p>Other technical leadership roles may exist, but in my experience, they don't have the same focus. Enterprise Architects spend their time evaluating third-party technologies and mandating their use, while Solution Architects focus on course-grained, high-level, system-to-system integrations. Management is often too busy—or simply not technical enough—to provide much architectural guidance.</p>
+            <p>Instead, software architecture is, by necessity, left up to the Software Engineers. While this de facto approach sounds reasonable—the engineers have to work with the system, after all—there are problems with leaving the architecture undefined.</p>
+            <p>The first problem is that developers may become overly focused on delivering individual stories, overlooking the importance of viewing the system as a whole. This myopic approach can result in a heterogeneous architecture, where different parts of the application diverge due to variations in the developers' backgrounds. Left unchecked, some modules may become so cryptic that only the original developer can maintain the code.</p>
+            <p>Secondly, under constant schedule pressure, developers might prioritize quick solutions over thoughtful architectural considerations, leading to the accumulation of technical debt. Unfortunately, refactoring, essential for maintaining a healthy codebase, often takes a back seat to more immediate business needs, so any technical debt may reside in the backlog for a considerable amount of time before being addressed.</p>
+            <p>Finally, the team simply may not have experience in, or even knowledge of, agile development practices. Without a designated Software Architect, teams inevitably fall back to a design-by-committee approach, where decisions are influenced by the loudest voice rather than a strategic architectural vision.</p>
+            <p>Having a dedicated Software Architect, whether formal or informal, is pivotal. This individual should be well-versed in agile software development practices and possess the ability to guide the team towards a cohesive and adaptable architectural design.</p>
+            <h3>What does Agile Software look like?</h3>
+            <img class="img-left"  src="img/spyglass.png">
+            <p>In the pursuit of innovation, many organizations adopt the agile methodology. Once implemented, their product teams engage in time-boxed sprints, conduct daily scrum meetings, and actively manage a backlog of work. Successful implementation results in the release of working software into production early and often, defining a Software Development Lifecycle (SDLC) that is more responsive to changing consumer demands than traditional Waterfall approaches.</p>
+            <p>While agile adoption nurtures a culture that embraces change, it doesn't automatically guarantee the resulting product shares the same flexibility. Surprisingly, agile teams can inadvertently craft software that is just as rigid as those built under traditional project management approaches. A telling example is when adding a new feature requires a myriad of small changes across multiple classes—a situation aptly coined "Shotgun Surgery." It is a signal that the application is rigid, contradicting the essence of agility.</p>
+            <p>Truly agile software transcends the methodology itself. It is characterized by clarity, flexibility, and maintainability. Refactorings are infrequent, signifying a system that readily adapts to change.</p>
+            <h3>Agile Software sounds great, but how do we get there?</h3>
+            <img class="img-right" src="img/thisway.png">
+            <p>There are no shortcuts. There's no language—old or new—that magically ensures good software architecture. With a little foresight and discipline, though, any product can be agile-first.</p>
+            <p>These software development concepts are not new, nor are they original to me, but I've found that they aren't broadly applied. The beauty of these concepts lies in their accessibility—they cost nearly nothing to implement but have the potential to save a substantial amount of money, frustration, and embarrassment in the long run.</p>
+            <p>While the principles I'm about to outline are well-documented elsewhere, they remain underutilized. I provide only a brief introduction here, but I encourage readers to explore these concepts further on their own.</p>
+            <h3>SOLID Principles</h3>
+            <img class="img-left" style="max-width:175px;" src="img/pyramid.png">
+            <p>First collected and presented by Robert C. Martin in 2000, SOLID is an acronym for five software development principles that focus on how classes are designed. These principles, while initially intended for Object-Oriented Programming (OOP) languages, have proven their versatility, and can be more broadly applied.</p>
+            <h5><span style="text-decoration:underline;">S</span>ingle Responsibility Principle</h5>
+            <p>The Single Responsibility Principle (SRP) advocates that each class have only one job to do, and therefore, a sole reason to change.</p>
+            <p>While most engineers understand the importance of ensuring individual functions have a single responsibility, its application to classes is often less intuitive, especially when OOP educational materials often illustrate how one can add complex methods to data classes.</p>
+            <p>SRP guides developers towards a refined architecture by urging the separation of the data model from functionality. As an illustration, instead of appending a <span class="code">.Save()</span> method to a class named <span class="code">Foo</span>, adhering to SRP guides us to create a dedicated <span class="code">FooPersister</span> class equipped with a <span class="code">.Save(foo)</span> method.
+            <h5><span style="text-decoration:underline;">O</span>pen-Closed Principle</h5>
+            <p>The Open-Closed Principle (OCP) posits that each software entity—be it a module, class, or method—should be open for extension but closed for modification. At first glance, this principle might appear self-contradictory, but it promotes the use of inheritance, either through subclassing or, preferably, interfaces.</p>
+            <p>OCP seeks to minimize the impact of new code on a system by favoring the extension of existing classes (or new implementations of interfaces) over altering proven, working code. However, it's important to avoid taking this to an extreme; doing so can lead to the Onion anti-pattern, wherein layers of code are perpetually added without ever modernizing the older portions. Striking the right balance is essential to maintain a codebase that is both extensible and comprehensible.</p>
+            <h5><span style="text-decoration:underline;">L</span>iskov Substitution Principle</h5>
+            <p>The Liskov Substitution Principle (LSP) asserts that subtypes must be substitutable for their base types.</p>
+            <p>Since most programming languages support polymorphism, allowing a subclass to be used wherever a base class is expected, the initial impression might be that LSP is redundant. However, LSP delves into the runtime behavior of the class, emphasizing that the base class must be able to substitute for the subclass without fundamentally altering the program.</p>
+            <p>Currently, LSP lacks compiler enforcement and relies on code reviews for adherence. In practical terms, I've found that, in general, implementing interfaces is superior to subclassing. Subclassing should be approached cautiously and preferably avoided unless a compelling case justifies its use.</p>
+            <h5><span style="text-decoration:underline;">I</span>nterface Segregation Principle</h5>
+            <p>The Interface Segregation Principle (ISP) advocates for the creation of atomic, tightly-focused interfaces. A key advantage is that dependent classes can selectively request only the methods they truly need.</p>
+            <p>By encouraging the development of compact and purpose-driven interfaces, ISP aligns with the broader principles of modularity and simplicity in agile software design.</p>
+            <p>One of the significant benefits of ISP is its role in preventing SRP violations. Where SRP emphasizes that a class should have only one reason to change, ISP ensures that an interface, as a contract, remains cohesive and does not bloat with unrelated methods.</p>
+            <h5><span style="text-decoration:underline;">D</span>ependency Inversion Principle</h5>
+            <p>The Dependency Inversion Principle (DIP), often referred to as Inversion of Control (IoC), stands out as one of the most pivotal principles among the SOLID set. DIP fundamentally transforms the way software components interact by shifting the traditional control flow.</p>
+            <p>DIP advocates that classes should declare their dependencies and receive them through external means, rather than being responsible for the instantiation of foreign classes. This leads to more flexible, modular, and easily maintainable systems.</p>
+            <p>Consider a scenario involving a <span class="code">FooManager</span> class with a dependency on a class implementing the <span class="code">IFooPersister</span> interface. Instead of internally instantiating the dependency, DIP mandates passing the dependency from external sources. During runtime, the <span class="code">FooManager</span> could receive a <span class="code">FooDatabasePersister</span>, a <span class="code">FooFileSystemPersister</span>, or even a <span class="code">MockFooPersister</span>. This level of flexibility empowers developers to adapt the system to changing requirements without the need to modify the core logic of the components.</p>
+            <p>The recommended approach for handling dependencies is through constructor injection, where dependencies are passed in through the object's constructor. This method enhances clarity, as dependencies are explicitly declared, making it easier to understand and enforce. Property injection serves as an alternative, where dependencies are passed through properties, but constructor injection is generally favored for its transparency and effectiveness.</p>
+            <h5>Five Principles, One Unified Approach</h5>
+            <p>While the SOLID principles—Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion—are often discussed individually, their true strength lies in their collective synergy. Each principle is not an isolated guideline but a crucial piece in a unified approach to robust and maintainable software design. For instance, Interface Segregation helps enable Dependency Inversion, which in turn is best implemented when classes and interfaces have a Single Responsibility.</p>
+            <p>In essence, the SOLID principles form a holistic framework where each principle complements and reinforces the others. They are interconnected threads in the fabric of software design, weaving a tapestry of code that is not only modular and flexible but also resilient to the evolving needs of a dynamic development environment.</p>
+            <h3>Aspect-Oriented Programming</h3>
+            <img class="img-right" src="img/machete.png">
+            <p>When common concerns, such as logging, monitoring, caching, and security need to be addressed, these concerns can wind up repeated across multiple methods or modules. Aspect-Oriented Programming, or AOP, emerges as a powerful approach to elegantly handle these cross-cutting concerns.</p>
+            <p>AOP operates by segregating cross-cutting code into entities known as "aspects." These aspects encapsulate functionality that needs to be applied uniformly across various parts of the codebase. This approach brings a level of modularity and abstraction, preventing the scattering of concern-specific code throughout the application.</p>
+            <p>The implementation of AOP may vary across programming languages, but a common strategy involves the use of proxies generated at compile time. These proxies act as wrappers around the methods of target classes, intercepting calls and executing the aspect logic before and after the original implementation. This interception mechanism ensures that the cross-cutting concerns are seamlessly woven into the application without cluttering the core business logic.</p>
+            <p>It's worth noting that most popular Inversion of Control (IoC) containers, such as Unity and Spring, come equipped with built-in AOP functionality. However, the full potential of AOP is often underutilized, possibly due to a lack of awareness.</p>
+            <p>By embracing AOP, developers can significantly enhance code maintainability and reduce redundancy. It provides a centralized and modularized approach to handling concerns that span multiple parts of the codebase, promoting cleaner, more readable, and more maintainable software architectures.</p>
+            <h3>Test-Driven Development</h3>
+            <img class="img-left" src="img/net.png">
+            <p>While good development teams write unit tests to test their code, the best development teams practice Test-Driven Development (TDD).</p>
+            <p>In TDD, an idiosyncratic approach is taken where requirements are transformed into tests before the actual development commences. These tests are expected to fail initially; the development cycle involves refining the code until the tests pass. This pattern results in a growing suite of tests that act as a safety net, ensuring the application functions as intended despite any ongoing modifications.</p>
+            <p>That key distinction of TDD—creating tests before undertaking development—ensures that the tests are intrinsic to the requirements, and not contingent on the specific implementation details. In contrast, writing tests post-implementation—say against the individual methods of FooManager—can lead to a more rigid system. Changes to the implementation may necessitate extensive rewrites of the tests, making the system resistant to refinement or refactoring. This goes against our goal of agile software.</p>
+            <p>Instead, TDD promotes the creation of tests at the outermost layer of the program, free from dependencies on internal implementation details. For instance, when developing a microservice, the tests should simulate actual requests, routing them through the request handler and asserting that the responses align with the expectations. Placing tests at the system boundaries facilitates unencumbered refactoring while still affirming that any architectural changes haven't introduced flaws.</p>
+            <p>External dependencies should also be circumvented. Instead of testing against live data sources or APIs, mocks should be employed to create static conditions to test against. By decoupling tests from downstream system uptime and insulating them from data volatility, the stability of the test suite is preserved.</p>
+            <p>As an additional layer of quality assurance, the Continuous Integration/Continuous Deployment (CI/CD) pipeline acts as a gatekeeper. Any test failures should trigger a halt in the build process, preventing the deployment of the product until detected flaws are addressed. This stringent adherence to testing practices in TDD not only fosters a robust codebase but also instills confidence in the development and deployment process.</p>
+            <h3>Are Agile Development Practices Still Relevant?</h3>
+            <img class="img-right" src="img/campfire.png">
+            <p>The world has changed dramatically since these practices were first introduced. Today, we deal with cloud-native applications and scalable microservices, leading some to question whether agile development approaches are still relevant. I argue that these practices remain indispensable.</p>
+            <p>Deployment strategies, such as Horizontal Pod Autoscaling (HPA) or Vertical Scaling, cannot replace solid software architecture. While these strategies address immediate scalability concerns—effectively, throwing more hardware at the problem—they are not substitutes for the foundational principles described above.</p>
+            <p>SOLID principles, with their emphasis on creating efficient, lean, and flexible software, provide a timeless framework that aligns seamlessly with cloud-native architectures.</p>
+            <p>In modern systems that deal with millions of requests daily, the significance of monitoring and security cannot be overstated. Aspect-Oriented Programming emerges as a powerful tool to systematically address cross-cutting concerns, ensuring critical aspects like authorization are embedded throughout the application.</p>
+            <p>In environments characterized by continuous delivery, Test-Driven Development remains a linchpin for ensuring the quality of the product. TDD enables development teams to react swiftly to evolving requirements; the confidence instilled by a robust suite of tests ensures that each deployment is a controlled and low-risk operation.</p>
+            <h3>Navigating the Future</h3>
+            <img class="img-left" src="img/map.png">
+            <p>There is no substitute for good software architecture, and the cloud is not a panacea. Crashlooping, memory leaks, and processor spiking are all indicators that the application isn't well-architected.</p>
+            <p>While the technological landscape has undergone significant transformations since these practices were first introduced, they continue to provide a resilient foundation that thrives in the face of contemporary challenges.</p>
+          </div>
+          <div class="col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="resume">
+      <div class="d-flex no-select flex-column justify-content-center " style="background-image: url('img/resume.webp'); background-size: cover; background-position: center center;height:200px;padding: 0 15% 1rem 15%;color:white; ">                
+        <p class="display-3" style="text-shadow:2px 2px #222; text-align:left;margin-bottom:0;line-height:120%">My Resume:</p>
+        <p class="display-6" style="text-shadow:2px 2px #222; text-align:left;line-height:105%"><span style="text-wrap:nowrap">A History</span> <span style="text-wrap:nowrap">of Adaptability</span></p>
+      </div>
+      <div class="container">
+        <div class="row" style="margin-bottom: 3em;">          
+          <div class="col-md-1 col-lg-2"></div>
+          <div class="col" style="align-self:flex-end; margin-top: 2em;" >
+            <h3>Retrospective</h3>
+            <p>I began working in the technology field in 1998&mdash;truly a bygone era in the ever-evolving landscape of the Internet. Over the years, I've witnessed the remarkable evolution of the industry and accumulated a wealth of experience and expertise, navigating through transformative waves of technological advancements.</p>
+            <p>Below, I've grouped my resume into different parts to make it easier to read through, with the most recent&mdash;and most relevant&mdash;experience first. Naturally, the further back one looks, the less applicable the technologies are. <span style="font-style:italic">Allaire ColdFusion, anyone?</span> Today, I look back on these early forays into programming with both nostalgia and amusement.</p>
+            <p>Throughout the years, I've embraced the dynamic nature of the tech industry, consistently rising to meet the moment and adapting to the ever-changing needs of the business.</p>
+            <h3>Part I: The Healthcare Years</h3>
+            <p>For the past 12 years&mdash;nearly half of my career&mdash; I've been a part of the healthcare industry. During this time, I've switched from C# to Java, and then to Go, leading my team through the same transition.</p>
+            <div class="container-fluid" style="font-size: .9em">
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Manager, Application Development Engineering</span><br/>
+                  Centene Corporation
+                </div>
+                <div class="col text-end align-self-center" style="font-style:italic">March 2019 - Present</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/cetene.png"><br/>
+                  10,000+ Employees<br/>
+                  Remote
+                </div>
+                <div class="col">
+                  <p>Currently leading and managing a global, culturally-diverse team of 14 including software engineers, business systems analysts, quality-assurance testers, and site reliability engineers. Migrated critical claims-processing business logic out of legacy EDI software into cloud-native microservices that handle millions of requests daily. Kept the team highly-engaged and motivated despite changes in executive leadership, reorganizations, and layoffs. </p>
+                  <p>Technologies leveraged included Kubernetes (EKS), Go, C#, Apache Kafka, Amazon DynamoDB, Amazon Aurora. Observability Tier: Dynatrace, Jaeger, OpenSearch, CloudWatch.</p>
+                  <p>
+                    <span class="badge text-bg-primary">Leadership</span>
+                    <span class="badge text-bg-primary">Management</span>
+                    <span class="badge text-bg-primary">Agile Methodology</span>
+                    <span class="badge text-bg-primary">Scaled Agile Framework</span>
+                    <span class="badge text-bg-primary">Solution Architecture</span>
+                    <span class="badge text-bg-primary">Kafka</span>
+                    <span class="badge text-bg-primary">Go</span>
+                    <span class="badge text-bg-primary">Aurora</span>
+                    <span class="badge text-bg-primary">DynamoDB</span>
+                    <span class="badge text-bg-primary">Jira</span>
+                    <span class="badge text-bg-primary">Confluence</span>
+                    <span class="badge text-bg-primary">Gitlab</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">C#</span>
+                    <span class="badge text-bg-secondary">Kubernetes</span>
+                    <span class="badge text-bg-secondary">Istio</span>
+                    <span class="badge text-bg-secondary">Oracle</span>
+                    <span class="badge text-bg-secondary">Amisys</span>
+                    <span class="badge text-bg-secondary">EDI</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 col-sm-4 text-center">
+                  <img class="img-fluid" style="max-width:100px" src="img/logos/awsccp.png">
+                </div>
+                <div class="col align-self-center">
+                  Obtained the AWS Certified Cloud Practioner (AWS CCP) certification.
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Team Lead, Application Development</span><br/>
+                  Fidelis Care
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">Sept. 2015 - March 2019</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4  text-center">
+                  <img class="img-fluid" src="img/logos/fidelis.png"><br/>
+                  1,000 - 5,000 Employees<br/>
+                  Getzville, NY
+                </div>
+                <div class="col">
+                  <p>Founded and managed a team of six developers across two cities including hiring, salary negotiation, and reviews. Acted simultaneously as supervisor and software architect. Presented and reviewed solutions as a member of the architectural review board. Created code-review policies and procedures for the organization. Pushed for SOA and founded the company's ESB.</p>
+                  <p>Projects included a complete redesign of the company's Find-a-Doctor functionality as well as integrating the core business system (Facets) with Salesforce.</p>
+                  <p>Technologies used included Mule, Java, C#, Sybase, and MS SQL server.</p>
+                  <p><span style="font-weight:bold;">Note:</span> Fidelis was acquired by Centene in 2018.</p>
+                  <p>
+                    <span class="badge text-bg-primary">Leadership</span>
+                    <span class="badge text-bg-primary">Mangement</span>
+                    <span class="badge text-bg-primary">Agile Methodology</span>
+                    <span class="badge text-bg-primary">Solution Architecture</span>
+                    <span class="badge text-bg-primary">Software Architecture</span>
+                    <span class="badge text-bg-primary">Mule</span>
+                    <span class="badge text-bg-primary">Java</span>
+                    <span class="badge text-bg-primary">MS SQL Server</span>
+                    <span class="badge text-bg-primary">Jira</span>
+                    <span class="badge text-bg-primary">Confluence</span>
+                    <span class="badge text-bg-primary">Gitlab</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">C#</span>
+                    <span class="badge text-bg-secondary">Kubernetes</span>
+                    <span class="badge text-bg-secondary">Istio</span>
+                    <span class="badge text-bg-secondary">Sybase</span>
+                    <span class="badge text-bg-secondary">Facets</span>
+                    <span class="badge text-bg-secondary">Salesforce</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 col-sm-4 text-center">
+                  <img class="img-fluid" style="max-width:100px;" src="img/logos/mcd.png">
+                </div>
+                <div class="col align-self-center">
+                  Obtained the Mulesoft Certified Developer: Integration and API Associate certification.
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Senior Application Developer</span><br/>
+                  Independent Health
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">Oct. 2012 - Sept. 2015</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/independentHealth.png"><br/>
+                  1,000 - 5,000 Employees<br/>
+                  Williamsville, NY
+                </div>
+                <div class="col">
+                  <p>Worked as a member of a highly-motivated team to redevelop and launch Independent Health's member portal, personally focusing on security, performance, and web services. Developed a member data interpolation system that allowed content admins to readily create tailored content for members with data from the ESB securely. Devised and implemented new architectural strategy for .NET applications.</p>
+                  <p>Technologies used included C#, DNN, and Angular.</p>
+                  <p>
+                    <span class="badge text-bg-primary">Agile Methodology</span>
+                    <span class="badge text-bg-primary">Software Architecture</span>
+                    <span class="badge text-bg-primary">C#</span>
+                    <span class="badge text-bg-primary">ASP.NET</span>
+                    <span class="badge text-bg-primary">JavaScript</span>
+                    <span class="badge text-bg-primary">MS SQL Server</span>
+                    <span class="badge text-bg-primary">Team Foundation Server (TFS)</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">Internet Information Services (IIS)</span>
+                    <span class="badge text-bg-secondary">DotNetNuke (DNN)</span>
+                    <span class="badge text-bg-secondary">Angular</span>
+                    <span class="badge text-bg-secondary">jQuery</span>
+                    <span class="badge text-bg-secondary">Raphael.js</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <h3 style="margin-top: 2em;">Part II: The Small-Business Years</h3>
+            <p>Between 2001 and 2012, I worked primarily for small companies in the Buffalo area, including my own: BinarySwitch. During this period, I worked in a wide array of industries, including advertising, real estate, education, healhcare, and more.</p>
+            <div class="container-fluid" style="font-size:.9em">
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Senior Software Engineer</span><br/>
+                  RealtyUSA
+                </div>
+                <div class="col text-end align-self-center" style="font-style:italic">July 2009 - Oct. 2012</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/realtyUSA.png"><br/>
+                  201 - 500 Employees<br/>
+                  Williamsville, NY
+                </div>
+                <div class="col">
+                  <p>Led a team of three developers in creating and supporting in-house software as well as extending and maintaining the third-party core business system. Reported directly to CIO and CFO. Created a web-based real estate transaction reporting portal with record-level security. Developed a business rule monitoring system that would notify appropriate parties or take automatic action when rules were violated. Created custom job tracking / invoicing program for marketing department. Built a loan tracking and management application for mortgage division. Also created and maintained several communication channels for outside vendors for critical business areas such as direct deposit, listings, sales, and advertising.</p>
+                  <p>Primary technologies were VB.NET, SQL Server, and other MS products.</p>
+                  <p>
+                    <span class="badge text-bg-primary">Leadership</span>
+                    <span class="badge text-bg-primary">Solution Architecture</span>
+                    <span class="badge text-bg-primary">VB.NET</span>
+                    <span class="badge text-bg-primary">ASP.NET</span>
+                    <span class="badge text-bg-primary">JavaScript</span>
+                    <span class="badge text-bg-primary">SQL Server</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">SQL Server Integration Services (SSIS)</span>
+                    <span class="badge text-bg-secondary">SQL Server Reporting Services (SSRS)</span>
+                    <span class="badge text-bg-secondary">Crystal Reports</span>
+                    <span class="badge text-bg-secondary">MS Access</span>
+                    <span class="badge text-bg-secondary">VBA</span>
+                    <span class="badge text-bg-secondary">Profit Power</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Founder / Software Consultant</span><br/>
+                  BinarySwitch
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">April 2005 - July 2009</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/binarySwitch.png"><br/>
+                  1 - 10 Employees<br/>
+                  Williamsville, NY
+                </div>
+                <div class="col">
+                  <p>Founded a consulting company in April 2005 to experiment with cutting-edge technologies, broaden skill set, and develop innovative products. Performed business analysis and developed solutions with clients in the real estate, education, emerging technology, advertising, and corrections industries. In addition, created several freeware products with over twenty thousand active users.</p>
+                  <p>
+                    <span class="badge text-bg-primary">Consulting</span>
+                    <span class="badge text-bg-primary">Solution Architecture</span>
+                    <span class="badge text-bg-primary">Software Architecture</span>
+                    <span class="badge text-bg-primary">VB.NET</span>
+                    <span class="badge text-bg-primary">ASP.NET</span>
+                    <span class="badge text-bg-primary">JavaScript</span>
+                    <span class="badge text-bg-primary">MS SQL Server</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">Leadership</span>
+                    <span class="badge text-bg-secondary">Sales</span>
+                    <span class="badge text-bg-secondary">WPF</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 col-sm-4 text-center">
+                  <img class="img-fluid" style="max-width:100px" src="img/logos/mcsd.png">
+                </div>
+                <div class="col align-self-center">
+                  Obtained the Microsoft Certified Solution Developer (MCSD) certification.
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Team Leader, Innovation and R&D</span><br/>
+                  LanTrax
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">Feb. 2002 - June 2005</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/lanTrax.png"/><br/>
+                  11 - 50 Employees<br/>
+                  Williamsville, NY
+                </div>
+                <div class="col">
+                  <p>Led a team of programmers to develop, implement, and support a wide variety of web-based applications including electronic medical record (EMR) systems, project tracking systems, document repositories, physician credentialing, credit card issuance and account tracking, and a investor-to-startup 'matchmaking' search. Most clients in the highly-sensitive corrections, medical, real estate, health insurance, and advertising industries. Trusted to accompany CEO as a business analyst on meetings with high-profile clients such as Sotheby's, Cendant, and Intel. </p>
+                  <p>
+                    <span class="badge text-bg-primary">Solution Architecture</span>
+                    <span class="badge text-bg-primary">Software Architecture</span>
+                    <span class="badge text-bg-primary">VB.NET</span>
+                    <span class="badge text-bg-primary">ASP.NET</span>
+                    <span class="badge text-bg-primary">JavaScript</span>
+                    <span class="badge text-bg-primary">MS SQL Server</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">Leadership</span>
+                    <span class="badge text-bg-secondary">Consulting</span>
+                    <span class="badge text-bg-secondary">MS Access</span>
+                    <span class="badge text-bg-secondary">VBA</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row" >
+                <div class="col">
+                  <span style="font-weight:bold">Independent Consultant</span><br/>
+                  Sovereign Specialty Chemicals
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">Aug. 2001 - Jan. 2002</div>
+              </div>
+              <div class="row" style="padding-top: 1em">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/soverignSC.png"/><br/>
+                  51 - 200 Employees<br/>
+                  Buffalo, NY
+                </div>
+                <div class="col">
+                  <p>Created a mission-critical quality assurance database application for a local chemical manufacturer. Features included shipping and receiving, corrective action tracking, and chemical analysis document storage and trending.</p>
+                  <p>
+                    <span class="badge text-bg-primary">MS Access</span>
+                    <span class="badge text-bg-primary">VBA</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">Visual Basic 6</span>
+                    <span class="badge text-bg-secondary">ASP 3.0</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <h3 style="margin-top: 2em;">Part III: Getting Started</h3>
+            <p>From 1998 to 2001, I transformed myself to ascend out of my first job in the technology industry&mdash;building PCs&mdash;into a role as a software engineer.</p>
+            <div class="container-fluid" style="font-size: .9em">
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Corporate Software Engineer</span><br/>
+                  Computer Task Group (CTG)
+                </div>
+                <div class="col text-end align-self-center" style="font-style:italic">Feb. 2000 - July 2021</div>
+              </div>
+              <div class="row" style="padding-top: 1em;">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/ctg.png"><br/>
+                  1,001 - 5,000 Employees<br/>
+                  Buffalo, NY
+                </div>
+                <div class="col">
+                  <p>Developed several intranet applications as well as responsible for the expansion, modernization, and integration of existing core business systems. Applications included several document repositories, a consultant management system, and a high-profile requisition-management tool.</p>
+                  <p>
+                    <span class="badge text-bg-primary">ASP 3.0</span>
+                    <span class="badge text-bg-primary">Visual Basic Script</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">Visual Basic 6</span>
+                    <span class="badge text-bg-secondary">Allaire ColdFusion</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Internet Application Developer</span><br/>
+                  Cymfony Net, Inc.
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">March 1999 - Feb 2000</div>
+              </div>
+              <div class="row" style="padding-top: 1em;">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/cymfony.png"><br/>
+                  1 - 10 Employees<br/>
+                  Williamsville, NY
+                </div>
+                <div class="col">
+                  <p>Created and/or maintained sites for local businesses including Independent Health, WIVB-TV, Northtown Auto, Amherst Bee, and more. Collaborated with the Town of Amherst Police Department to develop a criminal case management system for investigators.</p>
+                  <p>
+                    <span class="badge text-bg-primary">ASP 3.0</span>
+                    <span class="badge text-bg-primary">Visual Basic Script</span>
+                    <span class="badge text-bg-primary">MS Access</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">SQL Server</span>
+                    <span class="badge text-bg-secondary">Macromedia Flash</span>
+                    <span class="badge text-bg-secondary">CGI</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class ="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <span style="font-weight:bold">Senior Application Developer</span><br/>
+                  CS Business Systems
+                </div>
+                <div class="col text-end text-middle align-self-center" style="font-style:italic;">April 1998 - March 1999</div>
+              </div>
+              <div class="row" style="padding-top: 1em;">
+                <div class="col-sm-4 text-center">
+                  <img class="img-fluid" src="img/logos/csb.png"><br/>
+                  11 - 50 Employees<br/>
+                  Buffalo, NY
+                </div>
+                <div class="col">
+                  <p>Actively maintained the corporate web site as well as intranet sites for contract clients and sales personnel. Created and maintained in-house applications and databases, including setting up EDI integration with GlaxoSmithKline (GSK). Assembled made-to-order PCs.</p>
+                  <p>
+                    <span class="badge text-bg-primary">MS Frontpage</span>
+                    <span class="badge text-bg-primary">MS Access</span>
+                    <span class="badge text-bg-primary">Visual Basic Script</span>
+                  </p>
+                  <p>
+                    <span class="badge text-bg-secondary">SQL Server</span>
+                    <span class="badge text-bg-secondary">ASP 3.0</span>
+                    <span class="badge text-bg-secondary">Mercator</span>
+                    <span class="badge text-bg-secondary">EDI</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 col-sm-4  text-center">
+                  <img class="img-fluid" style="max-width:100px" src="img/logos/comptia.png">
+                </div>
+                <div class="col align-self-center">
+                  Obtained the CompTIA A+ Certification.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="bio">
+      <div class="d-flex no-select flex-column justify-content-end align-items-end" style="background-image: url('img/road.webp'); background-size: cover; background-position: center center;height:200px;padding: 0 15% 1rem 15%;color:white; ">                
+        <p class="display-3" style="text-shadow:2px 2px #222; text-align:right;margin-bottom:0;line-height:105%">Beyond the Code:</p>
+        <p class="display-6" style="text-shadow:2px 2px #222; text-align:right;line-height:105%"><span style="text-wrap:nowrap">A Road</span> <span style="text-wrap:nowrap">Less Traveled</span></p>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-1 col-lg-2"></div>
+          <div class="col" style="align-self:flex-end; margin-top: 2em;" >
+            <div style="width:90%;margin:auto; border:1px solid #444; border-radius:.25rem; overflow:hidden; padding:.5rem; background-color: #f9f9f9; margin-bottom: 2rem;">
+              <h5>Summary</h5>
+              <hr style="margin:0px;"/>
+              <p style="margin-bottom:0"> 
+                ● The course of my life was interrupted by a death in the family during my senior year of high school.<br/>
+                ● Despite lacking a formal degree, my natural talent for programming and a desire for achievement led to a career in software development; my education comes from a combination of independent study and hands-on experience.<br/>
+                ● I have a long history of adapting to the needs of the business, readily changing languages as needed; as a leader, I have guided others through similar transitions.<br/>
+              </p>
+            </div>
+            <h3>The Early Years</h3>
+            <p>I can’t remember a time when I wasn’t attracted to technology.</p>
+            <p>As a child growing up in Buffalo, one of my favorite places to visit was the Ontario Science Centre across the border in Toronto. Pressing the buttons on the exhibits to activate the animatronic displays was something I couldn’t get enough of.</p>
+            <img class="img-right" style="max-width:100px;" src="img/joystick.png">
+            <p>Naturally, video games had their allure as well. I can still remember reading advertisements for games that, even then, promised complete freedom and immersive experiences. Eager to dive into new worlds, I saved up the meagre income from my paper route to buy a home computer. </p>
+            <p>It was the 1980s, and the there was no clear winner in the home computing space yet. After comparing what was on the market, I purchased an affordable Commodore 64. It had a whopping 16-color 320 x 200px display, which beat the contemporary lime-green monochrome display of the Apple II or the fuchsia and teal CGA displays of IBM PCs. Needless to say, the competition quickly caught up.</p>
+            <h3>Stop the Presses</h3>
+            <p>Irrespective of my interest in technology, I didn’t initially pursue a career in computing. I wanted to be a writer. The prospect of being a novelist, inventing whole new realities, fascinated me.</p>
+            <img class="img-left"  src="img/newspaper.png">
+            <p>As I grew older, I thought the job of a journalist was more practical. I began writing for my school newspaper, eventually becoming its editor. My flair for reporting led to an internship at the Niagara Gazette. I spent the summer after my sophomore year writing man-on-the-street columns, human interest stories, and other fluff pieces. It wasn’t serious work, but I had a byline in a real newspaper, and that was all that mattered to me at the time.</p>
+            <p>As much as I enjoyed my work as an intern, I noticed that the bullpen reporters were less satisfied with their profession. They were expected to churn out many articles a day and were largely burned out and cynical. My exposure to these veterans of the job made me less inclined to pursue journalism as a career. Without that longstanding career path in front of me, I felt a bit aimless.</p>
+            <h3>Tragedy Strikes</h3>
+            <img class="img-right" src="img/gravestone.png">
+            <p>Midway through my junior year, my parents announced they were getting a divorce. It overshadowed the rest of the school year. In June, I moved with my father to a new house on the other side of town, starting my Senior year in a new school. In October, he got remarried.</p>
+            <p>Then, in early December, my father died suddenly, tragically. The loss of a parent is hard for anyone, but the timing—midway through my senior year—couldn’t have been worse; I could have used his guidance in the years to come, and without it, I began floundering.</p>
+            <h3>Exit Stage Left</h3>
+            <p>In February, as soon as I turned 18, I began living off of my inheritance. I moved out of the home I shared with my stepmother, into an apartment of my own in the city.</p>
+            <img class="img-left" src="img/drama.png">
+            <p>Deep in mourning, I became heavily involved in the drama program at my high school, which offered both distraction and community. Inspired, and longing to hold onto that sense of belonging, I decided to pursue a career in theater.</p>
+            <p>However, midway through my first college semester, my professor leveled with me and bluntly told me he felt I didn’t have the knack for acting. Completely discouraged, I withdrew from school; without a clear career path, pursuing an unfocused liberal arts degree felt like a waste of time.</p>
+            <h3>Retreat & Survival</h3>
+            <img class="img-right" style="max-width:100px; margin-bottom:.5em;" src="img/music.png">
+            <p>Still living off my inheritance, the total lack of either professional or educational commitments meant I was completely free to spend my time working on personal projects. My friends and I, all long-time gamers, began working on making a video game of our own. I would spend my time composing music and developing low-poly 3D models for the game on a 486 DX2 PC I had built for myself. It was one of the most creative times in my life.</p>
+            <p>Inevitably, though, my inheritance ran out, and reality came crashing in. The music stopped.</p>
+            <p>I had to work four retail jobs at the same time to make ends meet, but even that wasn’t enough. To avoid homelessness, I moved in with some folks I barely knew. </p>
+            <p>Eventually, I received an assistant manager position with one of the stores. It provided more stability, but I wasn’t happy with the course of my life.</p>
+            <h3>A First Foothold</h3>
+            <img class="img-left" src="img/assembly.png">
+            <p>I happened to be visiting a friend at his workplace, CS Business Systems, when I heard that there was an opening in their custom PC assembly shop. I was no stranger to tinkering with computers, so I jumped at the chance to build PCs for a living.</p>
+            <p>After I was hired, I soon learned that our department had a need for an inventory management system. Our sales agents never knew which components we had in stock, and what we’d have to order in.</p>
+            <p>My friend was too busy developing the company’s core business system to help, so I invested in a few books, learned how to code, and built the intranet application myself, using a combination of MS Access, Frontpage, and Visual Basic.</p>
+            <p>Coding came naturally to me. I enjoyed the immediate feedback of the building and testing loop. I got a rush from it, and found I entered into flow just like I used to when composing music.</p>
+            <p>When the manager of the company’s service department learned about the system I had built, he was impressed. He began sending me out as a consultant to a local manufacturing company. Their technology stack was different—ASP 3.0 and Microsoft SQL Server—but the programming fundamentals were the same. Again, I purchased the relevant books and studied them intensely. I wanted to fight for this newfound career.</p>
+            <p>Despite my aptitude for programming, my job was still technically with the custom PC department, and my manager wanted me to return to the assembly line. I felt trapped between two worlds, and since I was more interested in development, I felt it was time to move on.</p>
+            <h3>The Climb Begins</h3>
+            <img class="img-right" src="img/cubes.png">
+            <p>It was 1999, and the world was in the middle of the Internet boom. It was a time where anyone who had any aptitude for programming could easily find a job, myself included. It wasn’t long before I landed my first true software development job with a small technology startup called Cymfony.</p>
+            <p>While not its core focus, the company acted as an Internet Service Provider and web host for several well-known local businesses, including WIVB, the region’s CBS affiliate. My role was supporting, maintaining, and expanding these web sites.</p>
+            <p>I learned a lot over a short time, but as much as I enjoyed my job at Cymfony, the following year I began to seek out a larger company with better benefits. I found it with Computer Task Group (CTG).</p>
+            <p>I joined CTG’s mission-critical department, working to maintain several of their internal applications. It was my first opportunity to work with a group of seasoned engineers, and I tried my hand at compiled languages for the first time.</p>
+            <h3>Growth and Independence</h3>
+            <p>Some time later, in 2002,  I began working at local company named LanTrax. They had an EMR product that was my primary focus, but I also supported their other projects, which were primarily in the advertising and real estate sectors. LanTrax is also where I met the woman who would later become my wife.</p>
+            <p>As time went on, the company began to zero in on real estate as its primary focus, and the EMR software and the advertising projects were getting sidelined. Around the same time, I was getting the urge to start my own business.</p>
+            <img style="float:right;max-width:150px; margin-left:1em;" src="img/freedom.png">
+            <p>I founded BinarySwitch in 2005, and took on the work that LanTrax didn’t want anymore. It was a side hustle at first, but eventually the business grew to the point that I could make a living off of it. The owner of LanTrax was happy he had someone to direct his less desirable projects to; we were never in competition with one another. </p>
+            <p>Running BinarySwitch gave me the freedom to work on my own ideas. I had several products of my own design including a desktop background creator, a website-blocking app, an RSS feed aggregator, and more. Ultimately, I was proud to have a company of my own.</p>
+            <p>While running BinarySwitch, I also invested in myself. I studied for months, passed several certification exams, and eventually achieved the Microsoft Certified Solution Developer (MCSD) certification, which was Microsoft’s top-tier certification for developers at the time.</p>
+            <p>Then the Great Recession came, directly impacting many of my clients. Without stable income, I began searching for a job. During these hard times, where many folks were out of work, I found that my lack of degree was preventing me from even getting an interview, despite having my MCSD.</p>
+            <p>One of my clients, RealtyUSA, came through with a job offer, but accepting the job resulted in a massive pay cut.</p>
+            <p>I decided it was time to return to college.</p>
+            <h3>Back to School</h3>
+            <img style="float:left;max-width:150px; margin-right:1em;" src="img/college.png">
+            <p>I started taking night classes at the local community college. I took multiple courses over the next several years including Pre-Calculus, English, Psychology, Chemistry, and Intro to Programming, carrying a 4.0 GPA.</p>
+            <p>During this time, I also switched jobs again and joined Independent Health for higher pay and better benefits, learning C# along the way.</p>
+            <p>A few years later, seeking to advance my career beyond just coding, I took on a Team Lead position at Fidelis Care. At Fidelis, I took charge of a handful of .NET developers and we all adapted to Java and founded the company's Enterprise Service Bus (ESB).</p>
+            <p>While I loved managing people, I found that my new job took so much of my time and energy that I couldn’t focus on my education. I struggled with Calculus, and I received my first “B” grade, dropping my 4.0 to a 3.8. Disheartened, I felt at the time it was better to stop attending classes than to let my grades suffer.</p>
+            <h3>Today</h3>
+            <img style="float:right;max-width:200px; margin-left:1em;" src="img/wfh.png">
+            <p>In 2018, Centene acquired Fidelis Care, and I was promoted to manager shortly thereafter. The team shifted from plan-focused work to corporate-wide initiatives. We retooled again, modernizing critical business logic out of legacy EDI software and into Go microservices hosted in AWS. </p>
+            <p>In 2020, due to the pandemic, Centene shuttered its offices and we became a 100% remote workforce.</p>
+            <p>In the span of time between Fidelis and Centene, I have built out my team from an initial staff of two engineers to a globally diverse, cross-functional team of fourteen. I have led the team through reskilling, transitions in upper management, multiple changes in direction, and layoffs. Through it all I’ve kept the team highly-engaged and highly productive, with only minimal attrition.</p>
+            <p>Though my life has taken a different path than most, I have a long track record of rising to meet the moment by adapting to the needs of the business. I am always eager to learn, ready to lead, and hungry for the next challenge.</p>
+          </div>
+          <div class="col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="border:none; border-radius:0; background-color: white;">
+      <p class="display-6" style="font-style:normal; font-size: 1.75rem; font-weight:lighter;padding-left: 1rem;">Up Next:</p>
+    </div>
+
+    <div class="preview" id="resumePreview" onclick="changePage('resume')">
+      <div class="d-flex">
+        <img src="img/resume-thumb.png"/>
+        <div class="d-flex flex-column justify-content-center">
+          <h2 style="margin-bottom: 0;">My Resume:</h2>
+          <h4>A History of Adaptability</h4>
+          <p class="d-none d-sm-block" style="margin-bottom: 0;">My full employment history.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" id="leadershipPreview" onclick="changePage('leadership')">
+      <div class="d-flex">
+        <img src="img/leadership-thumb.png"/>
+        <div class="d-flex flex-column justify-content-center">
+          <h2 style="margin-bottom: 0;">Lessons in Leadership:</h2>
+          <h4>Crafting High-Performing Teams</h4>
+          <p class="d-none d-sm-block" style="margin-bottom: 0;">How I keep a team highly-engaged and high-performing.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" id="architecturePreview" onclick="changePage('architecture')">
+      <div class="d-flex">
+        <img src="img/jungle-thumb.png"/>
+        <div class="d-flex flex-column justify-content-center" >
+          <h2 style="margin-bottom: 0;">Agile Software:</h2>
+          <h4>Is Architecture a Lost Art?</h4>
+          <p class="d-none d-sm-block" style="margin-bottom: 0;">An exploration of agile software development methods.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" id="bioPreview" onclick="changePage('bio')">
+      <div class="d-flex">
+        <img src="img/road-thumb.png"/>
+        <div class="d-flex flex-column justify-content-center">
+          <h2 style="margin-bottom: 0;">Beyond The Code:</h2>
+          <h4>A Road Less Traveled</h4>
+          <p class="d-none d-sm-block" style="margin-bottom: 0;">A brief biography.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container align-middle" style="margin-top: 2rem;">
+      <div class="row">
+        <div class="col" style="text-align:center; font-size:.8rem; border-top:.5px solid #444;">&copy;2024 Mark Milley. All Rights Reserved.</div>
+      </div>
+      <div class="row">
+        <div class="col" style="text-align:center; font-size:.8rem;">All views expressed are my own, and do not represent the views of my employers.</div>
+      </div>
+    </div>
+
+    <div class="fixed" style="top:0; left:0; height: 50px; background-color: white; width:100%; border-bottom: .10rem solid #444;">
+      <div style="position:absolute; top:0;left:0;"><img src="img/iconic.png" onclick="changePage('intro');" class="pseudolink" style="width:auto; height:45px; overflow: hidden; padding-left:3px;"/></div>
+      <div class="d-none d-sm-inline pseudolink" style="height:50px; margin:auto; position:absolute; left: 50px; top: 2px;font-weight:bolder; font-size:1.75em;" onclick="changePage('intro');">Mark S. Milley</div>
+      <div class="d-sm-none pseudolink" style="height:50px; margin:auto; position:absolute; left: 50px; top: 10px;font-weight:bolder; font-size:1rem;" onclick="changePage('intro');">Mark S. Milley</div>
+      <div style="float:right;margin:auto; height: 100%;padding-top:9px;">
+        <a href="tel:+17169036433"><img src="img/tel.png"></span></a>
+        <span class="d-none d-sm-inline pseudolink" style="font-weight:bold; font-size:1.05em; padding-right: 5px;"><a href="tel:+17169036433" style="color: #444; text-decoration: none;" >716-903-6433</a></span>
+        <a href="mailto:mark.milley@binaryswitch.com" ><img src="img/email.png" style="padding-left:5px;"></span></a>
+        <span class="d-none d-lg-inline pseudolink" style="font-weight:bold; font-size:1.05em;padding-right: 5px;"><a href="mailto:mark.milley@binaryswitch.com" style="color: #444; text-decoration: none;" >mark.milley@binaryswitch.com</a></span>
+        <a href="https://linkedin.com/in/markmilley" target="_blank"><img src="img/linkedin.png" style="padding-left:5px;padding-right: 10px;"></a>
+      </div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="site.js"></script>
+  </body>
+</html>
