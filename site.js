@@ -1,6 +1,6 @@
 
   function changePage(pageId){
-    document.location.hash = "#" + pageId
+    document.location.hash = "#" + pageId;
   }
   function showPage(pageId){
     $(".page").hide();
@@ -13,6 +13,22 @@
     $(pageId).show();
     console.log(pageId + "Preview");
     $(pageId + "Preview").hide();
+    switch(pageId){
+      case '#architecture':
+        document.title = "Mark S. Milley - Architecture";
+        break;
+      case '#leadership':
+        document.title = "Mark S. Milley - Leadership";
+        break;
+      case '#resume':
+        document.title = "Mark S. Milley - Resume";
+        break;
+      case '#bio':
+        document.title = "Mark S. Milley - Biography";
+        break;
+      default:
+        document.title = "Mark S. Milley - Welcome";
+    }
   }
   
 
@@ -27,9 +43,9 @@
     });
     
     if (window.location.hash) {
-        $(window).trigger('hashchange')
+        $(window).trigger('hashchange');
     }else {
-      window.location.hash = "intro"
+      window.location.hash = "intro";
     }
 
   });
