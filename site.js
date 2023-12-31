@@ -15,19 +15,19 @@
     $(pageId + "Preview").hide();
     switch(pageId){
       case '#architecture':
-        document.title = "Mark S. Milley - Architecture";
+        document.title = "Architecture | Mark S. Milley";
         break;
       case '#leadership':
-        document.title = "Mark S. Milley - Leadership";
+        document.title = "Leadership | Mark S. Milley";
         break;
       case '#resume':
-        document.title = "Mark S. Milley - Resume";
+        document.title = "Resume | Mark S. Milley";
         break;
       case '#bio':
-        document.title = "Mark S. Milley - Biography";
+        document.title = "Biography | Mark S. Milley";
         break;
       default:
-        document.title = "Mark S. Milley - Welcome";
+        document.title = "Welcome | Mark S. Milley";
     }
   }
   
