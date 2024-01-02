@@ -107,3 +107,13 @@ body {
     cursor:pointer;
     user-select: none; /* Standard syntax */
 }
+
+.resume-v {
+    border: none;
+}
+
+@media (min-width: 576px) { 
+    .resume-v {
+      border-right: 1px solid #44546A;
+    }
+  }
