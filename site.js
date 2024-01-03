@@ -1,6 +1,7 @@
 
   function changePage(pageId){
     document.location.hash = "#" + pageId;
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
     location.reload();
   }
   function showPage(pageId){
@@ -33,7 +34,7 @@
     $(window).on('hashchange', function (e) {
       showPage(location.hash);
     });
-    
+
     if (window.location.hash) {
       showPage(window.location.hash);
     }else {
