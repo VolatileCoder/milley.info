@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: auto !important;
+}
+
 .page {
     display:none;
     margin-top: 48px;
@@ -8,7 +12,6 @@
     cursor:pointer;
     font-weight:bold;
 }
-
 
 .pseudolink:hover {
     text-decoration:underline;

@@ -1,12 +1,14 @@
 
   function changePage(pageId){
     document.location.hash = "#" + pageId;
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-    location.reload();
   }
   function showPage(pageId){
     $(".page").hide();
     $(".preview").show();
+    setTimeout(function(){showPageReally(pageId)},1);
+  }
+
+  function showPageReally(pageId){
     $(pageId).show();
     console.log(pageId + "Preview");
     $(pageId + "Preview").hide();
@@ -30,15 +32,19 @@
   
 
   $(function(){
+    
+    $('.accordion-item').on('shown.bs.collapse', function () {
+      this.scrollIntoView();  
+    });
 
     $(window).on('hashchange', function (e) {
       showPage(location.hash);
     });
     
     if (window.location.hash) {
-      showPage(location.hash);
+        $(window).trigger('hashchange');
     }else {
-      showPage("#intro");
+      window.location.hash = "intro";
     }
 
   });
