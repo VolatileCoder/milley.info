@@ -6,10 +6,12 @@
     $(".page").hide();
     $(".preview").show();
     document.body.scrollTop = document.documentElement.scrollTop = 0;
-    setTimeout(function(){showPageReally(pageId)},10);
+    setTimeout(function(){showPageReally(pageId)},100);
   }
 
   function showPageReally(pageId){
+    
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
     $(pageId).show();
     console.log(pageId + "Preview");
     $(pageId + "Preview").hide();
