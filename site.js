@@ -6,7 +6,7 @@
     $(".page").hide();
     $(".preview").show();
     document.body.scrollTop = document.documentElement.scrollTop = 0;
-    setTimeout(function(){showPageReally(pageId)},1);
+    setTimeout(function(){showPageReally(pageId)},10);
   }
 
   function showPageReally(pageId){
@@ -29,6 +29,7 @@
       default:
         document.title = "Welcome | Mark S. Milley";
     }
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
   }
   
 
