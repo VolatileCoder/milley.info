@@ -1,6 +1,7 @@
 
   function changePage(pageId){
     document.location.hash = "#" + pageId;
+    location.reload();
   }
   function showPage(pageId){
     $(".page").hide();
