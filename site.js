@@ -26,8 +26,14 @@
         document.title = "Welcome | Mark S. Milley";
     }
   }
+  
 
   $(function(){
+
+    $(window).on('hashchange', function (e) {
+      showPage(location.hash);
+    });
+    
     if (window.location.hash) {
       showPage(location.hash);
     }else {
