@@ -1,18 +1,21 @@
 const game = {
+    top: 90,
     width:900, 
     height: 1600,
     paddle: {
-        width:160, 
-        height:40,
+        width:180, 
+        height:45,
         centerX:80,
         top: 1600-160,
         left: 0,
         lastLeft:0,
         velocity:0
     },
+    blockHeight: 45,
     control:{},
     balls: [], 
-    blocks: []
+    blocks: [],
+    palette:["#FF8", "#8F8", "#8FF", "#F88", "#88F"]
 };
 
 function initScreen(){
@@ -21,7 +24,10 @@ function initScreen(){
     game.screen.canvas.setAttribute('preserveAspectRatio', 'meet');
     game.screen.canvas.style.backgroundColor = '#334';    
     var well = game.screen.rect(0, 0, game.width, game.height);
-    well.attr("fill","#000");    
+    well.attr("fill","#000");
+    
+    var scoreboard = game.screen.rect(0,0,game.width, game.top);
+    scoreboard.attr({fill:"#223"});
     
 }
 
@@ -47,22 +53,31 @@ function initPaddle(){
 function addBall(fill){
     ball = {
         //in pixelsPerSecond
-        top:0,
+        top:game.height,
         left:0,
-        width:game.paddle.height,//TODO: Move to ball.size?
-        height:game.paddle.height,
+        width:game.blockHeight,//TODO: Move to ball.size?
+        height:game.blockHeight,
         directionX: 800,
         directionY: -800,
-    }
+    };
     ball.element = game.screen.rect(0, ball.top, ball.width, ball.height);
     ball.element.attr("fill",fill);
     game.balls.push(ball);
 }
 
-function addBlock(left, top, ){
+function addBlock(left, top, scale, colorIndex){
     block = {
-        opacity:1,
-    }
+        opacity: 1,
+        left: left,
+        top: top,
+        width: scale * game.blockHeight,
+        height: game.blockHeight, 
+        color: colorIndex
+    };
+    fill = game.palette[colorIndex];
+    block.element = game.screen.rect(block.left, block.top, block.width, block.height);
+    block.element.attr({fill: fill, stroke: fill});
+    game.blocks.push(block);
 }
 
 function oninput(e,a){
@@ -97,8 +112,8 @@ function moveBalls(deltaT){
         ball.left = ball.left + (ball.directionX/1000) * deltaT;
         
         //check game boundaries
-        if (ball.top<0){
-            ball.top = ball.top * -1;
+        if (ball.top<game.top){
+            ball.top = game.top + Math.abs(game.top - ball.top);
             hitY = true;
         }
         if (ball.left<0){
@@ -153,6 +168,17 @@ function moveBalls(deltaT){
                 }
             };
         });
+
+        blocksToRemove = [];
+        game.blocks.forEach((block)=>{
+            if(block.element && Raphael.isBBoxIntersect(ball.element.getBBox(), block.element.getBBox())){
+                ball.top = block.top+block.height +1
+                ball.directionY = ball.directionY * -1;
+                blocksToRemove.push(block);
+            }
+        });
+        blocksToRemove.forEach(removeBlock);
+        
         //check paddle intersection
         if(Raphael.isBBoxIntersect(ball.element.getBBox(), game.paddle.element.getBBox())){
             if(ball.directionY>0){
@@ -180,6 +206,32 @@ function moveBalls(deltaT){
         
     });
 }
+
+function removeBlock(block){
+    block.removing = true;
+    //todo: check for neighboring blocks;
+    game.blocks.forEach((block2)=>{
+        if(block2==block||block2.removing) return; 
+        if (block2.top == block.top && block.color == block2.color){
+            if ((block2.left <= (block.left - game.blockHeight) && (block.left - game.blockHeight) <= (block2.left + block2.width)) ||
+                (block2.left <= (block.left + block.width + game.blockHeight) && (block.left + block.width + game.blockHeight) <= (block2.left + block2.width)) ){
+                removeBlock(block2);
+            }
+        }
+        if(block2.left == block.left && block.color == block2.color){
+            if ((block2.top <= (block.top - game.blockHeight/2) && (block.top - game.blockHeight/2) <= (block2.top + block2.height)) ||
+                (block2.top <= (block.top + block.height + game.blockHeight/2) && (block.top + block.height + game.blockHeight/2) <= (block2.top + block2.height)) ){
+                removeBlock(block2);
+            }
+        }
+    });
+    
+    game.blocks.splice(game.blocks.indexOf(block),1);
+    if(block.element) block.element.remove();
+    block.element = null;
+    block = null;
+}
+
 function pauseLoop(){
     if(document.hasFocus()){
         gameLoop(Date.now());
@@ -187,6 +239,18 @@ function pauseLoop(){
         setTimeout(()=>pauseLoop(), 100);
     }
 }
+
+function moveBlocks(deltaT){
+    amountToAdvance = + (15/1000) * deltaT;
+    game.blocks.forEach((block)=>{
+        block.top = block.top + amountToAdvance;
+        if(block.element && block.element.attr("x") != Math.round(block.top)) {
+            block.element.attr({y: Math.round(block.top)});
+        }
+    });
+
+}
+
 function gameLoop(lastTime){
     var start  = Date.now();
     deltaT = start - lastTime
@@ -195,15 +259,43 @@ function gameLoop(lastTime){
     game.paddle.lastLeft = game.paddle.left;
     
     moveBalls(deltaT);
+    moveBlocks(deltaT);
     if(document.hasFocus()){
         setTimeout(()=>gameLoop(start),1);
     }else{
         pauseLoop();
     }
 }
+
+function addRow(top){
+    totalWidth=0;
+    lastColor=0;
+    color = lastColor;
+        
+    while ((game.width - totalWidth) > game.blockHeight){
+        color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
+        scale = 4;
+        addBlock(totalWidth, top, scale, color);
+        totalWidth += scale * game.blockHeight;
+        
+        lastColor = color
+    }
+    if(game.width - totalWidth>0){
+        color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
+        scale = (game.width - totalWidth)/game.blockHeight;
+        addBlock(totalWidth, top, scale, color);
+        totalWidth += scale * game.blockHeight; 
+    }
+}
+
 function startGame(){
     initPaddle();
     addBall("#FFF");
+    for(var i=0; i<10; i++){
+        addRow(game.top + (game.blockHeight * i));
+    
+    }
+    //addBlock(game.blockHeight * 10, game.blockHeight*10, 5, "#FF0");
     gameLoop(Date.now());
 }
 initScreen();
