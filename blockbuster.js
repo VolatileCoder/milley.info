@@ -93,7 +93,7 @@ function moveBalls(deltaT){
             hitX = true;
         } else if (ball.left + ball.width > game.width){
             overage = (ball.left + ball.width) - game.width; 
-            ball.let = (game.width - ball.width) - overage;
+            ball.left = (game.width - ball.width) - overage;
             hitX = true;
         }
 
