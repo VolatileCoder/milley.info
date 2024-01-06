@@ -4,6 +4,7 @@
     document.body.scrollTop = document.documentElement.scrollTop = 0;
     location.reload();
   }
+  
   function showPage(pageId){
     $(".page").hide();
     $(".preview").show();
