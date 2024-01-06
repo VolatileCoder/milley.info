@@ -15,6 +15,7 @@ const game = {
     control:{},
     balls: [], 
     blocks: [],
+    newBlocks: [],
     palette:["#FF8", "#8F8", "#8FF", "#F88", "#88F"]
 };
 
@@ -63,11 +64,25 @@ function addBall(fill){
     ball.element = game.screen.rect(0, ball.top, ball.width, ball.height);
     ball.element.attr("fill",fill);
     game.balls.push(ball);
+    
+    game.control.element.toFront();
 }
 
-function addBlock(left, top, scale, colorIndex){
+function fadeIn(deltaT){
+    blocksToRemove=[];
+    game.newBlocks.forEach((block)=>{
+        block.opacity = constrain(0,(block.opacity + (1/1000) * deltaT),1);
+        block.element.attr("opacity",block.opacity);
+        if(block.opacity==1){
+            blocksToRemove.push(block);
+        }
+    })
+    blocksToRemove.forEach((block)=>game.newBlocks.splice(game.newBlocks.indexOf(block)));
+}
+
+function addBlock(left, top, scale, colorIndex, opacity){
     block = {
-        opacity: 1,
+        opacity: opacity,
         left: left,
         top: top,
         width: scale * game.blockHeight,
@@ -76,8 +91,10 @@ function addBlock(left, top, scale, colorIndex){
     };
     fill = game.palette[colorIndex];
     block.element = game.screen.rect(block.left, block.top, block.width, block.height);
-    block.element.attr({fill: fill, stroke: fill});
+    block.element.attr({fill: fill, stroke: fill, opacity:opacity});
     game.blocks.push(block);
+    game.newBlocks.push(block);
+    game.control.element.toFront();
 }
 
 function oninput(e,a){
@@ -240,26 +257,21 @@ function pauseLoop(){
     }
 }
 
-function moveBlocks(deltaT){
-    amountToAdvance = + (15/1000) * deltaT;
-    game.blocks.forEach((block)=>{
-        block.top = block.top + amountToAdvance;
-        if(block.element && block.element.attr("x") != Math.round(block.top)) {
-            block.element.attr({y: Math.round(block.top)});
-        }
-    });
-
-}
-
+gameTime = 0;
 function gameLoop(lastTime){
     var start  = Date.now();
     deltaT = start - lastTime
+    gameTime+=deltaT;
 
     game.paddle.velocity = (game.paddle.velocity + (game.paddle.lastLeft - game.paddle.left))/2;
     game.paddle.lastLeft = game.paddle.left;
     
     moveBalls(deltaT);
-    moveBlocks(deltaT);
+    fadeIn(deltaT);
+    if(gameTime>1000){
+        gameTime = 0;
+        moveBlocks(deltaT);
+    }
     if(document.hasFocus()){
         setTimeout(()=>gameLoop(start),1);
     }else{
@@ -270,22 +282,28 @@ function gameLoop(lastTime){
 function addRow(top){
     totalWidth=0;
     lastColor=0;
-    color = lastColor;
         
-    while ((game.width - totalWidth) > game.blockHeight){
+    for (var i=0; i<5; i++){
         color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
         scale = 4;
-        addBlock(totalWidth, top, scale, color);
+        addBlock(totalWidth, top, scale, color, 0);
         totalWidth += scale * game.blockHeight;
-        
-        lastColor = color
     }
-    if(game.width - totalWidth>0){
-        color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
-        scale = (game.width - totalWidth)/game.blockHeight;
-        addBlock(totalWidth, top, scale, color);
-        totalWidth += scale * game.blockHeight; 
-    }
+
+}
+
+
+function moveBlocks(){
+
+    game.blocks.forEach((block)=>{
+        block.top = block.top + game.blockHeight;
+        block.element.attr("y", block.top);
+        if(block.element.attr("y")!=block.top){
+            alert("trapped");
+        }
+    });
+
+    addRow(game.top);
 }
 
 function startGame(){
@@ -293,7 +311,6 @@ function startGame(){
     addBall("#FFF");
     for(var i=0; i<10; i++){
         addRow(game.top + (game.blockHeight * i));
-    
     }
     //addBlock(game.blockHeight * 10, game.blockHeight*10, 5, "#FF0");
     gameLoop(Date.now());
