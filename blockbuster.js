@@ -11,7 +11,8 @@ const game = {
         velocity:0
     },
     control:{},
-    balls: []
+    balls: [], 
+    blocks: []
 };
 
 function initScreen(){
@@ -21,16 +22,14 @@ function initScreen(){
     game.screen.canvas.style.backgroundColor = '#334';    
     var well = game.screen.rect(0, 0, game.width, game.height);
     well.attr("fill","#000");    
-        
-    var killzone = game.screen.rect(0,game.paddle.top+game.paddle.height,game.width, game.height - (game.paddle.top+game.paddle.height));
-    killzone.attr("fill","#800");
+    
 }
 
 function initControl(){
     var control = game.screen.rect(0, 0, game.width, game.height); //must declare last
     control.attr("fill","#F0F");
     control.attr("opacity",0)
-    control.attr("cursor", "none");
+    control.attr("cursor", "ew-resize");
     control.mousemove(oninput);
     control.touchmove(oninput);
     game.control.element = control;
@@ -45,7 +44,7 @@ function initPaddle(){
     game.control.element.toFront();
 }
 
-function addBall(){
+function addBall(fill){
     ball = {
         //in pixelsPerSecond
         top:0,
@@ -56,11 +55,15 @@ function addBall(){
         directionY: -800,
     }
     ball.element = game.screen.rect(0, ball.top, ball.width, ball.height);
-    ball.element.attr("fill","#fff");
+    ball.element.attr("fill",fill);
     game.balls.push(ball);
 }
 
-
+function addBlock(left, top, ){
+    block = {
+        opacity:1,
+    }
+}
 
 function oninput(e,a){
     if (document.hasFocus() && game.paddle.element){
@@ -114,8 +117,43 @@ function moveBalls(deltaT){
             hitY=true;
         }
 
+        game.balls.forEach((ball2)=>{
+            if (ball2 == ball) return;
+            if(Raphael.isBBoxIntersect(ball.element.getBBox(), ball2.element.getBBox())){
+                xdiff = Math.abs(ball.left - ball2.left);
+                ydiff = Math.abs(ball.top - ball2.top);
+                if(xdiff>ydiff){
+                    //find the center point between the two
+                    centerX = Math.max(ball.left, ball2.left) - xdiff/2;
+                    if (ball.left<centerX){
+                        ball.left = centerX-ball.width;
+                        ball.directionX = Math.abs(ball2.directionX) * -1;
+                        ball2.left = centerX+ball.width;
+                        ball2.directionX = Math.abs(ball.directionX);
+                    } else {
+                        ball.left = centerX+ball.width;
+                        ball.directionX = Math.abs(ball2.directionX);
+                        ball2.left = centerX-ball.width;
+                        ball2.directionX = Math.abs(ball.directionX) * -1;     
+                    }                
+                } else {
+                    //find the center point between the two
+                    centerY = Math.max(ball.top, ball2.top) - ydiff/2;
+                    if (ball.top<centerY){
+                        ball.top = centerY-ball.height;
+                        ball.directionY = Math.abs(ball2.directionY) * -1;
+                        ball2.top = centerY+ball.height;
+                        ball2.directionY = Math.abs(ball.directionY);
+                    } else {
+                        ball.top = centerY+ball.height;
+                        ball.directionY = Math.abs(ball2.directionY);
+                        ball2.top = centerY-ball.height;
+                        ball2.directionY = Math.abs(ball.directionY) * -1;     
+                    }
+                }
+            };
+        });
         //check paddle intersection
-
         if(Raphael.isBBoxIntersect(ball.element.getBBox(), game.paddle.element.getBBox())){
             if(ball.directionY>0){
                 if(ball.top + ball.height > game.paddle.top){
@@ -156,7 +194,6 @@ function gameLoop(lastTime){
     game.paddle.velocity = (game.paddle.velocity + (game.paddle.lastLeft - game.paddle.left))/2;
     game.paddle.lastLeft = game.paddle.left;
     
-    console.log(game.paddle.velocity);
     moveBalls(deltaT);
     if(document.hasFocus()){
         setTimeout(()=>gameLoop(start),1);
@@ -166,7 +203,7 @@ function gameLoop(lastTime){
 }
 function startGame(){
     initPaddle();
-    addBall();
+    addBall("#FFF");
     gameLoop(Date.now());
 }
 initScreen();
