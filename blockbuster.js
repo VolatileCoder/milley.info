@@ -6,6 +6,9 @@ const game = {
         height:40,
         centerX:80,
         top: 1600-160,
+        left: 0,
+        lastLeft:0,
+        velocity:0
     },
     control:{},
     balls: []
@@ -27,6 +30,7 @@ function initControl(){
     var control = game.screen.rect(0, 0, game.width, game.height); //must declare last
     control.attr("fill","#F0F");
     control.attr("opacity",0)
+    control.attr("cursor", "none");
     control.mousemove(oninput);
     control.touchmove(oninput);
     game.control.element = control;
@@ -70,10 +74,16 @@ function oninput(e,a){
                 pos = game.width - game.paddle.width;
                 
             }
-            
+            game.paddle.left = pos;
             game.paddle.element.attr("x",pos);
         }    
     }   
+}
+
+function constrain (min, val, max){
+    if (val<min) return min;
+    if (val>max) return max;
+    return val;
 }
 
 function moveBalls(deltaT){
@@ -103,7 +113,23 @@ function moveBalls(deltaT){
             ball.top = (game.height - ball.height) - overage;
             hitY=true;
         }
-        
+
+        //check paddle intersection
+
+        if(Raphael.isBBoxIntersect(ball.element.getBBox(), game.paddle.element.getBBox())){
+            if(ball.directionY>0){
+                if(ball.top + ball.height > game.paddle.top){
+                    overage = (ball.top + ball.height) - game.paddle.top;
+                    ball.top = (game.paddle.top - ball.height) - overage;
+                    hitY=true;
+                }
+            }
+            
+            ball.directionX += game.paddle.velocity * -10;
+            ball.directionX = constrain(-1600, ball.directionX, 1600)
+            
+        } 
+
         if (hitY){
             ball.directionY = ball.directionY * -1;
         }
@@ -126,7 +152,11 @@ function pauseLoop(){
 function gameLoop(lastTime){
     var start  = Date.now();
     deltaT = start - lastTime
-    //console.log(deltaT);
+
+    game.paddle.velocity = (game.paddle.velocity + (game.paddle.lastLeft - game.paddle.left))/2;
+    game.paddle.lastLeft = game.paddle.left;
+    
+    console.log(game.paddle.velocity);
     moveBalls(deltaT);
     if(document.hasFocus()){
         setTimeout(()=>gameLoop(start),1);
