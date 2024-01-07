@@ -29,6 +29,18 @@ const game = {
     lives: 2,
 };
 
+sounds = {
+//create a synth and connect it to the main output (your speakers)
+    synth: new Tone.Synth().toDestination(),
+    lastTime: null,
+    ballHitPaddle: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F2",".001", Tone.now());}},
+    ballHitWall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("A2",".001", Tone.now());}},
+    ballHitBlock: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("C3",".001", Tone.now());}},
+    ballHitBall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F3",".001", Tone.now());}},
+
+}
+sounds.synth.envelope.release = .33;
+
 function initScreen(){
     game.screen = Raphael("main", game.width, game.height);
     game.screen.setViewBox(0, 0, game.width, game.height, true);
@@ -76,6 +88,7 @@ function launchBall(){
     game.balls.forEach((ball)=>{
         if(ball.anchored){
             ball.anchored=false;
+            //sounds.ballHitPaddle();
         }
     });
 }
@@ -236,19 +249,23 @@ function moveBalls(deltaT){
         if (ball.top<game.top){
             ball.top = game.top + Math.abs(game.top - ball.top);
             hitY = true;
+            sounds.ballHitWall();
         }
         if (ball.left<0){
             ball.left = ball.left * -1;
             hitX = true;
+            sounds.ballHitWall();
         } else if (ball.left + ball.width > game.width){
             overage = (ball.left + ball.width) - game.width; 
             ball.left = (game.width - ball.width) - overage;
             hitX = true;
+            sounds.ballHitWall();
         }
 
         game.balls.forEach((ball2)=>{
             if (ball2 == ball) return;
             if(Raphael.isBBoxIntersect(ball.element.getBBox(), ball2.element.getBBox())){
+                sounds.ballHitBall();
                 xdiff = Math.abs(ball.left - ball2.left);
                 ydiff = Math.abs(ball.top - ball2.top);
                 if(xdiff>ydiff){
@@ -309,7 +326,7 @@ function moveBalls(deltaT){
         if(blocksToRemove.length>0){
             blocksToRemove.forEach(removeBlock);
             commitRemoval();
-            //alert(leftHit);
+            sounds.ballHitBlock();
         }
         
         //check paddle intersection
@@ -323,8 +340,8 @@ function moveBalls(deltaT){
             }
             
             ball.directionX += game.paddle.velocity * -10;
-            ball.directionX = constrain(-1600, ball.directionX, 1600)
-            
+            ball.directionX = constrain(-1600, ball.directionX, 1600);
+            sounds.ballHitPaddle();
         } 
 
         if (hitY){
@@ -610,18 +627,19 @@ function setDifficulty(difficulty){
 }
 
 function startGame(){
-    initPaddle();
-    addBall();
     game.level.number=0;
+    game.level.difficulty = 0;
     increaseLevel();
     for(var i=0; i<10; i++){
         addRow(game.top + (game.blockHeight * i));
     }
     trace();
-    //addBlock(game.blockHeight * 10, game.blockHeight*10, 5, "#FF0");
+    addBall();
     gameLoop(Date.now());
 }
 initScreen();
 initControl();
+initPaddle();
+
 startGame();
 
