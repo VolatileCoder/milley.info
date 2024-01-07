@@ -10,7 +10,7 @@ const game = {
         width:180, 
         height:45,
         centerX:90,
-        top: 1600-160,
+        top: 1600-360,
         left: 0,
         lastLeft:0,
         velocity:0
