@@ -1,7 +1,8 @@
 const game = {
     level: {
         number: 1,
-        rowTimer: 5000
+        rowTimer: 5000,
+        difficulty: 1,
     },
     top: 90,
     width:900, 
@@ -13,13 +14,15 @@ const game = {
         top: 1600-360,
         left: 0,
         lastLeft:0,
-        velocity:0
+        velocity:0,
+        isLarge: false
     },
     blockHeight: 45,
     control:{},
     balls: [], 
     blocks: [],
     newBlocks: [],
+    powerUps: [],
     palette:["#FF8", "#8F8", "#8FF", "#F88", "#88F","#FB7"],
     score:0,
     highScore:0,
@@ -67,6 +70,9 @@ function initControl(){
 }
 
 function onclick(){
+    launchBall()
+}
+function launchBall(){
     game.balls.forEach((ball)=>{
         if(ball.anchored){
             ball.anchored=false;
@@ -93,6 +99,8 @@ function addBall(){
         directionX: 800,
         directionY: -800,
     };
+    ball.top = game.paddle.top - ball.height;
+    ball.left = game.paddle.left + game.paddle.width/2 - ball.width/2;
     ball.element = game.screen.rect(0, ball.top, ball.width, ball.height);
     ball.element.attr("fill","#fff");
     ball.anchored = true;
@@ -114,24 +122,67 @@ function fadeIn(deltaT){
 }
 
 var blockId = 0;
-function addBlock(left, top, scale, colorIndex, opacity){
+function addBlock(left, top, scale, colorIndex, opacity, powerUp){
     block = {
         opacity: opacity,
         left: left,
         top: top,
         width: scale * game.blockHeight,
         height: game.blockHeight, 
-        color: colorIndex
+        color: powerUp ? Math.random() : colorIndex,
+        powerUp: powerUp
     };
-    fill = game.palette[colorIndex];
+    fill = powerUp ? colorIndex :  game.palette[colorIndex];
     block.element = game.screen.rect(block.left, block.top, block.width, block.height);
     block.element.attr({fill: fill, stroke:fill, opacity:opacity, id:'block'+blockId,});
+    if (powerUp){
+        block.textElement = game.screen.text(block.left + block.width/2, block.top + block.height/2, powerUp);
+        block.textElement.attr("fill","#FFF");
+        block.textElement.attr("font-size","30pt");
+        block.element.toFront();
+        block.textElement.toFront();
+    }
     blockId++;
     game.blocks.push(block);
-
     game.newBlocks.push(block);
     game.control.element.toFront();
 }
+
+function movePowerUps(deltaT){
+    powerUpsToRemove=[];
+    game.powerUps.forEach((powerUp)=>{
+        powerUp.top = powerUp.top + (500/1000) * deltaT;
+        if(powerUp.top>game.height){
+            powerUpsToRemove.push(powerUp);
+            return;
+        }
+
+        //render
+        powerUp.element.attr("y", powerUp.top);
+        powerUp.element.toFront();
+        powerUp.textElement.attr("y", powerUp.top + powerUp.height/2);
+        powerUp.textElement.toFront();
+
+        if(Raphael.isBBoxIntersect(powerUp.element.getBBox(),game.paddle.element.getBBox())){
+            powerUpsToRemove.push(powerUp);
+            switch (powerUp.textElement.attr("text")){
+                case "+ Ball":
+                    addBall();
+                    launchBall();
+            }
+        }
+
+    });
+    powerUpsToRemove.forEach((powerUp)=>{
+       game.powerUps.splice(game.powerUps.indexOf(powerUp),1);
+       powerUp.element.remove();
+       powerUp.textElement.remove(); 
+    });
+
+    game.control.element.toFront();
+
+}
+
 
 function oninput(e,a){
     if (document.hasFocus() && game.paddle.element){
@@ -327,19 +378,23 @@ function commitRemoval(){
 
     blocksToRemove.forEach((block)=> {
         game.blocks.splice(game.blocks.indexOf(block),1);
-        if(block.element) block.element.remove();
-        if(block.path){
-            if(block.path.top) {block.path.top.remove(); block.path.top=null};
-            if(block.path.left) {block.path.left.remove(); block.path.left=null};
-            if(block.path.right) {block.path.right.remove(); block.path.right=null};
-            if(block.path.bottom) {block.path.bottom.remove(); block.path.bottom=null};
+        if(block.powerUp){
+            block.element.attr({"stroke":"#fff","stroke-width":3});
+            block.element.attr("r",20);     
+            game.powerUps.push(block);
+        }else{       
+            if(block.element) block.element.remove();
+            if(block.path){
+                if(block.path.top) {block.path.top.remove(); block.path.top=null};
+                if(block.path.left) {block.path.left.remove(); block.path.left=null};
+                if(block.path.right) {block.path.right.remove(); block.path.right=null};
+                if(block.path.bottom) {block.path.bottom.remove(); block.path.bottom=null};
+            }
+            block.element = null;
+            block = null
+            
         }
-        block.element = null;
-        block = null
     });
-    
-
-
 };
 
 function trace(){
@@ -429,6 +484,7 @@ function gameLoop(lastTime){
     
     fadeIn(deltaT);
     moveBalls(deltaT);
+    movePowerUps(deltaT);
     if(game.balls.length>0 && !game.balls[0].anchored){
         gameTime+=deltaT;
         if(gameTime > game.level.rowTimer){
@@ -460,6 +516,9 @@ function gameLoop(lastTime){
 
 var rows = 0;
 function addRow(top){
+    
+    powerUpInventory = getAvailablePowerUps();
+
     rows++;
     totalWidth=0;
     lastColor=0;
@@ -467,22 +526,37 @@ function addRow(top){
     for (var i=0; i<5; i++){
         color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
         scale = 4;
-        addBlock(totalWidth, top, scale, color, 0);
+        powerUp = null;
+        if(Math.round(Math.random()*10)==1){
+            p = powerUpInventory[Math.round(Math.random() * powerUpInventory.length)];
+            if (p){
+                powerUp = p.powerUp;
+                color = p.color;
+                powerUpInventory.splice(powerUpInventory.indexOf(p),1);
+            }
+        }
+        addBlock(totalWidth, top, scale, color, 0, powerUp);
         totalWidth += scale * game.blockHeight;
     }
     if (rows % 20 == 0) {
-        increaseDifficulty();
+        increaseLevel();
     }
 }
 
+function getAvailablePowerUps(){
+    powerUpInventory = [];
+    if (game.balls.length < 3) {
+        powerUpInventory.push({powerUp:"+ Ball",color:"#080"});
+    }
+    return powerUpInventory;
+}
 
 function moveBlocks(){
-
     game.blocks.forEach((block)=>{
         block.top = block.top + game.blockHeight;
         block.element.attr("y", block.top);
-        if(block.element.attr("y")!=block.top){
-            alert("trapped");
+        if(block.textElement){
+            block.textElement.attr("y", block.top + block.height/2);
         }
     });
 
@@ -490,10 +564,16 @@ function moveBlocks(){
     trace();
 }
 
-function increaseDifficulty(){
+
+function increaseLevel(){
     game.level.number += 1;
-    game.levelElement.attr("text", "Level " + game.level.number)
-    switch (game.level.number){
+    game.levelElement.attr("text", "Level " + game.level.number);
+    setDifficulty( game.level.difficulty + 1);
+}
+
+function setDifficulty(difficulty){
+    game.level.difficulty = constrain(1, difficulty, 8);
+    switch (game.level.difficulty){
         case 1:
             game.level.rowTimer = 5000;
             game.palette = ["#F88","#FF8", "#8FF"];
@@ -522,7 +602,7 @@ function increaseDifficulty(){
             game.level.rowTimer = 650;
             game.palette = ["#FF8", "#8FF", "#FB7", "#8F8", "#88F"];
             break;
-        case 8:
+        default:
             game.palette = ["#F88","#FF8", "#8FF", "#FB7", "#8F8", "#88F"];
             game.level.rowTimer = 500;
             break;
@@ -533,7 +613,7 @@ function startGame(){
     initPaddle();
     addBall();
     game.level.number=0;
-    increaseDifficulty();
+    increaseLevel();
     for(var i=0; i<10; i++){
         addRow(game.top + (game.blockHeight * i));
     }
