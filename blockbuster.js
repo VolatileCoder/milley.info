@@ -233,16 +233,32 @@ function moveBalls(deltaT){
         });
 
         blocksToRemove = [];
+        topHit = false;
+        bottomHit = false;
+        leftHit = false;
+        rightHit = false;
+
         game.blocks.forEach((block)=>{
             if(block.element && Raphael.isBBoxIntersect(ball.element.getBBox(), block.element.getBBox())){
-                ball.top = block.top+block.height +1
-                ball.directionY = ball.directionY * -1;
                 blocksToRemove.push(block);
+                topHit = topHit || (ball.top <= (block.top + block.height) && (ball.top + ball.height) > (block.top + block.height));
+                bottomHit = bottomHit || (ball.top < (block.top) && (ball.top + ball.height) > (block.top) && (ball.top + ball.height));
+                leftHit = leftHit || (ball.left > block.left) && (ball.left < (block.left + block.width));
+                rightHit = rightHit ||  ((ball.left + ball.width) > block.left && (ball.left + ball.width) < (block.left + block.width));
             }
         });
+
+        if ((topHit || bottomHit) && leftHit && rightHit){
+            hitY = true; 
+        } else if (leftHit || rightHit){
+            hitX = true; 
+        }
+        
+        
         if(blocksToRemove.length>0){
             blocksToRemove.forEach(removeBlock);
             commitRemoval();
+            //alert(leftHit);
         }
         
         //check paddle intersection
