@@ -200,6 +200,11 @@ function launchBall(){
 
 function initPaddle(){
     game.paddle.width = game.width*.25; 
+    if ((game.paddle.width + game.paddle.left)>game.width){
+        game.paddle.left = game.width - game.paddle.width;
+    }
+    game.paddle.isLarge = false;
+    game.paddle.isSmall = false;
     if(game.paddle.element){
         game.paddle.element.remove();
     }
@@ -677,6 +682,7 @@ function gameLoop(lastTime){
         }        
     }else if(game.balls.length == 0) {
         removeAllPowerUps();
+        initPaddle();
         if (game.lives > 0) {
             sounds.ballLost();
             addToLives(-1)
@@ -710,8 +716,8 @@ function addRow(top){
         color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
         scale = 4;
         powerUp = null;
-        //TODO: base on difficulty
-        if(Math.round(Math.random()*25)==1){
+        probability = 25 - Math.round((game.level.difficulty/8) * 20);
+        if(Math.round(Math.random()*probability)==1){
             p = powerUpInventory[Math.round(Math.random() * powerUpInventory.length)];
             if (p){
                 powerUp = p.powerUp;
