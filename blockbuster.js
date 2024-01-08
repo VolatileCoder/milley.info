@@ -32,9 +32,9 @@ const game = {
     rowsCreated:0,
 };
 
-const puGrowPaddle = "🡸 Paddle 🡺";
-const puShrinkPaddle = "🡺 Paddle 🡸";
-const puExtraBall ="✚ Ball"; 
+const puGrowPaddle = "<- Paddle ->";
+const puShrinkPaddle = "-> Paddle <-";
+const puExtraBall ="+ Ball"; 
 
 const puResetDifficulty ="Slow Down"; 
 
