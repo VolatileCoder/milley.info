@@ -338,10 +338,14 @@ function shrinkPaddle(){
 }
 
 function screenCleared(){
-    game.textElement.attr("text","Screen Cleared!\n+1 Extra Life!");
-    sounds.clearScreen();
-    addToLives(1);
-    setTimeout(()=>{game.textElement.attr("text","")}, 1000);
+    if(game.isRunning){
+        
+        game.textElement.attr("text","Screen Cleared!\n+1 Extra Life!");
+        sounds.clearScreen();
+        addToLives(1);
+        setTimeout(()=>{game.textElement.attr("text","")}, 1000);
+
+    }
 }
 
 function oninput(e,a){
@@ -836,7 +840,6 @@ function startGame(){
     addToLives(0);
     game.score = 0;
     game.scoreElement.attr("text","0");
-    game.isRunning = true,
     game.textElement.attr("text","");
     game.newBlocks = [];
     if(game.textBackgroundElement){
@@ -849,6 +852,7 @@ function startGame(){
     }
     trace();
     addBall();
+    game.isRunning = true,
     gameLoop(Date.now());
 }
 
