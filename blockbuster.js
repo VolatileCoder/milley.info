@@ -126,7 +126,8 @@ function initControl(){
     control.mousemove(oninput);
     control.touchmove(oninput);
     control.mouseup(onclick);
-    control.touchend(onclick);
+    control.touchend(onTouchEnd);
+    control.touchstart(onTouchStart);
     game.control.element = control;
 }
 
@@ -137,6 +138,20 @@ function onclick(){
         startGame();
     }
 }
+
+function onTouchStart(){
+    if (!game.isRunning){
+        startGame();
+    }
+}
+
+
+function onTouchEnd(){
+    if (game.isRunning){
+        launchBall();
+    }
+}
+
 function launchBall(){
     game.balls.forEach((ball)=>{
         if(ball.anchored){
