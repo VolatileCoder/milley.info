@@ -4,6 +4,7 @@ const game = {
         rowTimer: 5000,
         difficulty: 1,
     },
+    isRunning:false,
     top: 90,
     width:900, 
     height: 1600,
@@ -27,25 +28,53 @@ const game = {
     score:0,
     highScore:0,
     lives: 2,
+    rowsCreated:0,
 };
 
 sounds = {
 //create a synth and connect it to the main output (your speakers)
-    synth: new Tone.Synth().toDestination(),
+    //synth: new Tone.Synth().toDestination(),
     lastTime: null,
     ballHitPaddle: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F2",".001", Tone.now());}},
     ballHitWall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("A2",".001", Tone.now());}},
     ballHitBlock: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("C3",".001", Tone.now());}},
     ballHitBall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F3",".001", Tone.now());}},
-
+    init: ()=>{sounds.synth = new Tone.Synth().toDestination();sounds.synth.envelope.release = .33;}
 }
-sounds.synth.envelope.release = .33;
+
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+let name = cname + "=";
+let decodedCookie = decodeURIComponent(document.cookie);
+let ca = decodedCookie.split(';');
+for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+    c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+    return c.substring(name.length, c.length);
+    }
+}
+return "";
+}
 
 function initScreen(){
+    hs = getCookie("highScore");
+    if(hs && hs!=""){
+        game.highScore = parseInt(hs);
+    }
     game.screen = Raphael("main", game.width, game.height);
     game.screen.setViewBox(0, 0, game.width, game.height, true);
     game.screen.canvas.setAttribute('preserveAspectRatio', 'meet');
-    game.screen.canvas.style.backgroundColor = '#334';    
+    game.screen.canvas.style.backgroundColor = '#334';   
+    game.screen.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
     var well = game.screen.rect(0, 0, game.width, game.height);
     well.attr("fill","#000");
     
@@ -54,17 +83,30 @@ function initScreen(){
     
     game.levelElement = game.screen.text(100,45,"Level " + game.level.number);
     game.levelElement.attr("fill","#fff");
-    game.levelElement.attr("font-size","40pt");
+    game.levelElement.attr("font-size","30pt");
 
-    
-    game.scoreElement = game.screen.text(game.width/2,45,"0");
+    game.screen.text(game.width *.25 ,25,"Your Score:").attr({fill:"#fff","text-anchor":"start","font-size":"30pt"});
+    game.scoreElement = game.screen.text(game.width*.66,25,"0");
     game.scoreElement.attr("fill","#fff");
-    game.scoreElement.attr("font-size","40pt");
+    game.scoreElement.attr("text-anchor","end");
+    game.scoreElement.attr("font-size","30pt");
+    
+    
+    game.screen.text(game.width *.25 ,65,"High Score:").attr({fill:"#fff","text-anchor":"start","font-size":"30pt"});
+    game.highScoreElement = game.screen.text(game.width *.66 ,65,numberWithCommas(game.highScore));
+    game.highScoreElement.attr("fill","#fff");
+    game.highScoreElement.attr("text-anchor","end");
+    game.highScoreElement.attr("font-size","30pt");
     
     
     game.livesElement = game.screen.text(game.width-100,45,"Lives: " + game.lives);
     game.livesElement.attr("fill","#fff");
-    game.livesElement.attr("font-size","40pt");
+    game.livesElement.attr("font-size","30pt");
+
+    game.textElement = game.screen.text(game.width / 2, game.height / 2, "Click to Start!");
+    game.textElement.attr("fill","#fff")
+    game.textElement.attr("font-size","70pt");
+    game.textElement.attr("font-weight","bold");
 
     
 }
@@ -82,7 +124,11 @@ function initControl(){
 }
 
 function onclick(){
-    launchBall()
+    if (game.isRunning){
+        launchBall();
+    } else {
+        startGame();
+    }
 }
 function launchBall(){
     game.balls.forEach((ball)=>{
@@ -97,7 +143,7 @@ function initPaddle(){
     if(game.paddle.element){
         game.paddle.element.remove();
     }
-    game.paddle.element = game.screen.rect(0, game.paddle.top, game.paddle.width, game.paddle.height);
+    game.paddle.element = game.screen.rect(game.paddle.left, game.paddle.top, game.paddle.width, game.paddle.height);
     game.paddle.element.attr("fill","#fff");
     game.control.element.toFront();
 }
@@ -127,6 +173,7 @@ function fadeIn(deltaT){
     game.newBlocks.forEach((block)=>{
         block.opacity = constrain(0,(block.opacity + (1/Math.min(750,game.level.rowTimer)) * deltaT),1);
         if (block.element) block.element.attr("opacity",block.opacity);
+        if (block.textElement) block.textElement.attr("opacity",block.opacity);
         if(block.opacity==1){
             blocksToRemove.push(block);
         }
@@ -152,6 +199,7 @@ function addBlock(left, top, scale, colorIndex, opacity, powerUp){
         block.textElement = game.screen.text(block.left + block.width/2, block.top + block.height/2, powerUp);
         block.textElement.attr("fill","#FFF");
         block.textElement.attr("font-size","30pt");
+        block.textElement.attr("opacity",opacity);
         block.element.toFront();
         block.textElement.toFront();
     }
@@ -198,7 +246,7 @@ function movePowerUps(deltaT){
 
 
 function oninput(e,a){
-    if (document.hasFocus() && game.paddle.element){
+    if (document.hasFocus() && game.paddle.element && game.isRunning){
         r = e.target.getBoundingClientRect();
         pos = ((e.clientX-r.x)/r.width) * game.width;
         if (!isNaN(pos)) {
@@ -390,12 +438,11 @@ function commitRemoval(){
     blocksToRemove=[];
     game.blocks.forEach((block)=> {if(block.removing==true) {blocksToRemove.push(block)}});
     
-    game.score += game.blocks.length * game.level.number  * 5;
-    game.scoreElement.attr("text",numberWithCommas(game.score));
+    addToScore(game.blocks.length * game.level.difficulty * 5);
 
     blocksToRemove.forEach((block)=> {
         game.blocks.splice(game.blocks.indexOf(block),1);
-        if(block.powerUp){
+        if(block.powerUp && game.isRunning){
             block.element.attr({"stroke":"#fff","stroke-width":3});
             block.element.attr("r",20);     
             game.powerUps.push(block);
@@ -407,12 +454,22 @@ function commitRemoval(){
                 if(block.path.right) {block.path.right.remove(); block.path.right=null};
                 if(block.path.bottom) {block.path.bottom.remove(); block.path.bottom=null};
             }
+            if(block.textElement) block.textElement.remove();
             block.element = null;
             block = null
             
         }
     });
 };
+
+function removeAllPowerUps(){
+    powerUpsToRemove = Array.from(game.powerUps);
+    powerUpsToRemove.forEach((powerUp)=>{
+        powerUp.element.remove();
+        powerUp.textElement.remove();
+        game.powerUps.splice(game.powerUps.indexOf(powerUp),1);
+    });
+}
 
 function trace(){
     //remove old traces
@@ -510,33 +567,33 @@ function gameLoop(lastTime){
             moveBlocks(deltaT);
         }        
     }else if(game.balls.length == 0) {
+        removeAllPowerUps();
         if (game.lives > 0) {
             game.lives--;
             game.livesElement.attr("text","Lives: " + game.lives);
             addBall();
         }
         else {
-            alert("game over!");
-            //pauseLoop();
-            document.location.reload();
+            endGame();
             return;
         }
     }
     
     if(document.hasFocus()){
-        setTimeout(()=>gameLoop(start),1);
+        if (game.isRunning){
+            setTimeout(()=>gameLoop(start),1);
+        }
     }else{
         pauseLoop();
     }
 
 }
 
-var rows = 0;
 function addRow(top){
     
     powerUpInventory = getAvailablePowerUps();
 
-    rows++;
+    game.rowsCreated++;
     totalWidth=0;
     lastColor=0;
         
@@ -555,7 +612,7 @@ function addRow(top){
         addBlock(totalWidth, top, scale, color, 0, powerUp);
         totalWidth += scale * game.blockHeight;
     }
-    if (rows % 20 == 0) {
+    if (game.rowsCreated % 20 == 0) {
         increaseLevel();
     }
 }
@@ -574,6 +631,9 @@ function moveBlocks(){
         block.element.attr("y", block.top);
         if(block.textElement){
             block.textElement.attr("y", block.top + block.height/2);
+        }
+        if(block.top+block.height >= game.paddle.top){
+            endGame();
         }
     });
 
@@ -626,9 +686,36 @@ function setDifficulty(difficulty){
     }
 }
 
+function addToScore(points){
+    game.score += points;
+    game.scoreElement.attr("text",numberWithCommas(game.score));
+    if (game.score>game.highScore){
+        game.highScore = game.score;
+        game.highScoreElement.attr("text",numberWithCommas(game.highScore));
+    }
+}
+
 function startGame(){
+    sounds.init();
+    game.blocks.forEach((block)=>{removeBlock(block)});
+    
+    removeAllPowerUps();
+    commitRemoval();
+    initPaddle();
+    game.rowsCreated=0;
     game.level.number=0;
     game.level.difficulty = 0;
+    game.lives = 2;
+    game.livesElement.attr("text","Lives: " + game.lives);
+    game.score = 0;
+    game.scoreElement.attr("text","0");
+    game.isRunning = true,
+    game.textElement.attr("text","");
+    game.newBlocks = [];
+    if(game.textBackgroundElement){
+        game.textBackgroundElement.remove();
+        game.textBackgroundElement = null;
+    }
     increaseLevel();
     for(var i=0; i<10; i++){
         addRow(game.top + (game.blockHeight * i));
@@ -637,9 +724,29 @@ function startGame(){
     addBall();
     gameLoop(Date.now());
 }
+
+function endGame(){
+    game.isRunning = false;
+    setCookie("highScore", game.highScore, 365);
+    deadBalls = Array.from(game.balls);
+    deadBalls.forEach((ball)=>{
+        ball.element.remove();
+        game.balls.splice(game.balls.indexOf(ball),1);
+    })
+    
+    game.textBackgroundElement = game.screen.rect(game.width *.10, game.height*.45, game.width * .80, game.height *.10);
+    game.textBackgroundElement.attr({fill:"#000",opacity:.75});
+    game.textBackgroundElement.toFront();
+    game.textElement.attr("text","Game Over!");
+    game.textElement.toFront();
+    game.control.element.toFront();
+    setTimeout(()=>{
+        if(game.textBackgroundElement) game.textBackgroundElement.toFront();
+        if(game.textElement) game.textElement.toFront();
+    },500)
+}
+
 initScreen();
 initControl();
-initPaddle();
 
-startGame();
 
