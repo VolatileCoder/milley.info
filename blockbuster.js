@@ -711,7 +711,7 @@ function addRow(top){
         scale = 4;
         powerUp = null;
         //TODO: base on difficulty
-        if(Math.round(Math.random()*30)==1){
+        if(Math.round(Math.random()*25)==1){
             p = powerUpInventory[Math.round(Math.random() * powerUpInventory.length)];
             if (p){
                 powerUp = p.powerUp;
@@ -738,7 +738,7 @@ function getAvailablePowerUps(){
     if(!game.paddle.isSmall){
         powerUpInventory.push({powerUp:puShrinkPaddle,color:"#800"});    
     }
-    if(game.level.difficulty>4){
+    if(game.level.difficulty>3){
         powerUpInventory.push({powerUp:puResetDifficulty,color:"#BF7F00"});        
     }
     /*
