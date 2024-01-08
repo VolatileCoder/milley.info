@@ -37,6 +37,15 @@ const puExtraBall ="+ Ball";
 
 const puResetDifficulty ="Slow Down"; 
 
+function fetchLastModified(url, callback) {
+    fetch(url, {method: "HEAD"})
+        .then(r => {callback(new Date(r.headers.get('Last-Modified')))});
+}
+
+function setBuild(buildDate){
+    game.screen.text(game.width/2, game.height-25, "Build " + buildDate.getFullYear() + "." + (buildDate.getMonth() + 1) + "." + buildDate.getDate() + "." +buildDate.getHours() + "."+buildDate.getMinutes()).attr({fill:"white","font-size":"20pt"});
+}
+
 sounds = {
 //create a synth and connect it to the main output (your speakers)
     //synth: new Tone.Synth().toDestination(),
@@ -149,6 +158,7 @@ function initScreen(){
     game.textElement.attr("font-size","70pt");
     game.textElement.attr("font-weight","bold");
 
+    fetchLastModified("https://milley.info/blockbuster.js",setBuild);
     
 }
 
@@ -732,6 +742,8 @@ function addRow(top){
         increaseLevel();
     }
 }
+
+
 
 function getAvailablePowerUps(){
     powerUpInventory = [];
