@@ -16,7 +16,8 @@ const game = {
         left: 0,
         lastLeft:0,
         velocity:0,
-        isLarge: false
+        isLarge: false,
+        isSmall: false
     },
     blockHeight: 45,
     control:{},
@@ -30,6 +31,12 @@ const game = {
     lives: 2,
     rowsCreated:0,
 };
+
+const puGrowPaddle = "🡸 Paddle 🡺";
+const puShrinkPaddle = "🡺 Paddle 🡸";
+const puExtraBall ="✚ Ball"; 
+
+const puResetDifficulty ="Slow Down"; 
 
 sounds = {
 //create a synth and connect it to the main output (your speakers)
@@ -140,6 +147,7 @@ function launchBall(){
 }
 
 function initPaddle(){
+    game.paddle.width = game.width*.25; 
     if(game.paddle.element){
         game.paddle.element.remove();
     }
@@ -227,9 +235,19 @@ function movePowerUps(deltaT){
         if(Raphael.isBBoxIntersect(powerUp.element.getBBox(),game.paddle.element.getBBox())){
             powerUpsToRemove.push(powerUp);
             switch (powerUp.textElement.attr("text")){
-                case "+ Ball":
+                case puExtraBall:
                     addBall();
                     launchBall();
+                    break;
+                case puGrowPaddle:
+                    growPaddle();
+                    break;
+                case puShrinkPaddle:
+                    shrinkPaddle();
+                    break;
+                case puResetDifficulty:
+                    setDifficulty(1);
+                    break;
             }
         }
 
@@ -244,6 +262,36 @@ function movePowerUps(deltaT){
 
 }
 
+function growPaddle(){
+    game.paddle.isSmall = false;
+    game.paddle.width += game.paddle.width * .20;
+    game.paddle.width = Math.min(game.paddle.width, game.width/2);
+    if (game.paddle.width == game.width/2){
+        game.paddle.isLarge = true;
+    }
+    game.paddle.element.attr("width",game.paddle.width);
+    if (game.paddle.left + game.paddle.width > game.width){
+        game.paddle.left = game.width - game.paddle.width;
+        game.paddle.element.attr("x", game.paddle.left);
+    }
+}
+
+function shrinkPaddle(){
+    game.paddle.isLarge = false;
+    game.paddle.width -= game.paddle.width * .20;
+    game.paddle.width = Math.max(game.paddle.width, game.width/8);
+    if (game.paddle.width == game.width/8){
+        game.paddle.isSmall = true;
+    }
+    game.paddle.element.attr("width",game.paddle.width);
+}
+
+function screenCleared(){
+    game.textElement.attr("text","Screen Cleared!\n+1 Extra Life!");
+    addToLives(1);
+    //todo: play music
+    setTimeout(()=>{game.textElement.attr("text","")}, 1000);
+}
 
 function oninput(e,a){
     if (document.hasFocus() && game.paddle.element && game.isRunning){
@@ -436,6 +484,7 @@ function numberWithCommas(x) {
 
 function commitRemoval(){
     blocksToRemove=[];
+    initialCount = game.blocks.length;
     game.blocks.forEach((block)=> {if(block.removing==true) {blocksToRemove.push(block)}});
     
     addToScore(game.blocks.length * game.level.difficulty * 5);
@@ -460,6 +509,10 @@ function commitRemoval(){
             
         }
     });
+
+    if(game.blocks.length==0 && initialCount>0){
+        screenCleared();
+    }
 };
 
 function removeAllPowerUps(){
@@ -569,8 +622,7 @@ function gameLoop(lastTime){
     }else if(game.balls.length == 0) {
         removeAllPowerUps();
         if (game.lives > 0) {
-            game.lives--;
-            game.livesElement.attr("text","Lives: " + game.lives);
+            addToLives(-1)
             addBall();
         }
         else {
@@ -601,7 +653,7 @@ function addRow(top){
         color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
         scale = 4;
         powerUp = null;
-        if(Math.round(Math.random()*10)==1){
+        if(Math.round(Math.random()*40)==1){
             p = powerUpInventory[Math.round(Math.random() * powerUpInventory.length)];
             if (p){
                 powerUp = p.powerUp;
@@ -620,8 +672,22 @@ function addRow(top){
 function getAvailablePowerUps(){
     powerUpInventory = [];
     if (game.balls.length < 3) {
-        powerUpInventory.push({powerUp:"+ Ball",color:"#080"});
+        powerUpInventory.push({powerUp:puExtraBall,color:"#080"});
     }
+    if(!game.paddle.isLarge){
+        powerUpInventory.push({powerUp:puGrowPaddle,color:"#09F"});    
+    }
+    if(!game.paddle.isSmall){
+        powerUpInventory.push({powerUp:puShrinkPaddle,color:"#800"});    
+    }
+    if(game.level.difficulty>4){
+        powerUpInventory.push({powerUp:puResetDifficulty,color:"#BF7F00"});        
+    }
+    /*
+    if(!game.shield && game.level.difficulty>3){
+        powerUpInventory.push({powerUp:puShield,color:"#BF7F00"});            
+    }
+    */
     return powerUpInventory;
 }
 
@@ -694,6 +760,11 @@ function addToScore(points){
         game.highScoreElement.attr("text",numberWithCommas(game.highScore));
     }
 }
+function addToLives(lives){
+    
+    game.lives+=lives;
+    game.livesElement.attr("text","Lives: " + game.lives);
+}
 
 function startGame(){
     sounds.init();
@@ -706,7 +777,7 @@ function startGame(){
     game.level.number=0;
     game.level.difficulty = 0;
     game.lives = 2;
-    game.livesElement.attr("text","Lives: " + game.lives);
+    addToLives(0);
     game.score = 0;
     game.scoreElement.attr("text","0");
     game.isRunning = true,
