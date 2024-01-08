@@ -125,7 +125,7 @@ function initControl(){
     control.attr("cursor", "ew-resize");
     control.mousemove(oninput);
     control.touchmove(oninput);
-    control.mouseup(onclick);
+    control.mousedown(onclick);
     control.touchend(onTouchEnd);
     control.touchstart(onTouchStart);
     game.control.element = control;
