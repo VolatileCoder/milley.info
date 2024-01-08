@@ -11,7 +11,6 @@ const game = {
     paddle: {
         width:180, 
         height:45,
-        centerX:90,
         top: 1600-360,
         left: 0,
         lastLeft:0,
@@ -42,11 +41,46 @@ sounds = {
 //create a synth and connect it to the main output (your speakers)
     //synth: new Tone.Synth().toDestination(),
     lastTime: null,
-    ballHitPaddle: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F2",".001", Tone.now());}},
-    ballHitWall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("A2",".001", Tone.now());}},
-    ballHitBlock: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("C3",".001", Tone.now());}},
-    ballHitBall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F3",".001", Tone.now());}},
-    init: ()=>{sounds.synth = new Tone.Synth().toDestination();sounds.synth.envelope.release = .33;}
+    lastMusic: null,
+    ballHitPaddle: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F2",".001", t);}},
+    ballHitWall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("A2",".001", t);}},
+    ballHitBlock: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("C3",".001", t);}},
+    ballHitBall: ()=>{ t = Tone.now(); if (t != sounds.lastTime) { sounds.lastTime = t;  sounds.synth.triggerAttackRelease("F3",".001", t);}},
+    gameStart: ()=>{ 
+        t = Tone.now(); 
+        if (t != sounds.lastMusic) { 
+            sounds.lastMusic = t; 
+            sounds.music.triggerAttackRelease(["F2","A2","C2"],".1",t)//.start(0);
+            sounds.music.triggerAttackRelease(["F3","A2","C2"],".1",t+.25)//.start(250);
+        }
+    },
+    ballLost: ()=>{ 
+        t = Tone.now(); 
+        if (t != sounds.lastMusic) { 
+            sounds.lastMusic = t; 
+            sounds.music.triggerAttackRelease(["F2","A2","C2"],".1",t)//.start(250);
+            sounds.music.triggerAttackRelease(["F2","A2","C2"],".1",t+.25)//.start(250);
+        }
+    },
+    gameOver: ()=>{ 
+        t = Tone.now(); 
+        if (t != sounds.lastMusic) { 
+            sounds.lastMusic = t; 
+            sounds.music.triggerAttackRelease(["F3","A2","C2"],".1",t)//.start(0);
+            sounds.music.triggerAttackRelease(["F2","A2","C2"],".1",t+.25)//.start(250);
+            sounds.music.triggerAttackRelease(["F2","A2","C2"],".1",t+.50)//.start(250);
+        }
+    },
+    clearScreen: ()=>{ 
+        t = Tone.now(); 
+        if (t != sounds.lastMusic) { 
+            sounds.lastMusic = t; 
+            sounds.music.triggerAttackRelease(["F4","A4","C5"],".1",t)//.start(250);
+            sounds.music.triggerAttackRelease(["F4","A4","C5"],".25",t+.25)//.start(250);
+        }
+    },
+    
+    init: ()=>{sounds.synth = new Tone.Synth().toDestination();sounds.synth.envelope.release = .33;sounds.music = new Tone.PolySynth().toDestination();}
 }
 
 function setCookie(cname, cvalue, exdays) {
@@ -131,7 +165,8 @@ function initControl(){
     game.control.element = control;
 }
 
-function onclick(){
+function onclick(e){
+    e.preventDefault(e);
     if (game.isRunning){
         launchBall();
     } else {
@@ -139,14 +174,16 @@ function onclick(){
     }
 }
 
-function onTouchStart(){
+function onTouchStart(e){
+    e.preventDefault(e);
     if (!game.isRunning){
         startGame();
     }
 }
 
 
-function onTouchEnd(){
+function onTouchEnd(e){
+    e.preventDefault(e);
     if (game.isRunning){
         launchBall();
     }
@@ -168,7 +205,7 @@ function initPaddle(){
     }
     game.paddle.element = game.screen.rect(game.paddle.left, game.paddle.top, game.paddle.width, game.paddle.height);
     game.paddle.element.attr("fill","#fff");
-    game.control.element.toFront();
+    updateZorder();
 }
 
 function addBall(){
@@ -183,12 +220,11 @@ function addBall(){
     };
     ball.top = game.paddle.top - ball.height;
     ball.left = game.paddle.left + game.paddle.width/2 - ball.width/2;
-    ball.element = game.screen.rect(0, ball.top, ball.width, ball.height);
+    ball.element = game.screen.rect(ball.left, ball.top, ball.width, ball.height);
     ball.element.attr("fill","#fff");
     ball.anchored = true;
     game.balls.push(ball);
-    
-    game.control.element.toFront();
+    updateZorder();
 }
 
 function fadeIn(deltaT){
@@ -229,7 +265,7 @@ function addBlock(left, top, scale, colorIndex, opacity, powerUp){
     blockId++;
     game.blocks.push(block);
     game.newBlocks.push(block);
-    game.control.element.toFront();
+   updateZorder();
 }
 
 function movePowerUps(deltaT){
@@ -273,7 +309,7 @@ function movePowerUps(deltaT){
        powerUp.textElement.remove(); 
     });
 
-    game.control.element.toFront();
+    updateZorder();
 
 }
 
@@ -303,8 +339,8 @@ function shrinkPaddle(){
 
 function screenCleared(){
     game.textElement.attr("text","Screen Cleared!\n+1 Extra Life!");
+    sounds.clearScreen();
     addToLives(1);
-    //todo: play music
     setTimeout(()=>{game.textElement.attr("text","")}, 1000);
 }
 
@@ -313,7 +349,7 @@ function oninput(e,a){
         r = e.target.getBoundingClientRect();
         pos = ((e.clientX-r.x)/r.width) * game.width;
         if (!isNaN(pos)) {
-            pos -= game.paddle.centerX
+            pos -= game.paddle.width/2;
             if(pos < 0) {
                 pos = 0;
             } else if (pos + game.paddle.width > game.width) {
@@ -337,7 +373,7 @@ function moveBalls(deltaT){
     game.balls.forEach((ball)=>{
         
         if(ball.anchored){
-            ball.left = (game.paddle.left + game.paddle.centerX) - (ball.width/2);
+            ball.left = (game.paddle.left + game.paddle.width/2) - (ball.width/2);
             ball.top = game.paddle.top - ball.height;
             ball.element.attr("x",ball.left);
             ball.element.attr("y",ball.top);
@@ -510,6 +546,7 @@ function commitRemoval(){
             block.element.attr({"stroke":"#fff","stroke-width":3});
             block.element.attr("r",20);     
             game.powerUps.push(block);
+            
         }else{       
             if(block.element) block.element.remove();
             if(block.path){
@@ -605,7 +642,7 @@ function trace(){
 
     });
 
-    game.control.element.toFront();
+    updateZorder();
 }
 
 function pauseLoop(){
@@ -637,6 +674,7 @@ function gameLoop(lastTime){
     }else if(game.balls.length == 0) {
         removeAllPowerUps();
         if (game.lives > 0) {
+            sounds.ballLost();
             addToLives(-1)
             addBall();
         }
@@ -668,7 +706,8 @@ function addRow(top){
         color = constrain(0,Math.round(Math.random()*game.palette.length),game.palette.length-1);
         scale = 4;
         powerUp = null;
-        if(Math.round(Math.random()*40)==1){
+        //TODO: base on difficulty
+        if(Math.round(Math.random()*30)==1){
             p = powerUpInventory[Math.round(Math.random() * powerUpInventory.length)];
             if (p){
                 powerUp = p.powerUp;
@@ -782,7 +821,9 @@ function addToLives(lives){
 }
 
 function startGame(){
+    if (game.isEnding) return;
     sounds.init();
+    sounds.gameStart();
     game.blocks.forEach((block)=>{removeBlock(block)});
     
     removeAllPowerUps();
@@ -812,7 +853,10 @@ function startGame(){
 }
 
 function endGame(){
+    
+    sounds.gameOver();
     game.isRunning = false;
+    game.isEnding = true;
     setCookie("highScore", game.highScore, 365);
     deadBalls = Array.from(game.balls);
     deadBalls.forEach((ball)=>{
@@ -822,15 +866,23 @@ function endGame(){
     
     game.textBackgroundElement = game.screen.rect(game.width *.10, game.height*.45, game.width * .80, game.height *.10);
     game.textBackgroundElement.attr({fill:"#000",opacity:.75});
-    game.textBackgroundElement.toFront();
     game.textElement.attr("text","Game Over!");
-    game.textElement.toFront();
-    game.control.element.toFront();
+    updateZorder();
     setTimeout(()=>{
-        if(game.textBackgroundElement) game.textBackgroundElement.toFront();
-        if(game.textElement) game.textElement.toFront();
-    },500)
+        game.isEnding = false;
+        updateZorder();
+        
+    },1000)
 }
+
+function updateZorder(){
+    if(game.textBackgroundElement) game.textBackgroundElement.toFront();
+    if(game.textElement) game.textElement.toFront();
+    game.balls.forEach((ball)=>{ball.element.toFront();});
+    game.powerUps.forEach((powerUp)=>{powerUp.element.toFront();powerUp.textElement.toFront();});
+    game.control.element.toFront();
+}
+
 
 initScreen();
 initControl();
