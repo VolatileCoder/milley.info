@@ -31,11 +31,10 @@ const game = {
     rowsCreated:0,
 };
 
-const puGrowPaddle = "<- Paddle ->";
-const puShrinkPaddle = "-> Paddle <-";
+const puGrowPaddle = "+ Paddle";
+const puShrinkPaddle = "- Paddle";
 const puExtraBall ="+ Ball"; 
-
-const puResetDifficulty ="Slow Down"; 
+const puResetDifficulty ="Slow Down";
 
 function fetchLastModified(url, callback) {
     fetch(url, {method: "HEAD"})
@@ -115,7 +114,7 @@ for(let i = 0; i <ca.length; i++) {
 return "";
 }
 
-function initScreen(){
+function clearScreen(){
     hs = getCookie("highScore");
     if(hs && hs!=""){
         game.highScore = parseInt(hs);
@@ -271,9 +270,7 @@ function addBlock(left, top, scale, colorIndex, opacity, powerUp){
     block.element.attr({fill: fill, stroke:fill, opacity:opacity, id:'block'+blockId,});
     if (powerUp){
         block.textElement = game.screen.text(block.left + block.width/2, block.top + block.height/2, powerUp);
-        block.textElement.attr("fill","#FFF");
-        block.textElement.attr("font-size","30pt");
-        block.textElement.attr("opacity",opacity);
+        block.textElement.attr({"fill":"#FFF", "font-size":"30pt", "opacity": opacity, "font-weight":"bold"});
         block.element.toFront();
         block.textElement.toFront();
     }
@@ -743,8 +740,6 @@ function addRow(top){
     }
 }
 
-
-
 function getAvailablePowerUps(){
     powerUpInventory = [];
     if (game.balls.length < 3) {
@@ -906,7 +901,7 @@ function updateZorder(){
 }
 
 
-initScreen();
+clearScreen();
 initControl();
 
 
