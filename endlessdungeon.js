@@ -31,6 +31,8 @@ const game = {
         roomMaxWidthInBricks: 16,
         roomMaxHeightInBricks: 16, 
         spriteFamesPerSecond: 10,
+        controllerRadius: 175,
+        controllerCrossThickness: 66,
     },
     palette: {
         doorFrame: "#928e85",
@@ -42,7 +44,109 @@ const game = {
         left:0,
         down:0,
         right:0,
-        buttonPressed:0
+        buttonPressed:0,
+        elements: [],
+        dpadTouchStart: function(e){
+            e.preventDefault(e);
+            r = e.target.getBoundingClientRect();
+        
+            //console.log({"start":e});
+            touches = Array.from(e.touches);
+            
+            touches.forEach((t)=>{
+                console.log({"r":r})
+                x = (((t.clientX-r.x)/r.width)*game.constants.controllerRadius*2) - game.constants.controllerRadius;
+                y = (((t.clientY-r.y)/r.height)*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * game.dimensions.height;
+                
+                d = Math.abs(radiansToDegrees(pointToAngle(y,x)));
+
+                game.controller.up = y < 0 && d > 23 ? 1 : 0;
+                game.controller.right = x > 0 && d < 68 ? 1 : 0;
+                game.controller.down = y > 0 && d > 22 ? 1 : 0;
+                game.controller.left = x < 0 && d < 68 ? 1 : 0;
+                
+
+                
+                console.log({x:x, y:y, degrees: d, up:this.up, up2: game.controller.up});
+                //drawRect(     - t.radiusX/2, y - t.radiusY/2, t.radiusX, t.radiusY,"#FF0", "#000",0)
+            })
+        
+        },
+        render: function(){
+            centerY = Math.round((game.dimensions.height - game.dimensions.width - game.dimensions.infoHeight)/2 + game.dimensions.width + game.dimensions.infoHeight);
+            dPadLeft = Math.round(game.dimensions.width/4);  
+            if (this.elements.length ==0){
+                   
+                color = "#3a3a3a"
+                this.elements.push(drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,color,"#000",game.constants.lineThickness));
+                color = "#444444"
+                this.elements.push(drawRect(dPadLeft - game.constants.controllerCrossThickness/2, centerY - game.constants.controllerRadius, game.constants.controllerCrossThickness, game.constants.controllerRadius*2,color, "#000",game.constants.lineThickness))
+                this.elements.push(drawRect(dPadLeft - game.constants.controllerRadius, centerY - game.constants.controllerCrossThickness/2, game.constants.controllerRadius*2, game.constants.controllerCrossThickness,color, "#000",game.constants.lineThickness))
+                this.elements.push(drawRect(dPadLeft - game.constants.controllerCrossThickness/2, centerY - game.constants.controllerCrossThickness/2-game.constants.lineThickness/2, game.constants.controllerCrossThickness, game.constants.controllerCrossThickness + game.constants.lineThickness,color, color,0))
+                this.elements.push(drawLine(dPadLeft - game.constants.controllerCrossThickness/2, centerY - game.constants.controllerCrossThickness/2, dPadLeft + game.constants.controllerCrossThickness/2, centerY + game.constants.controllerCrossThickness/2,"#000",game.constants.lineThickness))
+                this.elements.push(drawLine(dPadLeft + game.constants.controllerCrossThickness/2, centerY - game.constants.controllerCrossThickness/2, dPadLeft - game.constants.controllerCrossThickness/2, centerY + game.constants.controllerCrossThickness/2,"#000",game.constants.lineThickness))
+                arrowMargin = 4*game.constants.lineThickness;
+                arrowHeight = 40;
+                color = "#303030"
+                this.elements.push(drawTriangle(
+                    dPadLeft, centerY - game.constants.controllerRadius + arrowMargin,
+                    dPadLeft + game.constants.controllerCrossThickness/2 - arrowMargin, centerY - game.constants.controllerRadius + arrowHeight, 
+                    dPadLeft - game.constants.controllerCrossThickness/2 + arrowMargin, centerY - game.constants.controllerRadius + arrowHeight,  
+                    0,0, color, "#000",0//game.constants.lineThickness
+                ));
+                this.elements.push(drawTriangle(
+                    dPadLeft + game.constants.controllerRadius - arrowMargin, centerY,
+                    dPadLeft + game.constants.controllerRadius - arrowHeight, centerY + game.constants.controllerCrossThickness/2 - arrowMargin, 
+                    dPadLeft + game.constants.controllerRadius - arrowHeight, centerY - game.constants.controllerCrossThickness/2 + arrowMargin,  
+                    0,0, color, "#000",0
+                ));
+                this.elements.push(drawTriangle(
+                    dPadLeft, centerY + game.constants.controllerRadius - arrowMargin,
+                    dPadLeft + game.constants.controllerCrossThickness/2 - arrowMargin, centerY + game.constants.controllerRadius - arrowHeight, 
+                    dPadLeft - game.constants.controllerCrossThickness/2 + arrowMargin, centerY + game.constants.controllerRadius - arrowHeight,  
+                    0,0, color, "#000",0
+                ));
+                this.elements.push(drawTriangle(
+                    dPadLeft - game.constants.controllerRadius + arrowMargin, centerY,
+                    dPadLeft - game.constants.controllerRadius + arrowHeight, centerY + game.constants.controllerCrossThickness/2 - arrowMargin, 
+                    dPadLeft - game.constants.controllerRadius + arrowHeight, centerY - game.constants.controllerCrossThickness/2 + arrowMargin,  
+                    0,0, color, "#000",0
+                ));
+                
+                el = drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,"90-rgba(200,200,200,0.05)-rgba(0,0,0,0.2):50","#000",game.constants.lineThickness).attr({"opacity":.2})
+                this.elements.push(el);
+                e2 = drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,"#000","#000",game.constants.lineThickness).attr({"opacity":.1})
+                
+                e2.touchstart(this.dpadTouchStart);
+                e2.touchmove(this.dpadTouchStart);
+                e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
+                
+            }
+            el = this.elements[this.elements.length-1];
+
+            
+            //read controller
+            x = game.controller.left * -1 + game.controller.right;
+            y = game.controller.up * -1  + game.controller.down;
+            degrees = 0;
+            //read state
+            if(x == 0 && y == 0){
+                el.hide();
+                return;
+            }
+            degrees = 
+                x == -1 && y == 1 ? 225 :
+                x == 1 && y == -1 ? 45 :
+                x == -1 && y == -1 ? 315 :
+                x == 1 && y == 1 ? 135 :
+                x == -1 ? 270 :
+                x == 1 ? 90 :     
+                y == -1 ? 0 :
+                y == 1 ? 180 : 
+                0 ;
+            el.show();
+            el.transform("r" + degrees + "," + dPadLeft + "," + centerY);
+        }
     }
 };
 
@@ -109,8 +213,11 @@ function newPlayer(){
             this.element.toFront();
             
             this.element.animate({transform:trans0,"clip-rect": rect},0,null,()=>{
-                this.element.animate({transform:trans, "clip-rect": rect},deltaT,'linear');
-                this.lastLocation = this.location;
+                if (this.element){        
+                   this.element.animate({transform:trans, "clip-rect": rect},deltaT,'linear');
+                   this.lastLocation = this.location;
+                    
+                }
             })
             
         }
@@ -126,10 +233,42 @@ function clearScreen(){
         game.screen.canvas.style.backgroundColor = '#334';   
         game.screen.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
     }else{
+        game.controller.elements = [];
         game.player.element = null;
         game.screen.clear();
     }
-    game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
+    gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
+    //register Virtual Controller
+    //gameElement.touchstart(onTouchStart);
+    //gameElement.touchmove(onTouchMove);
+    //gameElement.touchend(onTouchEnd);
+    game.controller.render();
+}
+
+
+touchElem ="";
+function onTouchStart(e){
+    e.preventDefault(e);
+    r = e.target.getBoundingClientRect();
+
+    console.log({"start":e});
+    touches = Array.from(e.touches);
+    
+    touches.forEach((t)=>{
+        console.log({"r":r})
+        x = ((t.clientX-r.x)/r.width)*game.dimensions.width;
+        y = ((t.clientY-r.y)/r.height) * game.dimensions.height;
+
+        drawRect(x - t.radiusX/2, y - t.radiusY/2, t.radiusX, t.radiusY,"#FF0", "#000",0)
+    })
+}
+
+function onTouchMove(e){
+    console.log({"move":e});
+}
+
+function onTouchEnd(e){
+    console.log({"end":e});
 }
 
 function newLevel(){
@@ -805,6 +944,9 @@ function pointToAngle(opposite, adjacent){
 function degreesToRadians(angle){
     return (angle % 360) / 360 * 2 * Math.PI
 }
+function radiansToDegrees(angle){
+    return angle * 57.2958
+}
 
 function cotangent(radians){
     return 1/Math.tan(radians);
@@ -840,6 +982,11 @@ function drawRect(x,y,w,h,color,strokecolor, thickness){
     return game.screen.rect(x,y,w,h).attr({"stroke-width": thickness, "stroke":strokecolor, "fill": color});
 }
 
+function drawTriangle(x1,y1,x2,y2,x3,y3, translateX, translateY, fillColor, strokeColor, thickness){
+    path =  "M" + (x1 + translateX) + "," + (y1 + translateY) + "L" + (x2 + translateX) + "," + (y2 + translateY) + "L" + (x3 + translateX) + "," + (y3 + translateY) + "Z";
+    return game.screen.path(path).attr({"stroke-width": thickness, "stroke": strokeColor, "fill": fillColor});
+}
+
 function drawPoly(x1,y1,x2,y2,x3,y3,x4,y4, translateX, translateY, fillColor, strokeColor, thickness){
     path =  "M" + (x1 + translateX) + "," + (y1 + translateY) + "L" + (x2 + translateX) + "," + (y2 + translateY) + "L" + (x3 + translateX) + "," + (y3 + translateY) + "L" + (x4 + translateX) + "," + (y4 + translateY) + "Z";
     return game.screen.path(path).attr({"stroke-width": thickness, "stroke": strokeColor, "fill": fillColor});
@@ -862,6 +1009,8 @@ function gameLoop(lastTime){
     //read controller
     x = game.controller.left *-1 + game.controller.right;
     y = game.controller.up*-1  + game.controller.down;
+    game.controller.render();
+
     multplier = 1;
     if(x!=0 && y!=0){
         multplier = 1/Math.sqrt(2);
