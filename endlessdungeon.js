@@ -67,8 +67,7 @@ const game = {
                     });
                 }else{
                     //alert ("not available on screens");
-                    screens.style.top = "100px";
-                    window.scrollTo(0,100);
+                    window.scrollTo(0,1);
                     this.isFullScreen = true;
                 }
             }else {
@@ -308,13 +307,15 @@ function clearScreen(){
 function onResize(){
     //alert();
     
-    controllerHeight = game.dimensions.height-game.dimensions.infoHeight-game.dimensions.width
-    if (window.screen.orientation.type== 'landscape-primary' || window.screen.orientation.type =='landscape-secondary'){
+    //controllerHeight = game.dimensions.height-game.dimensions.infoHeight-game.dimensions.width
+   
+
+    if (window.screen.orientation.type== 'landscape-primary' || window.screen.orientation.type =='landscape-secondary' ||  window.screen.width * window.devicePixelRatio > window.screen.height * window.devicePixelRatio){
         document.getElementById("controller").style.display = "none";
         game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.width + game.dimensions.infoHeight, true);
     }else {
         document.getElementById("controller").style.display = "block";    
-        game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);    
+        game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);  
     }
 }
 window.addEventListener("resize", onResize);
