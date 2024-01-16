@@ -67,7 +67,8 @@ const game = {
                     });
                 }else{
                     //alert ("not available on screens");
-                    window.scrollTo(0,1)
+                    document.getElementById("screens").style("position","100");
+                    window.scrollTo(0,100)
                 }
             }else {
                 this.isFullScreen = false;
