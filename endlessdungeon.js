@@ -269,7 +269,8 @@ function clearScreen(){
 
     gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
     fullScreenElement = drawRect(0,0, 100,75,"#FA0","#000",3);
-    fullScreenElement.mouseup(goFullScreen);
+    fullScreenElement.touchstart(goFullScreen);
+    
     //register Virtual Controller
     
     //gameElement.touchstart(onTouchStart);
@@ -289,7 +290,6 @@ function onResize(){
         game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);    
     }
 }
-
 window.addEventListener("resize", onResize);
 
 
