@@ -55,7 +55,7 @@ const game = {
         buttonPressed:0,
         elements: [],
         toggleFullScreen: function (){
-            screens = document.getElementById("main");
+            screens = document.getElementById("screens");
             if(!this.isFullScreen){
                 if (false && screens.requestFullscreen){
                     this.isFullScreen = true;
@@ -67,14 +67,15 @@ const game = {
                     });
                 }else{
                     //alert ("not available on screens");
-                    document.getElementById("screens").style.position.top = 100;
-                    window.scrollTo(0,100)
+                    screens.style.top = "100px";
+                    window.scrollTo(0,100);
+                    this.isFullScreen = true;
                 }
             }else {
                 this.isFullScreen = false;
                 document.exitFullscreen();
                 //alert ("not available on screens");
-                document.getElementById("screens").style.position.top = 0;
+                screens.style.top = 0;
                 window.scrollTo(0,0)
             }
         },
