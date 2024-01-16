@@ -54,6 +54,7 @@ const game = {
         right:0,
         buttonPressed:0,
         elements: [],
+        /*
         toggleFullScreen: function (){
             screens = document.getElementById("screens");
             if(!this.isFullScreen){
@@ -78,8 +79,9 @@ const game = {
                 window.scrollTo(0,0)
             }
         },
+        */
         dpadTouchStart: function(e){
-            //e.preventDefault(e);
+            e.preventDefault(e);
             r = e.target.getBoundingClientRect();
         
             //console.log({"start":e});
@@ -152,10 +154,8 @@ const game = {
                 
                 e2.touchstart(this.dpadTouchStart);
                 e2.touchmove(this.dpadTouchStart);
-                e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
+                e2.touchend((e)=>{e.preventDefault(e); game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
 
-                //fullScreenButton = drawEllipse(game.dimensions.width/2,centerY - game.constants.controllerRadius + 25,50,50,0,0,"#1A1A1A","#000",game.constants.lineThickness);
-                //fullScreenButton.touchend(this.toggleFullScreen);
                 //point functions back the original screen;
                 game.screen = screen;
 
