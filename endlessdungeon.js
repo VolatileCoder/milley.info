@@ -70,9 +70,7 @@ const game = {
                 game.controller.down = y > 0 && d > 22 ? 1 : 0;
                 game.controller.left = x < 0 && d < 68 ? 1 : 0;
                 
-
-                
-                console.log({x:x, y:y, degrees: d, up:this.up, up2: game.controller.up});
+                //console.log({x:x, y:y, degrees: d, up:this.up, up2: game.controller.up});
                 //drawRect(     - t.radiusX/2, y - t.radiusY/2, t.radiusX, t.radiusY,"#FF0", "#000",0)
             })
         
@@ -81,7 +79,11 @@ const game = {
             centerY = Math.round((game.dimensions.height - game.dimensions.width - game.dimensions.infoHeight)/2 + game.dimensions.width + game.dimensions.infoHeight);
             dPadLeft = Math.round(game.dimensions.width/4);  
             if (this.elements.length ==0){
-                   
+
+                //point functions to secondary screen
+                var screen = game.screen;
+                game.screen = game.screen2;
+
                 color = "#3a3a3a"
                 this.elements.push(drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,color,"#000",game.constants.lineThickness));
                 color = "#444444"
@@ -126,6 +128,8 @@ const game = {
                 e2.touchmove(this.dpadTouchStart);
                 e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
                 
+                //point functions back the original screen;
+                game.screen = screen;
             }
             el = this.elements[this.elements.length-1];
 
@@ -240,18 +244,31 @@ function newPlayer(){
 
 function clearScreen(){
     if (!game.screen){
+        controllerHeight = game.dimensions.height-game.dimensions.infoHeight-game.dimensions.width
         game.screen = Raphael("main", game.dimensions.width, game.dimensions.height);
         game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);
         game.screen.canvas.setAttribute('preserveAspectRatio', 'meet');
         game.screen.canvas.style.backgroundColor = '#334';   
         game.screen.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
-    }else{
+        
+        game.screen2 = Raphael("controller", game.dimensions.width, game.dimensions.height);
+        game.screen2.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);
+        game.screen2.canvas.setAttribute('preserveAspectRatio', 'meet');
+        //game.screen2.canvas.style.backgroundColor = '#334';
+        //game.screen2.style = {top:controllerHeight, position:"absolute"};
+
+        game.screen2.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
+        gameElement2 = game.screen2.rect(0, game.dimensions.height-controllerHeight, game.dimensions.width, controllerHeight).attr({"fill":"#222", "r": 50});
+  
+    }else{  
         game.controller.elements = [];
         game.player.element = null;
         game.screen.clear();
     }
     gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
+    
     //register Virtual Controller
+    
     //gameElement.touchstart(onTouchStart);
     //gameElement.touchmove(onTouchMove);
     //gameElement.touchend(onTouchEnd);
@@ -379,7 +396,6 @@ function generateMap(level){
     keyRoom.palette.floorColor = "#880";
     keyRoom.keys = 1;
 }
-
 
 function getRoom(x, y){
     foundRoom = game.level.findRoom(x,y);

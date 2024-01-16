@@ -8,10 +8,14 @@ body, html{
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none; /* Standard syntax */
 }
-#main{
+.screen{
     height: 100%;
     width: 100%;
     touch-action: none;
+    top:0px;
+    left:0px;
+    position:absolute;
+    border-bottom:5px solid black;
 }
 
 /*  Make the SVG canvas fill its container - both initially and after resizing */
