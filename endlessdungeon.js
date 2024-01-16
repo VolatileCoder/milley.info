@@ -17,7 +17,20 @@ const PLAYERSTATE_IDLE = 0;
 const PLAYERSTATE_WALKING = 1;
 const PLAYERSTATE_WHIPPING = 2;
 
-
+const trig = {
+    degreesToRadians: function (angle){
+        return (angle % 360) / 360 * 2 * Math.PI
+    },
+    radiansToDegrees: function (angle){
+        return angle * 57.2958
+    },
+    cotangent: function (radians){
+        return 1/Math.tan(radians);
+    },
+    tangent: function (radians){
+        return Math.tan(radians);
+    }
+};
 
 const game = {
     dimensions: {
@@ -54,52 +67,21 @@ const game = {
         right:0,
         buttonPressed:0,
         elements: [],
-        /*
-        toggleFullScreen: function (){
-            screens = document.getElementById("screens");
-            if(!this.isFullScreen){
-                if (false && screens.requestFullscreen){
-                    this.isFullScreen = true;
-                    screens.requestFullscreen().catch((err) => {
-                        this.isFullScreen = false;
-                        alert(
-                        `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
-                        );
-                    });
-                }else{
-                    //alert ("not available on screens");
-                    window.scrollTo(0,1);
-                    this.isFullScreen = true;
-                }
-            }else {
-                this.isFullScreen = false;
-                document.exitFullscreen();
-                //alert ("not available on screens");
-                screens.style.top = 0;
-                window.scrollTo(0,0)
-            }
-        },
-        */
         dpadTouchStart: function(e){
             e.preventDefault(e);
             r = e.target.getBoundingClientRect();
-        
-            //console.log({"start":e});
             touches = Array.from(e.touches);
-            
             touches.forEach((t)=>{
                 x = (((t.clientX-r.x)/r.width)*game.constants.controllerRadius*2) - game.constants.controllerRadius;
                 y = (((t.clientY-r.y)/r.height)*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * game.dimensions.height;
                 
-                d = Math.abs(radiansToDegrees(pointToAngle(y,x)));
+                d = Math.abs(trig.radiansToDegrees(pointToAngle(y,x)));
 
                 game.controller.up = y < 0 && d > 23 ? 1 : 0;
                 game.controller.right = x > 0 && d < 68 ? 1 : 0;
                 game.controller.down = y > 0 && d > 22 ? 1 : 0;
                 game.controller.left = x < 0 && d < 68 ? 1 : 0;
                 
-                //console.log({x:x, y:y, degrees: d, up:this.up, up2: game.controller.up});
-                //drawRect(     - t.radiusX/2, y - t.radiusY/2, t.radiusX, t.radiusY,"#FF0", "#000",0)
             })
         
         },
@@ -186,6 +168,7 @@ const game = {
         }
     }
 };
+
 
 function directionToDegress(direction){
     switch (direction){
@@ -283,8 +266,6 @@ function clearScreen(){
         game.screen2 = Raphael("controller", game.dimensions.width, game.dimensions.height);
         game.screen2.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);
         game.screen2.canvas.setAttribute('preserveAspectRatio', 'meet');
-        //game.screen2.canvas.style.backgroundColor = '#334';
-        //game.screen2.style = {top:controllerHeight, position:"absolute"};
 
         game.screen2.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
         gameElement2 = game.screen2.rect(0, game.dimensions.height-controllerHeight, game.dimensions.width, controllerHeight).attr({"fill":"#181818", "r": 50});
@@ -295,7 +276,7 @@ function clearScreen(){
         game.screen.clear();
     }
 
-    gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#040404"});
+    gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#080808"});
 
     //register Virtual Controller
     
@@ -555,7 +536,7 @@ function newRoom(){
         mapped:0,
         top :10, 
         left: 100,
-        wallHeight: game.constants.brickHeight * 4,
+        wallHeight: game.constants.brickHeight * 3,
         width: 400,
         height: 600,
         doors:[],
@@ -709,14 +690,14 @@ function renderBricks(room){
     //determine focal point / offset
     focus={};
     focus.x =  room.width / 2
-    focus.y = cotangent(degreesToRadians(45)) * focus.x;
+    focus.y = trig.cotangent(trig.degreesToRadians(45)) * focus.x;
     
     offset={};
     offset.x = focus.x + room.left + room.wallHeight;
     offset.y = focus.y + room.top + room.wallHeight + game.dimensions.infoHeight;
     
     //Draw NW Corner
-    drawAngleSegmentX(degreesToRadians(225), -room.width/2-room.wallHeight, -room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
+    drawAngleSegmentX(trig.degreesToRadians(225), -room.width/2-room.wallHeight, -room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 1;
     for(y = 0; y<room.wallHeight; y+=game.constants.brickHeight){
@@ -735,7 +716,7 @@ function renderBricks(room){
             column ++;
         }
         if(row>1){
-            drawLine(Math.round(cotangent(degreesToRadians(225)) * y1)+offset.x, y1 + offset.y, Math.round(cotangent(degreesToRadians(315)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
+            drawLine(Math.round(trig.cotangent(trig.degreesToRadians(225)) * y1)+offset.x, y1 + offset.y, Math.round(trig.cotangent(trig.degreesToRadians(315)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
         }
         row++;
     }
@@ -744,13 +725,13 @@ function renderBricks(room){
     //determine focal point / offset
     focus={};
     focus.x =  room.width / 2
-    focus.y = -cotangent(degreesToRadians(225)) * focus.x;
+    focus.y = -trig.cotangent(trig.degreesToRadians(225)) * focus.x;
     
     offset={};
     offset.x = focus.x + room.left + room.wallHeight;
     offset.y = focus.y + room.top + room.height + room.wallHeight + game.dimensions.infoHeight;
 
-    drawAngleSegmentX(degreesToRadians(225), room.width/2+room.wallHeight, room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
+    drawAngleSegmentX(trig.degreesToRadians(225), room.width/2+room.wallHeight, room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 1;
     for(y = 0; y<room.wallHeight; y+=game.constants.brickHeight){
@@ -769,7 +750,7 @@ function renderBricks(room){
             column ++;
         }
         if(row>1){
-            drawLine(Math.round(cotangent(degreesToRadians(225)) * y1)+offset.x, y1 + offset.y, Math.round(cotangent(degreesToRadians(315)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
+            drawLine(Math.round(trig.cotangent(trig.degreesToRadians(225)) * y1)+offset.x, y1 + offset.y, Math.round(trig.cotangent(trig.degreesToRadians(315)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
         }
         row++;
     }
@@ -779,13 +760,13 @@ function renderBricks(room){
     //determine focal point / offset
     focus={};
     focus.y = -room.height / 2
-    focus.x = tangent(degreesToRadians(135)) * focus.y;
+    focus.x = trig.tangent(trig.degreesToRadians(135)) * focus.y;
     
     offset={};
     offset.x = focus.x + room.left + room.wallHeight;
     offset.y = focus.y + room.top + room.height + room.wallHeight + game.dimensions.infoHeight;
 
-    drawAngleSegmentY(degreesToRadians(135), room.height/2+room.wallHeight, room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
+    drawAngleSegmentY(trig.degreesToRadians(135), room.height/2+room.wallHeight, room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 0;
     for(x = 0; x<room.wallHeight; x+=game.constants.brickHeight){
@@ -805,8 +786,8 @@ function renderBricks(room){
             column ++;
         }
         if(row>0){
-        //    drawLine(Math.round(cotangent(degreesToRadians(135)) * y1)+offset.x, y1 + offset.y, Math.round(cotangent(degreesToRadians(225)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
-            drawLine(x1 + offset.x, Math.round(tangent(degreesToRadians(135))*x1)+offset.y, x1 + offset.x, Math.round(tangent(degreesToRadians(225))*x1)+offset.y, color, game.constants.lineThickness);
+        //    drawLine(Math.round(trig.cotangent(trig.degreesToRadians(135)) * y1)+offset.x, y1 + offset.y, Math.round(trig.cotangent(trig.degreesToRadians(225)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
+            drawLine(x1 + offset.x, Math.round(trig.tangent(trig.degreesToRadians(135))*x1)+offset.y, x1 + offset.x, Math.round(trig.tangent(trig.degreesToRadians(225))*x1)+offset.y, color, game.constants.lineThickness);
         
         }
         row++;
@@ -816,13 +797,13 @@ function renderBricks(room){
     //determine focal point / offset
     focus={};
     focus.y = -room.height / 2
-    focus.x = tangent(degreesToRadians(225)) * focus.y;
+    focus.x = trig.tangent(trig.degreesToRadians(225)) * focus.y;
     
     offset={};
     offset.x = focus.x + room.left + room.width + room.wallHeight;
     offset.y = focus.y + room.top + room.height + room.wallHeight + game.dimensions.infoHeight;
 
-    drawAngleSegmentY(degreesToRadians(315), -room.height/2-room.wallHeight, -room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
+    drawAngleSegmentY(trig.degreesToRadians(315), -room.height/2-room.wallHeight, -room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
     
     row = 0;
     for(x = 0; x<room.wallHeight; x+=game.constants.brickHeight){
@@ -842,8 +823,8 @@ function renderBricks(room){
             column ++;
         }
         if(row>0){
-        //    drawLine(Math.round(cotangent(degreesToRadians(135)) * y1)+offset.x, y1 + offset.y, Math.round(cotangent(degreesToRadians(225)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
-            drawLine(x1 + offset.x, Math.round(tangent(degreesToRadians(135))*x1)+offset.y, x1 + offset.x, Math.round(tangent(degreesToRadians(225))*x1)+offset.y, color, game.constants.lineThickness);
+        //    drawLine(Math.round(trig.cotangent(trig.degreesToRadians(135)) * y1)+offset.x, y1 + offset.y, Math.round(trig.cotangent(trig.degreesToRadians(225)) * y1)+offset.x, y1+offset.y, color, game.constants.lineThickness);
+            drawLine(x1 + offset.x, Math.round(trig.tangent(trig.degreesToRadians(135))*x1)+offset.y, x1 + offset.x, Math.round(trig.tangent(trig.degreesToRadians(225))*x1)+offset.y, color, game.constants.lineThickness);
         }
         row++;
     }
@@ -901,7 +882,7 @@ function renderDoor(room, door){
     focus={};
     focus.x =  (door.wall == NORTH || door.wall == SOUTH ? room.width : room.height) / 2
     //focus.x = room.width /2
-    focus.y = cotangent(degreesToRadians(45)) * focus.x;
+    focus.y = trig.cotangent(trig.degreesToRadians(45)) * focus.x;
 
     offset={};
     offset.x = 0//focus.x + room.left + room.wallHeight;
@@ -913,9 +894,9 @@ function renderDoor(room, door){
     x4 = door.offset + game.constants.doorWidth/2 + game.constants.doorFrameThickness;
     y4 = -focus.x;
     y2 = y1 - game.constants.doorHeight - game.constants.doorFrameThickness;
-    x2 = cotangent(pointToAngle(y1,x1)) * y2;
+    x2 = trig.cotangent(pointToAngle(y1,x1)) * y2;
     y3 = y4 - game.constants.doorHeight - game.constants.doorFrameThickness;
-    x3 = cotangent(pointToAngle(y4,x4)) * y3;
+    x3 = trig.cotangent(pointToAngle(y4,x4)) * y3;
     elements.push(drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,game.palette.doorFrame,"#000",game.constants.lineThickness));
 
 
@@ -925,9 +906,9 @@ function renderDoor(room, door){
     x4 = door.offset + game.constants.doorWidth/2;
     y4 = -focus.x;
     dy2 = y1 - game.constants.doorHeight;
-    dx2 = cotangent(pointToAngle(y1,x1)) * dy2;
+    dx2 = trig.cotangent(pointToAngle(y1,x1)) * dy2;
     dy3 = y4 - game.constants.doorHeight;
-    dx3 = cotangent(pointToAngle(y4,x4)) * dy3;
+    dx3 = trig.cotangent(pointToAngle(y4,x4)) * dy3;
     door.opened = game.level.findNeighbor(room, door.wall).opened;
     elements.push(drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,door.opened ? "#000" : door.color,"#000",game.constants.lineThickness));
 
@@ -941,16 +922,16 @@ function renderDoor(room, door){
         y4 = -focus.x + game.constants.lineThickness;
         y2 = y1 - game.constants.thresholdDepth;
         if (x1 > 0){
-            x2 = cotangent(pointToAngle(y1,x1)) * y2;        
+            x2 = trig.cotangent(pointToAngle(y1,x1)) * y2;        
         }else {
-            x2 = x1 - ((cotangent(pointToAngle(y1,x1)) * y2)-x1)/3;
+            x2 = x1 - ((trig.cotangent(pointToAngle(y1,x1)) * y2)-x1)/3;
         }
         
         y3 = y4 - game.constants.thresholdDepth;
         if (x4 < 0){
-            x3 = cotangent(pointToAngle(y4,x4)) * y3;      
+            x3 = trig.cotangent(pointToAngle(y4,x4)) * y3;      
         }else {
-            x3 = x4 - ((cotangent(pointToAngle(y4,x4)) * y3)-x4)/3;
+            x3 = x4 - ((trig.cotangent(pointToAngle(y4,x4)) * y3)-x4)/3;
         }
         elements.push(drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"90-" +room.palette.floorColor+ ":5-#000:95","#000",0));                
     } else {
@@ -960,19 +941,19 @@ function renderDoor(room, door){
         y0 = -focus.x;
         
         y1 = -focus.x - game.constants.doorHeight/5;
-        x1 = (cotangent(pointToAngle(y0,x0)) * y1) - game.constants.doorWidth/12;
+        x1 = (trig.cotangent(pointToAngle(y0,x0)) * y1) - game.constants.doorWidth/12;
         
         y4 = -focus.x - game.constants.doorHeight/5;
-        x4 = (cotangent(pointToAngle(y0,x0)) * y1) + game.constants.doorWidth/12;
+        x4 = (trig.cotangent(pointToAngle(y0,x0)) * y1) + game.constants.doorWidth/12;
 
         y2 = y1 - 16;
-        x2 = (cotangent(pointToAngle(y0,x0)) * y2) -1 ;        
+        x2 = (trig.cotangent(pointToAngle(y0,x0)) * y2) -1 ;        
         y3 = y4 - 16;
-        x3 = (cotangent(pointToAngle(y0,x0)) * y3) +1; 
+        x3 = (trig.cotangent(pointToAngle(y0,x0)) * y3) +1; 
 
         elements.push(drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"#000","#000",0));
         
-        elements.push(drawEllipse( (cotangent(pointToAngle(y0,x0)) * y3), y3, 8, 4,offset.x,offset.y,"#000","#000",0));
+        elements.push(drawEllipse( (trig.cotangent(pointToAngle(y0,x0)) * y3), y3, 8, 4,offset.x,offset.y,"#000","#000",0));
 
         
     }
@@ -985,7 +966,7 @@ function renderDoor(room, door){
             y0 = -room.width/2;
             //game.screen.rect(x0+offset.x,y0+offset.y,1,1).attr({"stroke":"#f3f"});
             y1 = -room.width/2 - game.constants.doorHeight;
-            x1 = (cotangent(pointToAngle(y0,x0)) * y1);                    
+            x1 = (trig.cotangent(pointToAngle(y0,x0)) * y1);                    
             //drawPoly(x0,y0,x0,y1,x1,y1,x1,y0,offset.x,offset.y,game.palette.doorBarColor, "#000",0)
             elements.push(drawLine(x0+offset.x, y0+offset.y, x1+offset.x, y1+offset.y, game.palette.doorBarColor, game.constants.lineThickness));
             elements.push(drawLine(dx2+offset.x, dy2+offset.y, dx3+offset.x, dy3+offset.y, "#000", game.constants.lineThickness));
@@ -1022,32 +1003,19 @@ function pointToAngle(opposite, adjacent){
     return Math.atan(opposite/adjacent);
 }
 
-function degreesToRadians(angle){
-    return (angle % 360) / 360 * 2 * Math.PI
-}
-function radiansToDegrees(angle){
-    return angle * 57.2958
-}
 
-function cotangent(radians){
-    return 1/Math.tan(radians);
-}
-
-function tangent(radians){
-    return Math.tan(radians);
-}
 
 function drawAngleSegmentX(angle, startX, endX, translateX, translateY, color, thickness){
-    startY = Math.round(tangent(angle) * startX);
-    endY = Math.round(tangent(angle) * endX);
+    startY = Math.round(trig.tangent(angle) * startX);
+    endY = Math.round(trig.tangent(angle) * endX);
     startX+=translateX; endX += translateX;
     startY+=translateY; endY += translateY;
     drawLine(startX, startY, endX, endY, color, thickness);
 }
 
 function drawAngleSegmentY(angle, startY, endY, translateX, translateY, color, thickness){
-    startX = Math.round(cotangent(angle) * startY);
-    endX = Math.round(cotangent(angle) * endY);
+    startX = Math.round(trig.cotangent(angle) * startY);
+    endX = Math.round(trig.cotangent(angle) * endY);
     startX+=translateX; endX += translateX;
     startY+=translateY; endY += translateY;
     drawLine(startX, startY, endX, endY, color, thickness);
