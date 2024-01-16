@@ -57,7 +57,7 @@ const game = {
         toggleFullScreen: function (){
             screens = document.getElementById("main");
             if(!this.isFullScreen){
-                if (screens.requestFullscreen){
+                if (false && screens.requestFullscreen){
                     this.isFullScreen = true;
                     screens.requestFullscreen().catch((err) => {
                         this.isFullScreen = false;
@@ -67,12 +67,15 @@ const game = {
                     });
                 }else{
                     //alert ("not available on screens");
-                    document.getElementById("screens").style("position","100");
+                    document.getElementById("screens").style.position.top = 100;
                     window.scrollTo(0,100)
                 }
             }else {
                 this.isFullScreen = false;
                 document.exitFullscreen();
+                //alert ("not available on screens");
+                document.getElementById("screens").style.position.top = 0;
+                window.scrollTo(0,0)
             }
         },
         dpadTouchStart: function(e){
