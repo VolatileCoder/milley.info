@@ -10,6 +10,7 @@ body, html{
 }
 body{
     margin-top: 1px;
+    background-color: black;
 }
 
 .screen{
