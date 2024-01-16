@@ -3,6 +3,11 @@ const EAST = 1;
 const SOUTH = 2;
 const WEST = 3;
 
+const NORTHEAST = NORTH + 0.5;
+const SOUTHEAST = EAST + 0.5;
+const SOUTHWEST = SOUTH + 0.5;
+const NORTHWEST = WEST + 0.5;
+
 const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 const LEFT_ARROW = 37;
@@ -154,12 +159,20 @@ function directionToDegress(direction){
     switch (direction){
         case NORTH:
             return 0;
+        case NORTHEAST:
+            return 45;
         case EAST:
             return 90;
+        case SOUTHEAST:
+            return 135;
         case SOUTH: 
             return 180;
+        case SOUTHWEST:
+            return 225;
         case WEST:
             return 270;
+        case NORTHWEST:
+            return 315;
         default:
             return 0;
     }
@@ -595,7 +608,8 @@ function newRoom(){
             constrained.x = constrain(this.left + this.wallHeight, x2, this.left + this.wallHeight + this.width - game.player.dimensions.width);
             constrained.y = constrain(this.top + this.wallHeight, y2, this.top + this.wallHeight + this.height - game.player.dimensions.height);
             
-            this.doors.forEach((door)=>{
+            for(d=0;d<this.doors.length;d++){
+                door = this.doors[d];
                 switch(door.wall){
                     case NORTH:
                         doorCenter = this.left + this.wallHeight + this.width/2 + door.offset;
@@ -604,7 +618,8 @@ function newRoom(){
                             constrained.y = y2;
                             if(y2<this.top+this.wallHeight-game.constants.doorHeight){
                                 constrained.y = this.top+this.wallHeight-game.constants.doorHeight;
-                                //alert("changeroom"); 
+                                openNextRoom(door.wall);
+                                return null;
                             }
                         }
                         break;
@@ -615,7 +630,8 @@ function newRoom(){
                             constrained.y = y2;
                             if(x2<this.left+this.wallHeight-game.constants.doorHeight){
                                 constrained.x = this.left+this.wallHeight-game.constants.doorHeight;
-                                //alert("changeroom"); 
+                                openNextRoom(door.wall);
+                                return null;
                             }
                         }
                         break;
@@ -626,7 +642,8 @@ function newRoom(){
                             constrained.y = y2;
                             if(x2+game.player.dimensions.width>this.left+this.width+this.wallHeight+game.constants.doorHeight){
                                 constrained.x = this.left+this.width+this.wallHeight+game.constants.doorHeight-game.player.dimensions.width;
-                                //alert("changeroom"); 
+                                openNextRoom(door.wall); 
+                                return null;
                             }
                         }
                         break;
@@ -638,13 +655,13 @@ function newRoom(){
                             
                             if(y2+game.player.dimensions.height>this.top+this.wallHeight+this.height+game.constants.doorHeight){
                                 constrained.y = this.top+this.wallHeight+this.height+game.constants.doorHeight - game.player.dimensions.height;
-                                //alert("changeroom"); 
+                                openNextRoom(door.wall);
+                                return null
                             }
-                            
                         }
                         break;
                 }
-            });
+            };
 
             return constrained;
         }
@@ -809,6 +826,40 @@ function newDoor(wall, offset, opened, barred){
         barred: Boolean(barred),
     }
 }
+
+function getEnteranceLocation(room, wall){
+    wall = wall % 4
+    var door = room.findDoor(wall);
+    var loc = {x:0, y:0};
+    switch (wall){
+        case NORTH:
+            return {
+                x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
+                y : room.top + room.wallHeight - game.constants.doorHeight/2
+            };
+        case EAST: 
+            return {
+                x : room.left + room.wallHeight + room.width - game.constants.doorHeight/2,
+                y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
+            };
+        
+        case SOUTH:
+            return {
+                x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
+                y : room.top + room.wallHeight + room.height - game.constants.doorHeight/2
+            };
+        case WEST: 
+            return {
+                x : room.left + room.wallHeight - game.constants.doorHeight/2,
+                y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
+            };
+        
+        default:
+            console.warn("unexpected wall: " + wall)
+            return {x:0, y:0};
+    }
+}
+
 
 function renderDoor(room, door){
 
@@ -1014,6 +1065,15 @@ function gameLoop(lastTime){
     multplier = 1;
     if(x!=0 && y!=0){
         multplier = 1/Math.sqrt(2);
+        if (y<0 && x<0){
+            game.player.direction=NORTHWEST;
+        }else if (y<0 && x>0){
+            game.player.direction=NORTHEAST;
+        }else if (y>0 && x<0){
+            game.player.direction=SOUTHWEST;
+        }else if (y>0 && x>0){
+            game.player.direction=SOUTHEAST;
+        }
     }else{
         if (y<0){
             game.player.direction=NORTH;
@@ -1026,13 +1086,13 @@ function gameLoop(lastTime){
         }
     }
     
-    constrained = currentRoom.constrainPlayer(
+    constrained = game.currentRoom.constrainPlayer(
         game.player.location.x, 
         game.player.location.y,
         game.player.location.x + Math.round(x * game.player.speed * multplier * deltaT/1000),
         game.player.location.y + Math.round(y * game.player.speed * multplier * deltaT/1000)
     )
-    if (game.player.location.x != constrained.x || game.player.location.y != constrained.y){
+    if (constrained && (game.player.location.x != constrained.x || game.player.location.y != constrained.y)){
         if (game.player.state!=PLAYERSTATE_WALKING){
             game.player.state = PLAYERSTATE_WALKING;
             game.player.stateStart = Date.now()
@@ -1053,6 +1113,28 @@ function gameLoop(lastTime){
     game.player.render(Math.round(deltaT));
 
     window.setTimeout(()=>gameLoop(startTime), 50);
+}
+
+function openNextRoom(direction){
+    if(game.currentRoom.findDoor(direction)){
+        nextRoom = game.level.findNeighbor(game.currentRoom, direction);
+        
+        if(nextRoom.opened){
+            game.currentRoom = nextRoom;
+            //entrance = game.currentRoom.findDoor((direction + 2) % 4);
+            loc = getEnteranceLocation(nextRoom,(direction + 2) % 4)
+            game.player.location.x = loc.x;//game.currentRoom.left + game.currentRoom.width / 2;
+            game.player.location.y = loc.y;//game.currentRoom.top + game.currentRoom.height / 2;
+            if (game.currentRoom.keys){
+                game.currentRoom.keys=0;
+                game.player.keys++;
+            }
+        }else if(game.player.keys>0){
+            nextRoom.opened=1;
+        }
+        clearScreen();
+        game.currentRoom.render();
+    }
 }
 
 window.onkeyup = function(e){
@@ -1122,12 +1204,13 @@ window.onkeydown = function(e){
         default:
             return true;
     }
-    if(currentRoom.findDoor(direction)){
-        nextRoom = game.level.findNeighbor(currentRoom, direction);
+    /*
+    if(game.currentRoom.findDoor(direction)){
+        nextRoom = game.level.findNeighbor(game.currentRoom, direction);
 
         if(nextRoom.opened){
-            currentRoom = nextRoom;
-            if (currentRoom.keys){
+            game.currentRoom = nextRoom;
+            if (game.currentRoom.keys){
                 currentRoom.keys=0;
                 game.player.keys++;
             }
@@ -1137,9 +1220,11 @@ window.onkeydown = function(e){
         clearScreen();
         currentRoom.render();
     }
+*/
     e.handled= true;
     e.preventDefault();
     return false;
+
 }
 //layBricks();
 
@@ -1148,6 +1233,6 @@ window.onkeydown = function(e){
 game.player = newPlayer();
 clearScreen();//init Screen
 newLevel();
-currentRoom = getRoom(0,0);
-currentRoom.render();
+game.currentRoom = getRoom(0,0);
+game.currentRoom.render();
 gameLoop(Date.now());
