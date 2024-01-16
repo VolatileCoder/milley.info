@@ -8,13 +8,19 @@ body, html{
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none; /* Standard syntax */
 }
+body{
+    margin-top: 1px;
+}
+
 .screen{
     height: 100%;
     width: 100%;
     touch-action: none;
     top:0px;
     left:0px;
-    position:absolute;
+    bottom:0px;
+    right:0px;
+    position:fixed;
     border-bottom:5px solid black;
     -webkit-user-select: none; /* Safari */
     -ms-user-select: none; /* IE 10 and IE 11 */

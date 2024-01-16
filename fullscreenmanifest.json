@@ -1,5 +1,12 @@
 {
     "short_name": "Endless Dungeon",
     "name": "Endless Dungeon",
+    "icons": [
+        {
+          "src": "img/favico.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
     "display": "fullscreen"
   }
