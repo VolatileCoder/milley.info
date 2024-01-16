@@ -17,6 +17,8 @@ const PLAYERSTATE_IDLE = 0;
 const PLAYERSTATE_WALKING = 1;
 const PLAYERSTATE_WHIPPING = 2;
 
+
+
 const game = {
     dimensions: {
         width: 900, 
@@ -44,6 +46,7 @@ const game = {
         doorDefaultColor: "#4d3737",
         doorBarColor: "#999"
     },
+    isFullScreen: false,
     controller: {
         up:0,
         left:0,
@@ -51,15 +54,33 @@ const game = {
         right:0,
         buttonPressed:0,
         elements: [],
+        toggleFullScreen: function (){
+            screens = document.getElementById("screens");
+            if(!this.isFullScreen){
+                if (screens.requestFullscreen){
+                    this.isFullScreen = true;
+                    screens.requestFullscreen().catch((err) => {
+                        this.isFullScreen = false;
+                        alert(
+                        `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
+                        );
+                    });
+                }else{
+                    alert ("not available on screens")
+                }
+            }else {
+                this.isFullScreen = false;
+                document.exitFullscreen();
+            }
+        },
         dpadTouchStart: function(e){
-            e.preventDefault(e);
+            //e.preventDefault(e);
             r = e.target.getBoundingClientRect();
         
             //console.log({"start":e});
             touches = Array.from(e.touches);
             
             touches.forEach((t)=>{
-                console.log({"r":r})
                 x = (((t.clientX-r.x)/r.width)*game.constants.controllerRadius*2) - game.constants.controllerRadius;
                 y = (((t.clientY-r.y)/r.height)*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * game.dimensions.height;
                 
@@ -127,9 +148,14 @@ const game = {
                 e2.touchstart(this.dpadTouchStart);
                 e2.touchmove(this.dpadTouchStart);
                 e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
+
                 
+                fullScreenButton = drawEllipse(game.dimensions.width/2,centerY - game.constants.controllerRadius + 25,50,50,0,0,"#1A1A1A","#000",game.constants.lineThickness);
+                fullScreenButton.touchend(this.toggleFullScreen);
                 //point functions back the original screen;
                 game.screen = screen;
+
+
             }
             el = this.elements[this.elements.length-1];
 
@@ -261,21 +287,16 @@ function clearScreen(){
         game.screen2.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
         gameElement2 = game.screen2.rect(0, game.dimensions.height-controllerHeight, game.dimensions.width, controllerHeight).attr({"fill":"#222", "r": 50});
         onResize();
-    }else{  
+    }else{      
         game.controller.elements = [];
         game.player.element = null;
         game.screen.clear();
     }
 
     gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
-    fullScreenElement = drawRect(0,0, 100,75,"#FA0","#000",3);
-    fullScreenElement.touchstart(goFullScreen);
-    
+
     //register Virtual Controller
     
-    //gameElement.touchstart(onTouchStart);
-    //gameElement.touchmove(onTouchMove);
-    //gameElement.touchend(onTouchEnd);
     game.controller.render();
 }
 function onResize(){
@@ -291,32 +312,6 @@ function onResize(){
     }
 }
 window.addEventListener("resize", onResize);
-
-
-touchElem ="";
-function onTouchStart(e){
-    e.preventDefault(e);
-    r = e.target.getBoundingClientRect();
-
-    console.log({"start":e});
-    touches = Array.from(e.touches);
-    
-    touches.forEach((t)=>{
-        console.log({"r":r})
-        x = ((t.clientX-r.x)/r.width)*game.dimensions.width;
-        y = ((t.clientY-r.y)/r.height) * game.dimensions.height;
-
-        drawRect(x - t.radiusX/2, y - t.radiusY/2, t.radiusX, t.radiusY,"#FF0", "#000",0)
-    })
-}
-
-function onTouchMove(e){
-    console.log({"move":e});
-}
-
-function onTouchEnd(e){
-    console.log({"end":e});
-}
 
 function newLevel(){
     game.level = {
@@ -1148,6 +1143,7 @@ function gameLoop(lastTime){
     game.player.render(Math.round(deltaT));
 
     window.setTimeout(()=>gameLoop(startTime), 50);
+    
 }
 
 function openNextRoom(direction){
@@ -1263,16 +1259,6 @@ window.onkeydown = function(e){
 }
 //layBricks();
 
-function goFullScreen(){
-    screens = document.getElementById("screens");
-    if (screens.requestFullscreen){
-        screens.requestFullscreen().catch((err) => {
-            alert(
-              `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
-            );
-          });
-    }
-}
 
 game.player = newPlayer();
 clearScreen();//init Screen
