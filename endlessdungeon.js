@@ -154,8 +154,8 @@ const game = {
                 e2.touchmove(this.dpadTouchStart);
                 e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
 
-                fullScreenButton = drawEllipse(game.dimensions.width/2,centerY - game.constants.controllerRadius + 25,50,50,0,0,"#1A1A1A","#000",game.constants.lineThickness);
-                fullScreenButton.touchend(this.toggleFullScreen);
+                //fullScreenButton = drawEllipse(game.dimensions.width/2,centerY - game.constants.controllerRadius + 25,50,50,0,0,"#1A1A1A","#000",game.constants.lineThickness);
+                //fullScreenButton.touchend(this.toggleFullScreen);
                 //point functions back the original screen;
                 game.screen = screen;
 
@@ -295,7 +295,7 @@ function clearScreen(){
         game.screen.clear();
     }
 
-    gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
+    gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#040404"});
 
     //register Virtual Controller
     
@@ -897,7 +897,6 @@ function getEnteranceLocation(room, wall){
 function renderDoor(room, door){
 
     elements = [];
-    //draw door. 
     
     focus={};
     focus.x =  (door.wall == NORTH || door.wall == SOUTH ? room.width : room.height) / 2
@@ -907,8 +906,6 @@ function renderDoor(room, door){
     offset={};
     offset.x = 0//focus.x + room.left + room.wallHeight;
     offset.y = 0//focus.y + room.top + room.wallHeight + game.dimensions.infoHeight;
-            
-    game.screen.rect(offset.x,offset.y,1,1).attr({"stroke":"#fff"});
 
     //DOOR FRAME
     x1 = door.offset - game.constants.doorWidth/2 - game.constants.doorFrameThickness;
