@@ -277,7 +277,7 @@ function clearScreen(){
         game.screen = Raphael("main", game.dimensions.width, game.dimensions.height);
         game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.height, true);
         game.screen.canvas.setAttribute('preserveAspectRatio', 'meet');
-        game.screen.canvas.style.backgroundColor = '#111';   
+        game.screen.canvas.style.backgroundColor = '#000';   
         game.screen.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
         
         game.screen2 = Raphael("controller", game.dimensions.width, game.dimensions.height);
@@ -287,7 +287,7 @@ function clearScreen(){
         //game.screen2.style = {top:controllerHeight, position:"absolute"};
 
         game.screen2.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
-        gameElement2 = game.screen2.rect(0, game.dimensions.height-controllerHeight, game.dimensions.width, controllerHeight).attr({"fill":"#222", "r": 50});
+        gameElement2 = game.screen2.rect(0, game.dimensions.height-controllerHeight, game.dimensions.width, controllerHeight).attr({"fill":"#181818", "r": 50});
         onResize();
     }else{      
         game.controller.elements = [];
