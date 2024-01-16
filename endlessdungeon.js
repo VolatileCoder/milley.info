@@ -266,8 +266,10 @@ function clearScreen(){
         game.player.element = null;
         game.screen.clear();
     }
+
     gameElement = game.screen.rect(0, 0, game.dimensions.width, game.dimensions.height).attr({"fill":"#000"});
-    
+    fullScreenElement = drawRect(0,0, 100,75,"#FA0","#000",3);
+    fullScreenElement.mouseup(goFullScreen);
     //register Virtual Controller
     
     //gameElement.touchstart(onTouchStart);
@@ -1261,7 +1263,16 @@ window.onkeydown = function(e){
 }
 //layBricks();
 
-
+function goFullScreen(){
+    screens = document.getElementById("screens");
+    if (screens.requestFullscreen){
+        screens.requestFullscreen().catch((err) => {
+            alert(
+              `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
+            );
+          });
+    }
+}
 
 game.player = newPlayer();
 clearScreen();//init Screen
@@ -1269,9 +1280,3 @@ newLevel();
 game.currentRoom = getRoom(0,0);
 game.currentRoom.render();
 gameLoop(Date.now());
-window.setTimeout(()=>{
-    screens = document.getElementById("screens");
-    if (screens.requestFullscreen){
-        screens.requestFullscreen();
-    }
-},100);
