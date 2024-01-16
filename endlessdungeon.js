@@ -39,7 +39,7 @@ const game = {
         roomMaxHeightInBricks: 16, 
         spriteFamesPerSecond: 10,
         controllerRadius: 175,
-        controllerCrossThickness: 66,
+        controllerCrossThickness: 70,
     },
     palette: {
         doorFrame: "#928e85",
@@ -55,7 +55,7 @@ const game = {
         buttonPressed:0,
         elements: [],
         toggleFullScreen: function (){
-            screens = document.getElementById("screens");
+            screens = document.getElementById("main");
             if(!this.isFullScreen){
                 if (screens.requestFullscreen){
                     this.isFullScreen = true;
@@ -66,7 +66,8 @@ const game = {
                         );
                     });
                 }else{
-                    alert ("not available on screens")
+                    //alert ("not available on screens");
+                    window.scrollTo(0,1)
                 }
             }else {
                 this.isFullScreen = false;
