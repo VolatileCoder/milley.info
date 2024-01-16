@@ -154,16 +154,13 @@ const game = {
                 e2.touchmove(this.dpadTouchStart);
                 e2.touchend(()=>{game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0})
 
-                
                 fullScreenButton = drawEllipse(game.dimensions.width/2,centerY - game.constants.controllerRadius + 25,50,50,0,0,"#1A1A1A","#000",game.constants.lineThickness);
                 fullScreenButton.touchend(this.toggleFullScreen);
                 //point functions back the original screen;
                 game.screen = screen;
 
-
             }
             el = this.elements[this.elements.length-1];
-
             
             //read controller
             x = game.controller.left * -1 + game.controller.right;
@@ -308,9 +305,8 @@ function onResize(){
     //alert();
     
     //controllerHeight = game.dimensions.height-game.dimensions.infoHeight-game.dimensions.width
-   
-
-    if (window.screen.orientation.type== 'landscape-primary' || window.screen.orientation.type =='landscape-secondary' ||  window.screen.width * window.devicePixelRatio > window.screen.height * window.devicePixelRatio){
+    if (window.screen.width * window.devicePixelRatio > window.screen.height * window.devicePixelRatio){
+        
         document.getElementById("controller").style.display = "none";
         game.screen.setViewBox(0, 0, game.dimensions.width, game.dimensions.width + game.dimensions.infoHeight, true);
     }else {
