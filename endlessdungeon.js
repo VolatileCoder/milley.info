@@ -439,17 +439,6 @@ function clearScreen(){
     game.controller.render();
 }
 
-function onResize(){
-    //alert();
-    
-    //controllerHeight = dimensions.height-dimensions.infoHeight-dimensions.width
-    //console.log({w:document.width, h:window.screen.height});
-
-    if (SCREEN_WIDTH > SCREEN_HEIGHT){
-    }else {
-    }
-}
-
 function newLevel(){
     game.level = {
         number: 0,
@@ -1250,8 +1239,6 @@ game = newGame();
 portrait = window.matchMedia("(orientation: portrait)");
 portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
-
-onResize();
 game.player = newPlayer();
 clearScreen();//init Screen
 newLevel();

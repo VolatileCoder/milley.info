@@ -3,7 +3,7 @@
     "name": "Endless Dungeon",
     "icons": [
         {
-          "src": "img/favico.png",
+          "src": "img/ed/favico.png",
           "sizes": "192x192",
           "type": "image/png"
         }
