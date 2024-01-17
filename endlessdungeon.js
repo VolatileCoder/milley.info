@@ -17,6 +17,9 @@ const PLAYERSTATE_IDLE = 0;
 const PLAYERSTATE_WALKING = 1;
 const PLAYERSTATE_WHIPPING = 2;
 
+const SCREEN_WIDTH = window.screen.width;
+const SCREEN_HEIGHT = window.screen.height;
+
 function directionToDegress(direction){
     switch (direction){
         case NORTH:
@@ -321,30 +324,6 @@ function newController(){
     return controller;
 }
 
-function newGame() {
-    return {
-        constants: {
-            brickHeight: 16,
-            brickWidth: 50,
-            lineThickness: 3,
-            doorWidth: 75,
-            doorFrameThickness: 10,
-            doorHeight: 38,
-            thresholdDepth: 20,
-            roomMinWidthInBricks: 5,
-            roomMinHeightInBricks: 5,
-            roomMaxWidthInBricks: 16,
-            roomMaxHeightInBricks: 16, 
-            spriteFamesPerSecond: 10,
-            controllerRadius: 175,
-            controllerCrossThickness: 70,
-        },
-        isFullScreen: false,
-        screen: newScreen("main"),
-        controller: newController(),
-    };
-};
-
 function newPlayer(){
     return {
         location :{
@@ -404,6 +383,32 @@ function newPlayer(){
     }
 }
 
+function newGame() {
+    return {
+        constants: {
+            brickHeight: 16,
+            brickWidth: 50,
+            lineThickness: 3,
+            doorWidth: 75,
+            doorFrameThickness: 10,
+            doorHeight: 38,
+            thresholdDepth: 20,
+            roomMinWidthInBricks: 5,
+            roomMinHeightInBricks: 5,
+            roomMaxWidthInBricks: 16,
+            roomMaxHeightInBricks: 16, 
+            spriteFamesPerSecond: 10,
+            controllerRadius: 175,
+            controllerCrossThickness: 70,
+        },
+        isFullScreen: false,
+        screen: newScreen("main"),
+        controller: newController(),
+        player: newPlayer(),
+    };
+};
+
+
 function clearScreen(){
     if (!game.screen){
         
@@ -438,16 +443,12 @@ function onResize(){
     //alert();
     
     //controllerHeight = dimensions.height-dimensions.infoHeight-dimensions.width
-    if (window.screen.width * window.devicePixelRatio > window.screen.height * window.devicePixelRatio){
-        
-        document.getElementById("controller").style.display = "none";
-        game.screen.setViewBox(0, 0, dimensions.width, dimensions.width + dimensions.infoHeight, true);
+    //console.log({w:document.width, h:window.screen.height});
+
+    if (SCREEN_WIDTH > SCREEN_HEIGHT){
     }else {
-        document.getElementById("controller").style.display = "block";    
-        game.screen.setViewBox(0, 0, dimensions.width, dimensions.height, true);  
     }
 }
-window.addEventListener("resize", onResize);
 
 function newLevel(){
     game.level = {
@@ -1235,11 +1236,22 @@ function openNextRoom(direction){
     }
 }
 
-
-
+function onOrientationChange(e) {
+    if(e.matches) {
+        document.getElementById("controller").style.display = "block";    
+        game.screen.setViewBox(0, 0, dimensions.width, dimensions.height, true);  
+    } else {
+        document.getElementById("controller").style.display = "none";
+        game.screen.setViewBox(0, 0, dimensions.width, dimensions.width + dimensions.infoHeight, true);
+    }
+}
 
 game = newGame();
+portrait = window.matchMedia("(orientation: portrait)");
+portrait.addEventListener("change", onOrientationChange)
+onOrientationChange(window.matchMedia("(orientation: portrait)"));
 
+onResize();
 game.player = newPlayer();
 clearScreen();//init Screen
 newLevel();
