@@ -70,7 +70,7 @@ const trig = {
 const dimensions = {
     width: 900, 
     height: 1600,
-    infoHeight: 250,
+    infoHeight: 50,
 };
 
 const palette = {
@@ -84,13 +84,9 @@ function newScreen(domElementId){
     screen.setViewBox(0, 0, dimensions.width, dimensions.height, true);
     screen.canvas.setAttribute('preserveAspectRatio', 'meet');
     screen.canvas.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve"); 
-    //needed?
-    //game.screen.canvas.style.backgroundColor = '#000';   
-    //controllerHeight = dimensions.height-dimensions.infoHeight-dimensions.width;
-    //gameElement2 = game.screen2.rect(0, dimensions.height-controllerHeight, dimensions.width, controllerHeight).attr({"fill":"#181818", "r": 50});
+
     screen.reset = function(){
         game.controller.elements = [];
-        game.player.element = null;
         this.clear();
     }
 
@@ -133,6 +129,24 @@ function newScreen(domElementId){
         startX+=translateX; endX += translateX;
         startY+=translateY; endY += translateY;
         return this.drawLine(startX, startY, endX, endY, color, thickness);
+    }
+    screen._clear = screen.clear;
+    screen.clearListeners = [];
+    screen.clear = function(){
+        failed=[]
+        this.clearListeners.forEach((f)=>{
+            try{
+                f();
+            } catch(e){
+                failed.push(f);
+            }
+        });
+        failed.forEach((f)=>this.clearListeners.splice(this.clearListeners.indexOf(f),1));
+        this._clear();
+    }
+    screen.onClear = function (handler){
+        //register handler
+        this.clearListeners.push(handler);
     }
 
     return screen;
@@ -324,61 +338,130 @@ function newController(){
     return controller;
 }
 
+function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeight, x, y){
+    sprite = {
+        screen: screen,
+        image: {
+            uri: uri,
+            width: imageWidth,
+            height: imageHeight
+        },
+        size: {
+            width: spriteWidth,
+            height: spriteHeight
+        },
+        location: {
+            x: x,
+            y: y, 
+            r: 0
+        },
+        lastLocation: {
+            x: x,
+            y: y, 
+            r: 0
+        },
+        animation: {
+            series: 0,
+            frame: 0,
+            startTime: Date.now()
+        }
+    };
+    sprite.setAnimation = function(series){
+        if (series!=this.animation.series){
+            this.animation.series = series;
+            this.animation.frame = 0;
+            this.animation.startTime = Date.now();
+        }
+    }
+
+    sprite._buildTranslation = function (x, y, r){
+        tx = Math.round(x - this.animation.frame * this.size.width);
+        ty = Math.round(y - this.animation.series *  this.size.height) + dimensions.infoHeight;
+        t = "t" + tx + "," + ty 
+        if(r == 0){
+            return t
+        }
+        rx = Math.round(frame * this.size.width + this.size.width/2);
+        ry = Math.round(this.animation.series *  this.size.height + this.size.height/2);
+        return t + "r" + r + "," + rx + "," + ry;
+    }
+
+    sprite._buildClipRect = function (){
+        x = Math.round(this.animation.frame * this.size.width) 
+        y = Math.round(this.animation.series * this.size.height)
+        w = this.size.width;
+        h = this.size.height;
+        return "" + x + "," + y +"," + w + "," + h;
+    }
+
+    sprite._calculateCurrentFrame = function(deltaT) {
+        animdelta = Date.now() - this.animation.startTime;
+        frame = Math.round((animdelta / 1000) * game.constants.spriteFamesPerSecond) % Math.round(this.image.width/this.size.width);
+        return frame
+    }
+    
+    sprite.render = function(deltaT){
+        this.animation.frame = this._calculateCurrentFrame(deltaT);
+
+        if(!this.element){
+            this.element = this.screen.image(this.image.uri, 0, 0, this.image.width, this.image.height).attr({opacity:0});
+            this.screen.onClear(()=>{this.element = null});
+        }
+
+        trans0 = this._buildTranslation(this.lastLocation.x, this.lastLocation.y, this.lastLocation.r);
+        trans1 = this._buildTranslation(this.location.x, this.location.y, this.location.r);
+
+        rect = sprite._buildClipRect();
+
+        
+        if (this.element){
+            console.log({a: trans0, b: trans1});
+            this.element.attr({opacity:1}).animate({transform:trans0, "clip-rect": rect},0, null,()=>{
+                if (this.element){        
+                    this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear');
+                }
+            })
+        }
+
+        this.lastLocation.x = this.location.x;
+        this.lastLocation.y = this.location.y;
+        this.lastLocation.z = this.location.z;
+                 
+        return this.element;
+    }
+    return sprite
+}
+
 function newPlayer(){
     return {
         location :{
             x: Math.round(dimensions.width / 2),
             y: Math.round(dimensions.width / 2),
         },
-        lastLocation: {x:0, y:0},
         dimensions: {
             width: 50,
-            height:50,
+            height:100,
         },  
         direction: NORTH,
         hearts: 3.0,
         gold: 0,
         keys: 0,
         bombs: 0,   
-        speed: 200,
+        speed: 125,
         state: PLAYERSTATE_IDLE,
         stateStart: Date.now(),
         lastTrans:"",
 
         render: function(deltaT, state){
-            if (!this.element){
-                //this.element.remove();
-                //this.element = game.screen.drawRect(0, 0, this.dimensions.width, this.dimensions.height, "#FF0", "#000", game.constants.lineThickness);
-                this.element = game.screen.image("img/ed/adventurer.png",0,0,400,150)
+            if(!this.sprite){
+                this.sprite = newSprite(game.screen, "img/ed/adventurer.png", 100, 400, 100, 100, 0, 0);
+               
             }
-
-            degrees = directionToDegress(this.direction);
+            sprite.setAnimation(this.direction);
             
-            animdelta = Date.now() - this.stateStart;
-            frame = 0;
-            if(this.state != PLAYERSTATE_IDLE || animdelta%3000> (3000 - 1000 / game.constants.spriteFamesPerSecond * 9)){
-                frame =Math.round((animdelta / 1000) * game.constants.spriteFamesPerSecond) % 8;
-            } else {
-                frame = 0;
-                
-            }
-
-            //console.log({x:this.element.matrix.x(0,0),  y:this.element.attr("y")}); 
-            trans0 = "t" + Math.round(this.lastLocation.x - frame * this.dimensions.width) + "," + (this.lastLocation.y  + dimensions.infoHeight - this.state *  this.dimensions.height) + "r"+degrees+","+(frame * this.dimensions.width + this.dimensions.width/2) + "," + ((this.dimensions.height/2 + this.state *  this.dimensions.height));
-            
-            trans =  "t" + (this.location.x - frame * this.dimensions.width) + "," + (this.location.y  + dimensions.infoHeight - this.state *  this.dimensions.height) + "r" + degrees + ","+ (frame * this.dimensions.width + this.dimensions.width/2) + "," + ((this.dimensions.height/2 + this.state *  this.dimensions.height));
-            rect = "" + ( frame * this.dimensions.width) +  "," + this.state *  this.dimensions.height + "," + (this.dimensions.width) + "," + (this.dimensions.height);
-            
-            this.element.toFront();
-            
-            this.element.animate({transform:trans0,"clip-rect": rect},0,null,()=>{
-                if (this.element){        
-                   this.element.animate({transform:trans, "clip-rect": rect},deltaT,'linear');
-                   this.lastLocation = this.location;
-                    
-                }
-            })
-            
+            this.sprite.location.x = this.location.x;
+            this.sprite.location.y = this.location.y;
+            this.sprite.render(deltaT);
         }
     }
 }
@@ -389,7 +472,7 @@ function newGame() {
             brickHeight: 16,
             brickWidth: 50,
             lineThickness: 3,
-            doorWidth: 75,
+            doorWidth: 150,
             doorFrameThickness: 10,
             doorHeight: 38,
             thresholdDepth: 20,
@@ -407,7 +490,6 @@ function newGame() {
         player: newPlayer(),
     };
 };
-
 
 function clearScreen(){
     if (!game.screen){
@@ -990,22 +1072,22 @@ function getEnteranceLocation(room, wall){
         case NORTH:
             return {
                 x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
-                y : room.top + room.wallHeight - game.constants.doorHeight/2
+                y : room.top + room.wallHeight - game.constants.doorHeight/2 + game.player.dimensions.height
             };
         case EAST: 
             return {
-                x : room.left + room.wallHeight + room.width - game.constants.doorHeight/2,
+                x : room.left + room.wallHeight + room.width - game.constants.doorHeight/2 - game.player.dimensions.width, 
                 y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
             };
         
         case SOUTH:
             return {
                 x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
-                y : room.top + room.wallHeight + room.height - game.constants.doorHeight/2
+                y : room.top + room.wallHeight + room.height - game.constants.doorHeight/2 - game.player.dimensions.height
             };
         case WEST: 
             return {
-                x : room.left + room.wallHeight - game.constants.doorHeight/2,
+                x : room.left + room.wallHeight - game.constants.doorHeight/2 + game.player.dimensions.width,
                 y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
             };
         
@@ -1139,7 +1221,6 @@ function renderDoor(room, door){
     })
 }
 
-
 function gameLoop(lastTime){
     startTime = Date.now();
     deltaT = startTime-lastTime;
@@ -1150,6 +1231,7 @@ function gameLoop(lastTime){
     game.controller.render();
 
     multplier = 1;
+    /*
     if(x!=0 && y!=0){
         multplier = 1/Math.sqrt(2);
         if (y<0 && x<0){
@@ -1162,6 +1244,7 @@ function gameLoop(lastTime){
             game.player.direction=SOUTHEAST;
         }
     }else{
+        */
         if (y<0){
             game.player.direction=NORTH;
         }else if(x>0){
@@ -1171,7 +1254,7 @@ function gameLoop(lastTime){
         }else if(x<0){
             game.player.direction=WEST;
         }
-    }
+    //}
     
     constrained = game.currentRoom.constrainPlayer(
         game.player.location.x, 
@@ -1213,6 +1296,8 @@ function openNextRoom(direction){
             loc = getEnteranceLocation(nextRoom,(direction + 2) % 4)
             game.player.location.x = loc.x;//game.currentRoom.left + game.currentRoom.width / 2;
             game.player.location.y = loc.y;//game.currentRoom.top + game.currentRoom.height / 2;
+            game.player.sprite.lastLocation.x = loc.x;
+            game.player.sprite.lastLocation.y = loc.y;
             if (game.currentRoom.keys){
                 game.currentRoom.keys=0;
                 game.player.keys++;
@@ -1240,8 +1325,14 @@ portrait = window.matchMedia("(orientation: portrait)");
 portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 game.player = newPlayer();
+x = game.screen.drawRect(0,0,100,100,"#F0F","#000",3);
+
+//alert(x);
 clearScreen();//init Screen
+//alert(x);
 newLevel();
 game.currentRoom = getRoom(0,0);
 game.currentRoom.render();
 gameLoop(Date.now());
+
+
