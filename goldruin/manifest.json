@@ -1,9 +1,9 @@
 {
-    "short_name": "Endless Dungeon",
-    "name": "Endless Dungeon",
+    "short_name": "Gold & Ruin",
+    "name": "Gold & Ruin",
     "icons": [
         {
-          "src": "img/ed/favico.png",
+          "src": "img/favico.png",
           "sizes": "192x192",
           "type": "image/png"
         }

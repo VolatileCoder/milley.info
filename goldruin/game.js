@@ -43,6 +43,51 @@ function directionToDegress(direction){
     }
 }
 
+function newBox(x, y, w, h) {
+    return {
+        x: x,
+        y: y,
+        width: w,
+        height: h,
+        center: function() {
+            return {
+                x: this.x + Math.round(this.width/2),
+                y: this.y + Math.round(this.height/2)
+            }
+        },
+        inside: function(box){
+            if(
+                this.x >= box.x && this.x <= box.x + box.width &&
+                this.x + this.width >= box.x && this.x + this.width <= box.x + box.width &&
+                this.y >= box.y && this.y <= box.y + box.height &&
+                this.y + this.height >= box.y && this.y + this.height <= box.y + box.height
+            ){
+                return true;
+            }
+            return false;
+        },
+        collidesWith: function(box){
+            if(
+                
+                ((this.x >= box.x && this.x <= box.x + box.width) ||
+                (this.x + this.width >= box.x && this.x + this.width <= box.x + box.width)) &&
+                ((this.y >= box.y && this.y <= box.y + box.height) ||
+                (this.y + this.height >= box.y && this.y + this.height <= box.y + box.height))
+            ){
+                return true;
+            }
+            return false;
+        },
+        render: function(color){
+            if(!this.element){ 
+                this.element = game.screen.rect(this.x, this.y + dimensions.infoHeight, this.width, this.height).attr("stroke", color);
+                game.screen.onClear(()=>{this.element = null});
+            };
+            this.element.attr({x:this.x, y:this.y + dimensions.infoHeight});
+        }
+    }
+}
+
 function constrain (min, val, max){
     if (val<min) return min;
     if (val>max) return max;
@@ -68,8 +113,8 @@ const trig = {
 };
 
 const dimensions = {
-    width: 900, 
-    height: 1600,
+    width: 910, 
+    height: 1618,
     infoHeight: 50,
 };
 
@@ -402,7 +447,7 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
     
     sprite.render = function(deltaT){
         this.animation.frame = this._calculateCurrentFrame(deltaT);
-
+        /*
         if(game.debug){
             if(!this.debugElement){
                 this.debugElement = game.screen.rect(this.location.x, this.location.y + dimensions.infoHeight, this.size.width, this.size.height).attr("stroke", "#F0F");
@@ -410,9 +455,13 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
             }
             this.debugElement.attr({x:this.location.x, y:this.location.y + dimensions.infoHeight});
         } 
+        */
 
         if(!this.element){
             this.element = this.screen.image(this.image.uri, 0, 0, this.image.width, this.image.height).attr({opacity:0});
+            this.lastLocation.x = this.location.x;
+            this.lastLocation.y = this.location.y;
+            this.lastLocation.r = this.location.r;
             this.screen.onClear(()=>{this.element = null});
         }
 
@@ -423,7 +472,6 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
 
         
         if (this.element){
-            console.log({a: trans0, b: trans1});
             this.element.attr({opacity:1}).animate({transform:trans0, "clip-rect": rect},0, null,()=>{
                 if (this.element){        
                     this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear');
@@ -433,7 +481,7 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
 
         this.lastLocation.x = this.location.x;
         this.lastLocation.y = this.location.y;
-        this.lastLocation.z = this.location.z;
+        this.lastLocation.r = this.location.r;
                  
         return this.element;
     }
@@ -442,39 +490,28 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
 
 function newPlayer(){
     return {
-        location :{
-            x: Math.round(dimensions.width / 2),
-            y: Math.round(dimensions.width / 2),
-        },
-        dimensions: {
-            width: 50,
-            height: 50,
-        },  
+        box: newBox(Math.round(dimensions.width / 2)-25, Math.round(dimensions.width / 2)-25,50,50),
         direction: SOUTH,
         hearts: 3.0,
         gold: 0,
         keys: 0,
         bombs: 0,   
-        speed: 125,
+        speed: 150,
         state: PLAYERSTATE_IDLE,
         stateStart: Date.now(),
         lastTrans:"",
 
         render: function(deltaT, state){
             if(!this.sprite){
-                this.sprite = newSprite(game.screen, "img/ed/adventurer.png", 100, 400, 100, 100, 0, 0);
+                this.sprite = newSprite(game.screen, "img/adventurer.png", 100, 400, 100, 100, 0, 0);
             }
             if(game.debug){
-                if(!this.element){
-                    this.element = game.screen.rect(this.location.x, this.location.y + dimensions.infoHeight, this.dimensions.width, this.dimensions.height).attr("stroke", "#FF0");
-                    game.screen.onClear(()=>{this.element = null});
-                }
-                this.element.attr({x:this.location.x, y:this.location.y + dimensions.infoHeight});
+                this.box.render("#FF0");
             } 
             sprite.setAnimation(this.direction);
             
-            this.sprite.location.x = this.location.x-25;
-            this.sprite.location.y = this.location.y-50;
+            this.sprite.location.x = this.box.x-25;
+            this.sprite.location.y = this.box.y-50;
             this.sprite.render(deltaT);
         }
     }
@@ -492,19 +529,19 @@ function newGame() {
             thresholdDepth: 20,
             roomMinWidthInBricks: 5,
             roomMinHeightInBricks: 5,
-            roomMaxWidthInBricks: 14,
-            roomMaxHeightInBricks: 14, 
+            roomMaxWidthInBricks: 15,
+            roomMaxHeightInBricks: 15, 
             spriteFamesPerSecond: 10,
             controllerRadius: 175,
             controllerCrossThickness: 70,
         },
-        debug: false, //true, 
+        //debug: true, 
         isFullScreen: false,
         screen: newScreen("main"),
         controller: newController(),
         player: newPlayer(),
     };
-};
+}
 
 function clearScreen(){
     if (!game.screen){
@@ -646,12 +683,12 @@ function generateRoom(x, y){
     room.palette.clipColor = game.level.palette.clipColor;
     room.palette.wallColor = game.level.palette.wallColor;
     
-    room.width = Math.round((((game.constants.roomMaxWidthInBricks - game.constants.roomMinWidthInBricks) * Math.random()) + game.constants.roomMinWidthInBricks)) * game.constants.brickWidth;
-    room.height = Math.round((((game.constants.roomMaxHeightInBricks - game.constants.roomMinHeightInBricks) * Math.random()) + game.constants.roomMinHeightInBricks)) * game.constants.brickWidth;
+    room.box.width = Math.round((((game.constants.roomMaxWidthInBricks - game.constants.roomMinWidthInBricks) * Math.random()) + game.constants.roomMinWidthInBricks)) * game.constants.brickWidth;
+    room.box.height = Math.round((((game.constants.roomMaxHeightInBricks - game.constants.roomMinHeightInBricks) * Math.random()) + game.constants.roomMinHeightInBricks)) * game.constants.brickWidth;
     
     //center by default
-    room.left = Math.round((dimensions.width - room.width - room.wallHeight*2) / 2);
-    room.top = Math.round((dimensions.width - room.height - room.wallHeight*2) / 2);
+    room.box.x = Math.round((dimensions.width - room.box.width - room.wallHeight*2) / 2) + room.wallHeight;
+    room.box.y = Math.round((dimensions.width - room.box.height - room.wallHeight*2) / 2) + room.wallHeight;
 
   //force doors
     for(wall = 0; wall<4; wall++){
@@ -661,86 +698,85 @@ function generateRoom(x, y){
         if(neighbor){
             neighboringDoor = neighbor.findDoor(oppositeWall);
             if(neighboringDoor){
-                //todo: resize room & calculate offset
                 offset = 0;
                 doorPadding = game.constants.doorFrameThickness + game.constants.doorWidth/2 + game.constants.brickWidth/2;
                 switch (wall){
                     case NORTH:
-                        doorX = (-neighboringDoor.offset + neighbor.width/2 + neighbor.left + neighbor.wallHeight);
-                        roomCenter = room.left + room.wallHeight + room.width/2;
+                        doorX = (-neighboringDoor.offset + neighbor.box.width/2 + neighbor.box.x + neighbor.wallHeight);
+                        roomCenter = room.box.x + room.wallHeight + room.box.width/2;
                         offset = doorX - roomCenter;
 
-                        if ((roomCenter + offset) < (room.left + room.wallHeight + doorPadding)){
-                            diff = ((room.left + room.wallHeight + doorPadding) - (roomCenter + offset));
-                            newleft = room.left - diff
+                        if ((roomCenter + offset) < (room.box.x + room.wallHeight + doorPadding)){
+                            diff = ((room.box.x + room.wallHeight + doorPadding) - (roomCenter + offset));
+                            newleft = room.box.x - diff
                             offset += diff;
-                            room.left = newleft;
+                            room.box.x = newleft;
                         }
-                        if ((roomCenter + offset) > (room.left + room.wallHeight + room.width - doorPadding)){
-                            diff = (roomCenter + offset) -(room.left + room.wallHeight + room.width - doorPadding);
-                            room.width +=diff;
-                            roomCenter = room.left + room.wallHeight + room.width/2;
+                        if ((roomCenter + offset) > (room.box.x + room.wallHeight + room.box.width - doorPadding)){
+                            diff = (roomCenter + offset) -(room.box.x + room.wallHeight + room.box.width - doorPadding);
+                            room.box.width +=diff;
+                            roomCenter = room.box.x + room.wallHeight + room.box.width/2;
                             offset = doorX - roomCenter;
                         }
                         break;
                     case WEST: 
-                        doorY = (neighboringDoor.offset + neighbor.height/2 + neighbor.top + neighbor.wallHeight);
-                        roomCenter = room.top + room.wallHeight + room.height/2;
+                        doorY = (neighboringDoor.offset + neighbor.box.height/2 + neighbor.box.y + neighbor.wallHeight);
+                        roomCenter = room.box.y + room.wallHeight + room.box.height/2;
                         offset = doorY - roomCenter;
 
-                        if ((roomCenter + offset) < (room.top + room.wallHeight + doorPadding)){
-                            diff = ((room.top + room.wallHeight + doorPadding) - (roomCenter + offset));
-                            newtop = room.top - diff
+                        if ((roomCenter + offset) < (room.box.y + room.wallHeight + doorPadding)){
+                            diff = ((room.box.y + room.wallHeight + doorPadding) - (roomCenter + offset));
+                            newtop = room.box.y - diff
                             offset += diff;
-                            room.top = newtop;
+                            room.box.y = newtop;
                         }
-                        if ((roomCenter + offset) > (room.top + room.wallHeight + room.height - doorPadding)){
-                            diff = (roomCenter + offset) -(room.top + room.wallHeight + room.height - doorPadding);
-                            room.height +=diff;
-                            roomCenter = room.top + room.wallHeight + room.height/2;                        
+                        if ((roomCenter + offset) > (room.box.y + room.wallHeight + room.box.height - doorPadding)){
+                            diff = (roomCenter + offset) -(room.box.y + room.wallHeight + room.box.height - doorPadding);
+                            room.box.height +=diff;
+                            roomCenter = room.box.y + room.wallHeight + room.box.height/2;                        
                             offset = doorY - roomCenter;
                         }
                         offset = offset *-1
                         break;
                     case SOUTH:
-                        doorX = (neighboringDoor.offset + neighbor.width/2 + neighbor.left + neighbor.wallHeight);
-                        roomCenter = room.left + room.wallHeight + room.width/2;
+                        doorX = (neighboringDoor.offset + neighbor.box.width/2 + neighbor.box.x + neighbor.wallHeight);
+                        roomCenter = room.box.x + room.wallHeight + room.box.width/2;
                         offset = doorX - roomCenter;
 
-                        if ((roomCenter + offset) < (room.left + room.wallHeight + doorPadding)){
-                            diff = ((room.left + room.wallHeight + doorPadding) - (roomCenter + offset));
-                            newleft = room.left - diff
+                        if ((roomCenter + offset) < (room.box.x + room.wallHeight + doorPadding)){
+                            diff = ((room.box.x + room.wallHeight + doorPadding) - (roomCenter + offset));
+                            newleft = room.box.x - diff
                             offset += diff;
-                            room.left = newleft;
+                            room.box.x = newleft;
                         }
-                        if ((roomCenter + offset) > (room.left + room.wallHeight + room.width - doorPadding)){
-                            diff = (roomCenter + offset) -(room.left + room.wallHeight + room.width - doorPadding);
-                            room.width +=diff;
-                            roomCenter = room.left + room.wallHeight + room.width/2;
+                        if ((roomCenter + offset) > (room.box.x + room.wallHeight + room.box.width - doorPadding)){
+                            diff = (roomCenter + offset) -(room.box.x + room.wallHeight + room.box.width - doorPadding);
+                            room.box.width +=diff;
+                            roomCenter = room.box.x + room.wallHeight + room.box.width/2;
                             offset = doorX - roomCenter;
                         }
                         offset = offset *-1
                         break;
                     case EAST: 
-                        doorY = (-neighboringDoor.offset + neighbor.height/2 + neighbor.top + neighbor.wallHeight);
-                        roomCenter = room.top + room.wallHeight + room.height/2;
+                        doorY = (-neighboringDoor.offset + neighbor.box.height/2 + neighbor.box.y + neighbor.wallHeight);
+                        roomCenter = room.box.y + room.wallHeight + room.box.height/2;
                         offset = doorY - roomCenter;
-                        if ((roomCenter + offset) < (room.top + room.wallHeight + doorPadding)){
-                            diff = ((room.top + room.wallHeight + doorPadding) - (roomCenter + offset));
-                            newtop = room.top - diff
+                        if ((roomCenter + offset) < (room.box.y + room.wallHeight + doorPadding)){
+                            diff = ((room.box.y + room.wallHeight + doorPadding) - (roomCenter + offset));
+                            newtop = room.box.y - diff
                             offset += diff;
-                            room.top = newtop;
+                            room.box.y = newtop;
                         }
-                        if ((roomCenter + offset) > (room.top + room.wallHeight + room.height - doorPadding)){
-                            diff = (roomCenter + offset) -(room.top + room.wallHeight + room.height - doorPadding);
-                            room.height +=diff;
-                            roomCenter = room.top + room.wallHeight + room.height/2;
+                        if ((roomCenter + offset) > (room.box.y + room.wallHeight + room.box.height - doorPadding)){
+                            diff = (roomCenter + offset) -(room.box.y + room.wallHeight + room.box.height - doorPadding);
+                            room.box.height +=diff;
+                            roomCenter = room.box.y + room.wallHeight + room.box.height/2;
                             offset = doorY - roomCenter;    
                         }
                         break;
                 }
 
-                room.doors.push(newDoor(wall, offset, neighbor.opened, room.barred));    
+                room.doors.push(newDoor(room, wall, offset));    
             }
         }
     }
@@ -751,12 +787,12 @@ function generateRoom(x, y){
             if(!door && game.level.findNeighbor(room, wall)==null && game.level.doorCount<game.level.maxRooms && Math.round(Math.random())==1){
                 game.level.doorCount++;
                 offset = 0;
-                sideSize = wall % 2== 0 ? room.width : room.height;
+                sideSize = wall % 2== 0 ? room.box.width : room.box.height;
                 sideSize -= game.constants.brickWidth*2 
                 sideSize -= Math.round(game.constants.doorWidth/2)
                 offset = Math.round(Math.random() * sideSize) - (sideSize/2)
                 opened = 1;
-                room.doors.push(newDoor(wall, offset, opened, room.barred));
+                room.doors.push(newDoor(room, wall, offset));
             }
         }
     } while (room.doors.length == 0 || room.doors.length == 1 && game.level.doorCount<game.level.maxRooms)
@@ -768,16 +804,15 @@ function generateRoom(x, y){
 
 function newRoom(){
     return { 
-        x: 0,
-        y: 0,
+        x:0, //map address
+        y:0, //map address
+        box: newBox(0,0,400,600),
         opened:1,
         barred:0,
         mapped:0,
-        top :10, 
-        left: 100,
+
         wallHeight: game.constants.brickHeight * 5,
-        width: 400,
-        height: 600,
+
         doors:[],
         palette: {
             clipColor:"#642",
@@ -797,10 +832,10 @@ function newRoom(){
             
             //render walls
             game.screen.rect(
-                this.left,
-                this.top + dimensions.infoHeight, 
-                this.width + this.wallHeight * 2,
-                this.height + this. wallHeight * 2
+                this.box.x - this.wallHeight,
+                this.box.y - this.wallHeight + dimensions.infoHeight, 
+                this.box.width + this.wallHeight * 2,
+                this.box.height + this. wallHeight * 2
             ).attr({
                 "fill": this.palette.wallColor,
                 "stroke-width": game.constants.lineThickness
@@ -809,10 +844,10 @@ function newRoom(){
 
             //render floor
             game.screen.rect(
-                this.left + this.wallHeight,
-                this.top + this.wallHeight + dimensions.infoHeight, 
-                this.width, 
-                this.height
+                this.box.x,
+                this.box.y + dimensions.infoHeight, 
+                this.box.width, 
+                this.box.height
             ).attr({
                 fill: this.palette.floorColor,
                 "stroke-width": game.constants.lineThickness
@@ -822,12 +857,12 @@ function newRoom(){
             renderBricks(this)
 
             //render doors
-            this.doors.forEach((door)=>renderDoor(this, door));
+            this.doors.forEach((door)=>door.render());
 
             if(this.exit){
                 //render exit
-                centerX = this.left + this.wallHeight + this.width/2
-                centerY = this.top + this.wallHeight + this.height/2 + dimensions.infoHeight
+                centerX = this.box.x + this.wallHeight + this.box.width/2
+                centerY = this.box.y + this.wallHeight + this.box.height/2 + dimensions.infoHeight
 
                 exitWidth = game.constants.doorWidth;
                 exitHeight = game.constants.brickWidth * 2;
@@ -843,7 +878,11 @@ function newRoom(){
                 //break;
                 }
             }
-            
+            /*
+            if(game.debug){
+                this.box.render("#F00");
+            }
+            */
         },
         findDoor: function(wall){
             for(i = 0; i<this.doors.length;i++){
@@ -853,16 +892,16 @@ function newRoom(){
             }
             return null;
         },
-        constrainPlayer: function(x1,y1,x2,y2){
+        constrainPlayer: function(x1, y1, x2, y2){
             constrained = {x:x1, y:y1};
-            //game.player.dimensions
-            constrained.x = constrain(this.left + this.wallHeight, x2, this.left + this.wallHeight + this.width - game.player.dimensions.width);
-            constrained.y = constrain(this.top + this.wallHeight, y2, this.top + this.wallHeight + this.height - game.player.dimensions.height);
+            //game.player.box
+            constrained.x = constrain(this.box.x, x2, this.box.x + this.box.width - game.player.box.width);
+            constrained.y = constrain(this.box.y, y2, this.box.y + this.box.height - game.player.box.height);
             
             allowance = Math.round((game.constants.doorWidth/2)+game.constants.doorFrameThickness);
             for(d=0;d<this.doors.length;d++){
                 door = this.doors[d];
-                if(!door.opened) {
+                if(!door.opened || room.barred) {
                     /*
                     if(game.player.keys>0){
                         
@@ -871,14 +910,12 @@ function newRoom(){
                     */
                     return constrained;
                 }
-                switch(door.wall){
+                switch(door.wall){  
                     case NORTH:
-                        doorCenter = this.left + this.wallHeight + this.width/2 + door.offset;
-                        
-                        if (x2 + game.player.dimensions.width/2 > doorCenter - allowance && x2 + game.player.dimensions.width/2 < doorCenter + allowance && y2<this.top+this.wallHeight){
-                            constrained.x = doorCenter - 25//constrain(doorCenter-allowance, x2, doorCenter + allowance - game.player.dimensions.width);
+                        if(game.player.box.inside(door.box) ){
+                            if(y2<y1) constrained.x = door.box.center().x - Math.round(game.player.box.width/2);
                             constrained.y = y2;
-                            if(y2-50<this.top+this.wallHeight-game.constants.doorHeight){
+                            if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
                                 return null;
                             }
@@ -886,36 +923,31 @@ function newRoom(){
                         break;
 
                     case EAST:
-                        doorCenter = this.top + this.wallHeight + this.height/2 + door.offset;
-                        if (y2> doorCenter - allowance -50 && y2 + 50 < doorCenter + allowance && x2+game.player.dimensions.width>this.left+this.wallHeight+this.width){
+
+                        if(game.player.box.inside(door.box) ){
+                            if(x2>x1) constrained.y = door.box.center().y;
                             constrained.x = x2;
-                            constrained.y = doorCenter//+ game.player.dimensions.height;
-                            if(x2 + game.player.dimensions.width > this.left + this.width + this.wallHeight + game.constants.doorHeight/2){
-                                openNextRoom(door.wall); 
+                            if (game.player.box.collidesWith(door.trip)){
+                                openNextRoom(door.wall);
                                 return null;
                             }
                         }
                         break;
                     case SOUTH:
-                        doorCenter = this.left + this.wallHeight + this.width/2 - door.offset;
-                        if (x2 > doorCenter - allowance && x2 + game.player.dimensions.width < doorCenter + allowance && y2+game.player.dimensions.height>this.top+this.wallHeight+this.height){
-                            constrained.x = doorCenter - 25//constrain(doorCenter-allowance, x2, doorCenter + allowance - game.player.dimensions.width);
+                        if(game.player.box.inside(door.box) ){
+                            if(y2>y1) constrained.x = door.box.center().x - Math.round(game.player.box.width/2);
                             constrained.y = y2;
-                            
-                            if(y2+75>this.top+this.wallHeight+this.height+game.constants.doorHeight){
-                                //constrained.y = this.top+this.wallHeight+this.height+game.constants.doorHeight - game.player.dimensions.height;
+                            if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
-                                return null
+                                return null;
                             }
                         }
                         break
                     case WEST:
-                        doorCenter = this.top + this.wallHeight + this.height/2 - door.offset;
-                        if (y2 > doorCenter - allowance && y2 + 50 < doorCenter + allowance && x2<this.left+this.wallHeight){
+                        if(game.player.box.inside(door.box) ){
+                            if(x2<x1) constrained.y = door.box.center().y;
                             constrained.x = x2;
-                            constrained.y = doorCenter;
-                            if(x2<this.left+this.wallHeight-game.constants.doorHeight/2){
-                                //constrained.x = this.left+this.wallHeight-game.constants.doorHeight;
+                            if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
                                 return null;
                             }
@@ -931,28 +963,28 @@ function newRoom(){
 
 function renderBricks(room){
     color="#000";
-    rows = room.height/game.constants.brickHeight;
+    rows = room.box.height/game.constants.brickHeight;
     
     //NORTHERN WALL
     //determine focal point / offset
     focus={};
-    focus.x =  room.width / 2
+    focus.x =  room.box.width / 2
     focus.y = trig.cotangent(trig.degreesToRadians(45)) * focus.x;
     
     offset={};
-    offset.x = focus.x + room.left + room.wallHeight;
-    offset.y = focus.y + room.top + room.wallHeight + dimensions.infoHeight;
+    offset.x = focus.x + room.box.x;
+    offset.y = focus.y + room.box.y + dimensions.infoHeight;
     
-    game.screen.drawAngleSegmentX(trig.degreesToRadians(225), -room.width/2-room.wallHeight, -room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
+    game.screen.drawAngleSegmentX(trig.degreesToRadians(225), -room.box.width/2-room.wallHeight, -room.box.width/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 1;
     for(y = 0; y<room.wallHeight; y+=game.constants.brickHeight){
-        y1 = -(room.width)/2 - room.wallHeight + y;
+        y1 = -(room.box.width)/2 - room.wallHeight + y;
         y2 = y1 + game.constants.brickHeight
         column = 0;
     
-        for(x = game.constants.brickWidth/2; x < room.width ; x += game.constants.brickWidth/2){
-            angle = trig.pointToAngle(room.width / 2, room.width / 2 - x);
+        for(x = game.constants.brickWidth/2; x < room.box.width ; x += game.constants.brickWidth/2){
+            angle = trig.pointToAngle(room.box.width / 2, room.box.width / 2 - x);
             
             if(column % 2 == row % 2){
                 game.screen.drawAngleSegmentY(angle, y1, y2, offset.x, offset.y, color, game.constants.lineThickness);
@@ -970,23 +1002,23 @@ function renderBricks(room){
     //SOUTHERN WALL
     //determine focal point / offset
     focus={};
-    focus.x =  room.width / 2
+    focus.x =  room.box.width / 2
     focus.y = -trig.cotangent(trig.degreesToRadians(225)) * focus.x;
     
     offset={};
-    offset.x = focus.x + room.left + room.wallHeight;
-    offset.y = focus.y + room.top + room.height + room.wallHeight + dimensions.infoHeight;
+    offset.x = focus.x + room.box.x;
+    offset.y = focus.y + room.box.y + room.box.height + dimensions.infoHeight;
 
-    game.screen.drawAngleSegmentX(trig.degreesToRadians(225), room.width/2+room.wallHeight, room.width/2, offset.x, offset.y, color, game.constants.lineThickness);
+    game.screen.drawAngleSegmentX(trig.degreesToRadians(225), room.box.width/2+room.wallHeight, room.box.width/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 1;
     for(y = 0; y<room.wallHeight; y+=game.constants.brickHeight){
-        y1 = (room.width)/2 + room.wallHeight - y;
+        y1 = (room.box.width)/2 + room.wallHeight - y;
         y2 = y1 - game.constants.brickHeight
         column = 0;
     
-        for(x = game.constants.brickWidth/2; x < room.width ; x += game.constants.brickWidth/2){
-            angle = trig.pointToAngle(room.width / 2, room.width / 2 - x);
+        for(x = game.constants.brickWidth/2; x < room.box.width ; x += game.constants.brickWidth/2){
+            angle = trig.pointToAngle(room.box.width / 2, room.box.width / 2 - x);
             
             if(column % 2 == row % 2){
                 game.screen.drawAngleSegmentY(angle, y1, y2, offset.x, offset.y, color, game.constants.lineThickness);
@@ -1005,24 +1037,24 @@ function renderBricks(room){
     //EASTERN WALL
     //determine focal point / offset
     focus={};
-    focus.y = -room.height / 2
+    focus.y = -room.box.height / 2
     focus.x = trig.tangent(trig.degreesToRadians(135)) * focus.y;
     
     offset={};
-    offset.x = focus.x + room.left + room.wallHeight;
-    offset.y = focus.y + room.top + room.height + room.wallHeight + dimensions.infoHeight;
+    offset.x = focus.x + room.box.x;
+    offset.y = focus.y + room.box.y + room.box.height + dimensions.infoHeight;
 
-    game.screen.drawAngleSegmentY(trig.degreesToRadians(135), room.height/2+room.wallHeight, room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
+    game.screen.drawAngleSegmentY(trig.degreesToRadians(135), room.box.height/2+room.wallHeight, room.box.height/2, offset.x, offset.y, color, game.constants.lineThickness);
 
     row = 0;
     for(x = 0; x<room.wallHeight; x+=game.constants.brickHeight){
-        x1 = -room.height/2 - room.wallHeight + x;
+        x1 = -room.box.height/2 - room.wallHeight + x;
         x2 = x1 + game.constants.brickHeight;
         column = 0;
         //game.screen.drawLine(x1+ offset.x, 0, x2+offset.x, dimensions.height, "#FF0", game.constants.lineThickness);
     
-        for(y = game.constants.brickWidth/2; y < room.height ; y += game.constants.brickWidth/2){
-            angle = trig.pointToAngle(-room.height / 2+y, -room.height / 2);
+        for(y = game.constants.brickWidth/2; y < room.box.height ; y += game.constants.brickWidth/2){
+            angle = trig.pointToAngle(-room.box.height / 2+y, -room.box.height / 2);
             
                 if(column % 2 == row % 2){
                     game.screen.drawAngleSegmentX(angle, x1, x2, offset.x, offset.y, color, game.constants.lineThickness);
@@ -1042,24 +1074,24 @@ function renderBricks(room){
     //WESTERN WALL
     //determine focal point / offset
     focus={};
-    focus.y = -room.height / 2
+    focus.y = -room.box.height / 2
     focus.x = trig.tangent(trig.degreesToRadians(225)) * focus.y;
     
     offset={};
-    offset.x = focus.x + room.left + room.width + room.wallHeight;
-    offset.y = focus.y + room.top + room.height + room.wallHeight + dimensions.infoHeight;
+    offset.x = focus.x + room.box.x + room.box.width;
+    offset.y = focus.y + room.box.y + room.box.height + dimensions.infoHeight;
 
-    game.screen.drawAngleSegmentY(trig.degreesToRadians(315), -room.height/2-room.wallHeight, -room.height/2, offset.x, offset.y, color, game.constants.lineThickness);
+    game.screen.drawAngleSegmentY(trig.degreesToRadians(315), -room.box.height/2-room.wallHeight, -room.box.height/2, offset.x, offset.y, color, game.constants.lineThickness);
     
     row = 0;
     for(x = 0; x<room.wallHeight; x+=game.constants.brickHeight){
-        x1 = room.height/2 + x;
+        x1 = room.box.height/2 + x;
         x2 = x1 + game.constants.brickHeight;
         column = 0;
         //game.screen.drawLine(x1+ offset.x, 0, x2+offset.x, dimensions.height, "#FF0", game.constants.lineThickness);
     
-        for(y = game.constants.brickWidth/2; y < room.height ; y += game.constants.brickWidth/2){
-            angle = trig.pointToAngle(-room.height / 2+y, -room.height / 2);
+        for(y = game.constants.brickWidth/2; y < room.box.height ; y += game.constants.brickWidth/2){
+            angle = trig.pointToAngle(-room.box.height / 2+y, -room.box.height / 2);
             
                 if(column % 2 == row % 2){
                     game.screen.drawAngleSegmentX(angle, x1, x2, offset.x, offset.y, color, game.constants.lineThickness);
@@ -1077,14 +1109,205 @@ function renderBricks(room){
 
 }
 
-function newDoor(wall, offset, opened, barred){
-    return {
+function newDoor(room, wall, offset){
+    door = {
+        room: room,
         wall: wall % 4,
         color: palette.doorDefaultColor,
-        offset: offset,
-        opened: opened,
-        barred: Boolean(barred),
+        offset: offset, 
+        render: function(){
+            //clear previous rendering
+            if(this.elements && this.elements.length>0){
+                this.elements.forEach((e)=>e.remove());
+                game.screen.onClear(()=>{this.elements = [];});
+            }
+            this.elements = [];
+ 
+    
+            focus={};
+            focus.x =  (this.wall == NORTH || this.wall == SOUTH ? this.room.box.width : this.room.box.height) / 2
+            //focus.x = this.room.box.width /2
+            focus.y = trig.cotangent(trig.degreesToRadians(45)) * focus.x;
+        
+            offset={};
+            offset.x = 0//focus.x + this.room.box.x + this.room.wallHeight;
+            offset.y = 0//focus.y + this.room.box.y + this.room.wallHeight + dimensions.infoHeight;
+        
+            //DOOR FRAME
+            x1 = this.offset - game.constants.doorWidth/2 - game.constants.doorFrameThickness;
+            y1 = -focus.x;
+            x4 = this.offset + game.constants.doorWidth/2 + game.constants.doorFrameThickness;
+            y4 = -focus.x;
+            y2 = y1 - game.constants.doorHeight - game.constants.doorFrameThickness;
+            x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;
+            y3 = y4 - game.constants.doorHeight - game.constants.doorFrameThickness;
+            x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;
+            this.elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,palette.doorFrame,"#000",game.constants.lineThickness));
+        
+        
+            //DOOR
+            x1 = this.offset - game.constants.doorWidth/2 ;
+            y1 = -focus.x;
+            x4 = this.offset + game.constants.doorWidth/2;
+            y4 = -focus.x;
+            dy2 = y1 - game.constants.doorHeight;
+            dx2 = trig.cotangent(trig.pointToAngle(y1,x1)) * dy2;
+            dy3 = y4 - game.constants.doorHeight;
+            dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
+            
+            this.opened = game.level.findNeighbor(room, this.wall).opened;
+            this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,this.opened ? "#000" : this.color,"#000",game.constants.lineThickness));
+        
+            
+            if (this.opened){
+                //THRESHOLD
+        
+                x1 = this.offset - game.constants.doorWidth/2 ;
+                y1 = -focus.x + game.constants.lineThickness;
+                x4 = this.offset + game.constants.doorWidth/2;
+                y4 = -focus.x + game.constants.lineThickness;
+                y2 = y1 - game.constants.thresholdDepth;
+                if (x1 > 0){
+                    x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;        
+                }else {
+                    x2 = x1 - ((trig.cotangent(trig.pointToAngle(y1,x1)) * y2)-x1)/3;
+                }
+                
+                y3 = y4 - game.constants.thresholdDepth;
+                if (x4 < 0){
+                    x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;      
+                }else {
+                    x3 = x4 - ((trig.cotangent(trig.pointToAngle(y4,x4)) * y3)-x4)/3;
+                }
+                this.elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"90-" +this.room.palette.floorColor+ ":5-#000:95","#000",0));                
+            } else {
+                //KEYHOLE
+        
+                x0 = this.offset;
+                y0 = -focus.x;
+                
+                y1 = -focus.x - game.constants.doorHeight/5;
+                x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1) - game.constants.doorWidth/12;
+                
+                y4 = -focus.x - game.constants.doorHeight/5;
+                x4 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1) + game.constants.doorWidth/12;
+        
+                y2 = y1 - 16;
+                x2 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y2) -1 ;        
+                y3 = y4 - 16;
+                x3 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y3) +1; 
+        
+                this.elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"#000","#000",0));
+                
+                this.elements.push(game.screen.drawEllipse( (trig.cotangent(trig.pointToAngle(y0,x0)) * y3), y3, 8, 4,offset.x,offset.y,"#000","#000",0));
+        
+                
+            }
+        
+            if(this.barred){
+                
+                bars = 5;
+                for(i=1;i<5; i++){
+                    x0 = (this.offset - game.constants.doorWidth/2) + (game.constants.doorWidth/5) * i;
+                    y0 = -this.room.box.width/2;
+                    //game.screen.rect(x0+offset.x,y0+offset.y,1,1).attr({"stroke":"#f3f"});
+                    y1 = -this.room.box.width/2 - game.constants.doorHeight;
+                    x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1);                    
+                    //game.screen.drawPoly(x0,y0,x0,y1,x1,y1,x1,y0,offset.x,offset.y,palette.doorBarColor, "#000",0)
+                    this.elements.push(game.screen.drawLine(x0+offset.x, y0+offset.y, x1+offset.x, y1+offset.y, palette.doorBarColor, game.constants.lineThickness));
+                    this.elements.push(game.screen.drawLine(dx2+offset.x, dy2+offset.y, dx3+offset.x, dy3+offset.y, "#000", game.constants.lineThickness));
+                
+                }
+            }
+        
+            this.elements.forEach((element)=>{
+                t = ""
+                switch (this.wall){
+                    case NORTH:
+                        t = "t" + Math.round(focus.x + this.room.box.x) + "," + Math.round(focus.y + this.room.box.y + dimensions.infoHeight);
+                        break;
+                    case SOUTH:
+                        t = "r180,0,0t" + Math.round(focus.x + this.room.box.x) *-1+ "," + Math.round(-focus.y + this.room.box.y + this.room.box.height + dimensions.infoHeight) *-1;
+                        break;
+                    case EAST:
+                        t = "r90,0,0t" + Math.round(focus.x + this.room.box.y + dimensions.infoHeight) + "," + Math.round(-focus.y + this.room.box.x + this.room.box.width) * -1;
+                        break;
+                    case WEST:
+                        t = "r270,0,0t" + Math.round(focus.x + this.room.box.y + dimensions.infoHeight) * -1 + "," + Math.round(focus.y + this.room.box.x);
+                        break;
+                }
+                element.transform(t)
+            })
+            if (game.debug && this.box ){
+                this.box.render("#0FF");
+            }
+            if (game.debug && this.trip ){
+                this.trip.render("#F00");
+            }
+        }
     }
+
+    switch(wall){
+        case NORTH:
+            door.box = newBox(
+                room.box.x + room.box.width / 2 + offset - game.constants.doorWidth/2,
+                room.box.y - room.wallHeight,
+                game.constants.doorWidth,
+                room.wallHeight + game.player.box.height * 1.25
+            );
+            door.trip = newBox(
+                room.box.x + room.box.width / 2 + offset - game.constants.doorWidth/2,
+                room.box.y - game.player.box.height - 25,
+                game.constants.doorWidth,
+                game.player.box.height  
+            );
+            break;
+        case EAST:
+            door.box = newBox(
+                room.box.x + room.box.width - game.player.box.width * 1.25,
+                room.box.y + room.box.height / 2 + offset - game.constants.doorWidth/2,
+                room.wallHeight + game.player.box.width * 1.25,
+                game.constants.doorWidth
+            );
+            door.trip = newBox(
+                room.box.x + room.box.width + 35,
+                room.box.y + room.box.height / 2 + offset - game.constants.doorWidth/2,
+                game.player.box.width,
+                game.constants.doorWidth
+            );
+            break;
+        case SOUTH:
+            door.box = newBox(
+                room.box.x + room.box.width / 2 - offset - game.constants.doorWidth/2,
+                room.box.y + room.box.height - room.wallHeight,
+                game.constants.doorWidth,
+                room.wallHeight + game.player.box.height * 1.25
+            );
+            door.trip = newBox(
+                room.box.x + room.box.width / 2 - offset - game.constants.doorWidth/2,
+                room.box.y + room.box.height + 35,
+                game.constants.doorWidth,
+                game.player.box.height  
+            );
+            break;
+        case WEST:
+            door.box = newBox(
+                room.box.x - room.wallHeight,
+                room.box.y + room.box.height / 2 - offset - game.constants.doorWidth/2,
+                room.wallHeight + game.player.box.width * 1.25,
+                game.constants.doorWidth
+            );
+            door.trip = newBox(
+                room.box.x - room.wallHeight,
+                room.box.y + room.box.height / 2 - offset - game.constants.doorWidth/2,
+                game.player.box.width,
+                game.constants.doorWidth
+            );
+            break;
+            
+    }
+
+    return door
 }
 
 function getEntranceLocation(room, wall){
@@ -1094,154 +1317,30 @@ function getEntranceLocation(room, wall){
     switch (wall){
         case NORTH:
             return {
-                x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
-                y : room.top + room.wallHeight - game.constants.doorHeight + game.constants.doorFrameThickness + 50
+                x : game.player.box.x,//room.box.x + room.wallHeight + door.offset + room.box.width/2,
+                y : room.box.y - game.constants.doorHeight + game.constants.doorFrameThickness + 50
             };
         case EAST: 
             return {
-                x : room.left + room.wallHeight + room.width - 25, 
-                y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
+                x : room.box.x + room.box.width - 25, 
+                y : game.player.box.y//room.box.y + room.wallHeight - game.constants.doorHeight/2
             };
         
         case SOUTH:
             return {
-                x : game.player.location.x,//room.left + room.wallHeight + door.offset + room.width/2,
-                y : room.top + room.wallHeight + room.height - game.constants.doorFrameThickness
+                x : game.player.box.x,//room.box.x + room.wallHeight + door.offset + room.box.width/2,
+                y : room.box.y + room.box.height - 25
             };
         case WEST: 
             return {
-                x : room.left + room.wallHeight - 25,
-                y : game.player.location.y//room.top + room.wallHeight - game.constants.doorHeight/2
+                x : room.box.x - 25,
+                y : game.player.box.y//room.box.y + room.wallHeight - game.constants.doorHeight/2
             };
         
         default:
             console.warn("unexpected wall: " + wall)
             return {x:0, y:0};
     }
-}
-
-function renderDoor(room, door){
-
-    elements = [];
-    
-    focus={};
-    focus.x =  (door.wall == NORTH || door.wall == SOUTH ? room.width : room.height) / 2
-    //focus.x = room.width /2
-    focus.y = trig.cotangent(trig.degreesToRadians(45)) * focus.x;
-
-    offset={};
-    offset.x = 0//focus.x + room.left + room.wallHeight;
-    offset.y = 0//focus.y + room.top + room.wallHeight + dimensions.infoHeight;
-
-    //DOOR FRAME
-    x1 = door.offset - game.constants.doorWidth/2 - game.constants.doorFrameThickness;
-    y1 = -focus.x;
-    x4 = door.offset + game.constants.doorWidth/2 + game.constants.doorFrameThickness;
-    y4 = -focus.x;
-    y2 = y1 - game.constants.doorHeight - game.constants.doorFrameThickness;
-    x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;
-    y3 = y4 - game.constants.doorHeight - game.constants.doorFrameThickness;
-    x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;
-    elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,palette.doorFrame,"#000",game.constants.lineThickness));
-
-
-    //DOOR
-    x1 = door.offset - game.constants.doorWidth/2 ;
-    y1 = -focus.x;
-    x4 = door.offset + game.constants.doorWidth/2;
-    y4 = -focus.x;
-    dy2 = y1 - game.constants.doorHeight;
-    dx2 = trig.cotangent(trig.pointToAngle(y1,x1)) * dy2;
-    dy3 = y4 - game.constants.doorHeight;
-    dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
-    door.opened = game.level.findNeighbor(room, door.wall).opened;
-    elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,door.opened ? "#000" : door.color,"#000",game.constants.lineThickness));
-
-    
-    if (door.opened){
-        //THRESHOLD
-
-        x1 = door.offset - game.constants.doorWidth/2 ;
-        y1 = -focus.x + game.constants.lineThickness;
-        x4 = door.offset + game.constants.doorWidth/2;
-        y4 = -focus.x + game.constants.lineThickness;
-        y2 = y1 - game.constants.thresholdDepth;
-        if (x1 > 0){
-            x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;        
-        }else {
-            x2 = x1 - ((trig.cotangent(trig.pointToAngle(y1,x1)) * y2)-x1)/3;
-        }
-        
-        y3 = y4 - game.constants.thresholdDepth;
-        if (x4 < 0){
-            x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;      
-        }else {
-            x3 = x4 - ((trig.cotangent(trig.pointToAngle(y4,x4)) * y3)-x4)/3;
-        }
-        elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"90-" +room.palette.floorColor+ ":5-#000:95","#000",0));                
-    } else {
-        //KEYHOLE
-
-        x0 = door.offset;
-        y0 = -focus.x;
-        
-        y1 = -focus.x - game.constants.doorHeight/5;
-        x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1) - game.constants.doorWidth/12;
-        
-        y4 = -focus.x - game.constants.doorHeight/5;
-        x4 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1) + game.constants.doorWidth/12;
-
-        y2 = y1 - 16;
-        x2 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y2) -1 ;        
-        y3 = y4 - 16;
-        x3 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y3) +1; 
-
-        elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"#000","#000",0));
-        
-        elements.push(game.screen.drawEllipse( (trig.cotangent(trig.pointToAngle(y0,x0)) * y3), y3, 8, 4,offset.x,offset.y,"#000","#000",0));
-
-        
-    }
-
-    if(door.barred){
-        
-        bars = 5;
-        for(i=1;i<5; i++){
-            x0 = (door.offset - game.constants.doorWidth/2) + (game.constants.doorWidth/5) * i;
-            y0 = -room.width/2;
-            //game.screen.rect(x0+offset.x,y0+offset.y,1,1).attr({"stroke":"#f3f"});
-            y1 = -room.width/2 - game.constants.doorHeight;
-            x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1);                    
-            //game.screen.drawPoly(x0,y0,x0,y1,x1,y1,x1,y0,offset.x,offset.y,palette.doorBarColor, "#000",0)
-            elements.push(game.screen.drawLine(x0+offset.x, y0+offset.y, x1+offset.x, y1+offset.y, palette.doorBarColor, game.constants.lineThickness));
-            elements.push(game.screen.drawLine(dx2+offset.x, dy2+offset.y, dx3+offset.x, dy3+offset.y, "#000", game.constants.lineThickness));
-        
-        }
-    }
-
-    elements.forEach((element)=>{
-        //t = "t" + Math.round(focus.x + room.left + room.wallHeight) + "," + Math.round(focus.y + room.top + room.wallHeight + dimensions.infoHeight);
-        
-        //element.transform(t)
-        switch (door.wall){
-            case NORTH:
-                t = "t" + Math.round(focus.x + room.left + room.wallHeight) + "," + Math.round(focus.y + room.top + room.wallHeight + dimensions.infoHeight);
-                element.transform(t)
-                break;
-            case SOUTH:
-                t = "r180,0,0t" + Math.round(focus.x + room.left + room.wallHeight) *-1+ "," + Math.round(-focus.y + room.top + room.height + room.wallHeight + dimensions.infoHeight) *-1;
-                element.transform(t)
-                break;
-            case EAST:
-                t = "r90,0,0t" + Math.round(focus.x + room.top + room.wallHeight + dimensions.infoHeight) + "," + Math.round(-focus.y + room.left + room.width + room.wallHeight) * -1;
-                element.transform(t)
-                break;
-            case WEST:
-                t = "r270,0,0t" + Math.round(focus.x + room.top + room.wallHeight + dimensions.infoHeight) * -1 + "," + Math.round(focus.y + room.left + room.wallHeight);
-                element.transform(t)
-                break;
-        } 
-    })
 }
 
 function gameLoop(lastTime){
@@ -1280,18 +1379,18 @@ function gameLoop(lastTime){
     //}
     
     constrained = game.currentRoom.constrainPlayer(
-        game.player.location.x, 
-        game.player.location.y,
-        game.player.location.x + Math.round(x * game.player.speed * multplier * deltaT/1000),
-        game.player.location.y + Math.round(y * game.player.speed * multplier * deltaT/1000)
+        game.player.box.x, 
+        game.player.box.y,
+        game.player.box.x + Math.round(x * game.player.speed * multplier * deltaT/1000),
+        game.player.box.y + Math.round(y * game.player.speed * multplier * deltaT/1000)
     )
-    if (constrained && (game.player.location.x != constrained.x || game.player.location.y != constrained.y)){
+    if (constrained && (game.player.box.x != constrained.x || game.player.box.y != constrained.y)){
         if (game.player.state!=PLAYERSTATE_WALKING){
             game.player.state = PLAYERSTATE_WALKING;
             game.player.stateStart = Date.now()
         }
-        game.player.location.x = constrained.x;
-        game.player.location.y = constrained.y;
+        game.player.box.x = constrained.x;
+        game.player.box.y = constrained.y;
     }
     else {
         if (game.player.state!=PLAYERSTATE_IDLE){
@@ -1300,7 +1399,7 @@ function gameLoop(lastTime){
         }
     }
     
-    //game.player.location.x = constrain(currentRoom.left+currentRoom.wallHeight, game.player.location.x, currentRoom.left + currentRoom.width+);
+    //game.player.box.x = constrain(currentroom.box.x+currentRoom.wallHeight, game.player.box.x, currentroom.box.x + currentroom.box.width+);
     
 
     game.player.render(Math.round(deltaT));
@@ -1317,8 +1416,8 @@ function openNextRoom(direction){
             game.currentRoom = nextRoom;
             //entrance = game.currentRoom.findDoor((direction + 2) % 4);
             loc = getEntranceLocation(nextRoom,(direction + 2) % 4)
-            game.player.location.x = loc.x;//game.currentRoom.left + game.currentRoom.width / 2;
-            game.player.location.y = loc.y;//game.currentRoom.top + game.currentRoom.height / 2;
+            game.player.box.x = loc.x;//game.currentroom.box.x + game.currentroom.box.width / 2;
+            game.player.box.y = loc.y;//game.currentroom.box.y + game.currentroom.box.height / 2;
             game.player.sprite.lastLocation.x = loc.x;
             game.player.sprite.lastLocation.y = loc.y;
             if (game.currentRoom.keys){
