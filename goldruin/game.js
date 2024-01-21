@@ -503,12 +503,12 @@ function newPlayer(){
 
         render: function(deltaT, state){
             if(!this.sprite){
-                this.sprite = newSprite(game.screen, "img/adventurer.png", 100, 400, 100, 100, 0, 0);
+                this.sprite = newSprite(game.screen, "img/adventurer.png", 800, 800, 100, 100, 0, 0);
             }
             if(game.debug){
                 this.box.render("#FF0");
             } 
-            sprite.setAnimation(this.direction);
+            sprite.setAnimation(this.direction + (this.state*4));
             
             this.sprite.location.x = this.box.x-25;
             this.sprite.location.y = this.box.y-50;
@@ -901,7 +901,13 @@ function newRoom(){
             allowance = Math.round((game.constants.doorWidth/2)+game.constants.doorFrameThickness);
             for(d=0;d<this.doors.length;d++){
                 door = this.doors[d];
-                if(!door.opened || room.barred) {
+                if(!door.opened && game.player.keys>0 && game.player.box.inside(door.box)){
+                    door.opened = 1;
+                    game.player.keys--;
+                    game.level.findNeighbor(this, door.wall).opened=1;
+                    clearScreen();
+                    this.render();
+                } else if(!door.opened || room.barred) {
                     /*
                     if(game.player.keys>0){
                         
@@ -1353,31 +1359,17 @@ function gameLoop(lastTime){
     game.controller.render();
 
     multplier = 1;
-    /*
-    if(x!=0 && y!=0){
-        multplier = 1/Math.sqrt(2);
-        if (y<0 && x<0){
-            game.player.direction=NORTHWEST;
-        }else if (y<0 && x>0){
-            game.player.direction=NORTHEAST;
-        }else if (y>0 && x<0){
-            game.player.direction=SOUTHWEST;
-        }else if (y>0 && x>0){
-            game.player.direction=SOUTHEAST;
-        }
-    }else{
-        */
-        if (y<0){
-            game.player.direction=NORTH;
-        }else if(x>0){
-            game.player.direction=EAST;
-        }else if(y>0){
-            game.player.direction=SOUTH;
-        }else if(x<0){
-            game.player.direction=WEST;
-        }
-    //}
-    
+
+    if (y<0){
+        game.player.direction=NORTH;
+    }else if(x>0){
+        game.player.direction=EAST;
+    }else if(y>0){
+        game.player.direction=SOUTH;
+    }else if(x<0){
+        game.player.direction=WEST;
+    }
+
     constrained = game.currentRoom.constrainPlayer(
         game.player.box.x, 
         game.player.box.y,
@@ -1387,7 +1379,7 @@ function gameLoop(lastTime){
     if (constrained && (game.player.box.x != constrained.x || game.player.box.y != constrained.y)){
         if (game.player.state!=PLAYERSTATE_WALKING){
             game.player.state = PLAYERSTATE_WALKING;
-            game.player.stateStart = Date.now()
+            game.player.sprite.setAnimation(1);
         }
         game.player.box.x = constrained.x;
         game.player.box.y = constrained.y;
@@ -1395,7 +1387,6 @@ function gameLoop(lastTime){
     else {
         if (game.player.state!=PLAYERSTATE_IDLE){
             game.player.state = PLAYERSTATE_IDLE;
-            game.player.stateStart = Date.now()
         }
     }
     
@@ -1424,8 +1415,6 @@ function openNextRoom(direction){
                 game.currentRoom.keys=0;
                 game.player.keys++;
             }
-        }else if(game.player.keys>0){
-            nextRoom.opened=1;
         }
         clearScreen();
         game.currentRoom.render();
