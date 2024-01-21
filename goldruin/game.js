@@ -139,6 +139,7 @@ function newScreen(domElementId){
 
     screen.drawLine = function(x1,y1,x2,y2,color,thickness){
         path = "M" + x1 + "," + y1 + "L" + x2 + "," + y2;
+        console.log(path);
         return this.path(path).attr({"stroke-width": thickness, "stroke":color});
     };
 
@@ -209,25 +210,69 @@ function newController(){
     };
     controller.dpadTouchStart = function(e){
         e.preventDefault(e);
+        
+        button = this.elements[this.elements.length-3];
+        dpad = this.elements[this.elements.length-2];
+        controller = this.elements[this.elements.length-1];
+        
         r = e.target.getBoundingClientRect();
+     
+        //r.y = r.y - dimensions.infoHeight - dimensions.width
         touches = Array.from(e.touches);
-        touches.forEach((t)=>{
-            x = (((t.clientX-r.x)/r.width)*game.constants.controllerRadius*2) - game.constants.controllerRadius;
-            y = (((t.clientY-r.y)/r.height)*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * dimensions.height;
+        dpadTouched = false;
+        buttonTouched = false;
+        touches.forEach((t)=>{   
             
-            d = Math.abs(trig.radiansToDegrees(trig.pointToAngle(y,x)));
+            //console.log(r,t,this.screen);
+            //console.log(t);
 
-            this.up = y < 0 && d > 23 ? 1 : 0;
-            this.right = x > 0 && d < 68 ? 1 : 0;
-            this.down = y > 0 && d > 22 ? 1 : 0;
-            this.left = x < 0 && d < 68 ? 1 : 0;
+
+            x = (((t.clientX - r.x)/r.width))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;
+            y = (((t.clientY - r.y)/r.height))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * dimensions.height;
+            x = x * controller.attr("width");
+            y = y * controller.attr("height") + dimensions.infoHeight + dimensions.width;
+
+            d = dpad.getBBox();
+            
+            if(x>d.x && x<d.x + d.width && y>d.y && y<d.y+d.width){
+                dpadTouched = true;
+                //this.screen.drawRect(x,y, 10, 10, "#FF0", "#000",0)
+
+                x = ((x - d.x)-d.width/2)/(d.width/2);
+                y = ((y - d.y)-d.height/2)/(d.height/2)
+            
+                d = Math.abs(trig.radiansToDegrees(trig.pointToAngle(y,x)));
+                this.up = y < 0 && d > 23 ? 1 : 0;
+                this.right = x > 0 && d < 68 ? 1 : 0;
+                this.down = y > 0 && d > 22 ? 1 : 0;
+                this.left = x < 0 && d < 68 ? 1 : 0;
+            }
+            
+            b = button.getBBox();
+            if(x>b.x && x<b.x + b.width && y>b.y && y<b.y+b.width){
+                dpadTouched = true;
+                buttonTouched = true;
+                this.buttonPressed = true;
+            }
+
         })
+        if(!dpadTouched){
+            this.up = 0;
+            this.right = 0;
+            this.down =  0;
+            this.left = 0;
+        }
+        if(!buttonTouched){
+            this.buttonPressed = 0;
+        }
     };
     controller.render =function(){
         centerY = Math.round((dimensions.height - dimensions.width - dimensions.infoHeight)/2 + dimensions.width + dimensions.infoHeight);
         dPadLeft = Math.round(dimensions.width/4);  
         if (this.elements.length ==0){
 
+            
+           this.screen.rect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height - dimensions.width - dimensions.infoHeight).attr({"fill":"#181818", "r": 50});
             color = "#3a3a3a"
             this.elements.push(this.screen.drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,color,"#000",game.constants.lineThickness));
             color = "#444444"
@@ -264,15 +309,20 @@ function newController(){
                 0,0, color, "#000",0
             ));
             
+            
+            el = this.screen.drawEllipse(Math.round(dimensions.width*.75), centerY, game.constants.controllerRadius/2, game.constants.controllerRadius/2,0,0,"#800","#000",game.constants.lineThickness);
+            this.elements.push(el);
+
             el = this.screen.drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,"90-rgba(200,200,200,0.05)-rgba(0,0,0,0.2):50","#000",game.constants.lineThickness).attr({"opacity":.2})
             this.elements.push(el);
-            e2 = this.screen.drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,"#000","#000",game.constants.lineThickness).attr({"opacity":.1})
+
+            e2 = this.screen.drawRect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height-(dimensions.width + dimensions.infoHeight),"#000","#000",game.constants.lineThickness).attr({"opacity":.1})
             e2.touchstart((e)=>{this.dpadTouchStart(e)});
             e2.touchmove((e)=>{this.dpadTouchStart(e)});
-            e2.touchend((e)=>{e.preventDefault(e); game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0});
+            e2.touchend((e)=>{e.preventDefault(e); game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0; game.controller.buttonPressed = 0});
+            this.elements.push(e2);
         }
-        el = this.elements[this.elements.length-1];
-        
+        el = this.elements[this.elements.length-2];
         //read controller
         x = game.controller.left * -1 + game.controller.right;
         y = game.controller.up * -1  + game.controller.down;
@@ -312,6 +362,9 @@ function newController(){
             case "d":
             case "D":
                 controller.right = 0;
+                break;
+            case " ":
+                controller.buttonPressed = 0;
                 break;
             default:
                 switch (e.keyCode){
@@ -355,7 +408,10 @@ function newController(){
             case "d":
             case "D":
                 controller.right = 1;
-                break; 
+                break;
+            case " ":
+                controller.buttonPressed = 1;
+                break;
             default:
                 switch (e.keyCode){
                     case UP_ARROW:
@@ -490,6 +546,7 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
 
 function newPlayer(){
     return {
+        
         box: newBox(Math.round(dimensions.width / 2)-25, Math.round(dimensions.width / 2)-25,50,50),
         direction: SOUTH,
         hearts: 3.0,
@@ -497,22 +554,114 @@ function newPlayer(){
         keys: 0,
         bombs: 0,   
         speed: 150,
+        whip: {
+            thickness: 25,
+            length: 150,
+            duration: 250
+        },
+        _stateStart: Date.now(),
         state: PLAYERSTATE_IDLE,
-        stateStart: Date.now(),
         lastTrans:"",
-
+        setState: function(state){
+            this.state = state;
+            this._stateStart = Date.now()
+        },
         render: function(deltaT, state){
+            framestart = Date.now()
             if(!this.sprite){
-                this.sprite = newSprite(game.screen, "img/adventurer.png", 800, 800, 100, 100, 0, 0);
+                this.sprite = newSprite(game.screen, "img/adventurer.png", 800, 1200, 100, 100, 0, 0);
             }
             if(game.debug){
                 this.box.render("#FF0");
             } 
-            sprite.setAnimation(this.direction + (this.state*4));
             
+            //render whip
+            if(this.state == PLAYERSTATE_WHIPPING){
+                if(!this.whip.element && framestart - this._stateStart > 100){
+                    switch(this.direction){
+                        case NORTH:
+                            this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2 )
+                            this.whip.element.transform("t0,-25");
+                            break;
+                        case EAST:
+                            this.whip.element = game.screen.drawRect(this.whip.box.x+10,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, this.whip.box.width-10, 3, "#624a2e","#000", 2)
+                            this.whip.element.transform("t0,-25");
+                            break;
+                        case SOUTH: 
+                            this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2)
+                            break;
+                    
+                        case WEST:
+                            this.whip.element = game.screen.drawRect(this.whip.box.x,  Math.round(this.whip.box.y + this.whip.box.height/2)-6 + dimensions.infoHeight, this.whip.box.width-10, 3, "#624a2e","#000", 2)
+                            this.whip.element.transform("t0,-25");
+                            break;
+                        }
+                        //this.whip.element.animate({transform:"t0,0"},this.whip.duration);
+                }
+            
+
+                if(game.debug && this.whip.box){
+                    this.whip.box.render("#A00")
+                }
+                if(framestart-this._stateStart>this.whip.duration){
+                    this.setState(PLAYERSTATE_IDLE);
+                    
+                    if(this.whip.element) this.whip.element.remove();
+                    this.whip.element = null;
+                    if(this.whip.box && this.whip.box.element) this.whip.box.element.remove();
+                    this.whip.box = null;
+                }
+            }
+                //render player sprite
+            sprite.setAnimation(this.direction + (this.state*4));
             this.sprite.location.x = this.box.x-25;
             this.sprite.location.y = this.box.y-50;
             this.sprite.render(deltaT);
+            if(this.sprite.element){
+                this.sprite.element.toFront();
+            }
+
+        },
+        attack: function(){
+            if(this.state != PLAYERSTATE_WHIPPING){
+                this.setState(PLAYERSTATE_WHIPPING);
+                this.whip.cracked = false;
+                switch (this.direction){
+                    case NORTH:
+                        this.whip.box = newBox(
+                            Math.round(this.box.x + this.box.width/2 - this.whip.thickness/2),
+                            constrain(game.currentRoom.box.y,this.box.y - this.whip.length, this.box.y),
+                            this.whip.thickness,
+                            constrain(0, this.whip.length, this.box.y - game.currentRoom.box.y)
+                        )
+                        break;
+                    case EAST:
+                        this.whip.box = newBox(
+                            constrain(this.box.x + this.box.width,this.box.x + this.box.width,game.currentRoom.box.x+game.currentRoom.box.width),
+                            Math.round(this.box.y + this.box.height/2 - this.whip.thickness/2),
+                            constrain(0, this.whip.length, (game.currentRoom.box.x + game.currentRoom.box.width) - (this.box.x + this.box.width)),
+                            this.whip.thickness
+                        )
+                        break;
+                    case SOUTH:
+                        this.whip.box = newBox(
+                            Math.round(this.box.x + this.box.width/2 - this.whip.thickness/2),
+                            constrain(this.box.y + this.box.height,this.box.y + this.box.height,game.currentRoom.box.y+game.currentRoom.box.height),
+                            this.whip.thickness,
+                            constrain(0, this.whip.length, (game.currentRoom.box.y + game.currentRoom.box.height) - (this.box.y + this.box.height))
+                        )
+                        break;
+                    case WEST:
+                        this.whip.box = newBox(
+                            constrain(game.currentRoom.box.x,this.box.x - this.whip.length, this.box.x),
+                            Math.round(this.box.y + this.box.height/2 - this.whip.thickness/2),
+                            constrain(0, this.whip.length, this.box.x - game.currentRoom.box.x),
+                            this.whip.thickness
+                        )
+                        break;
+                        break;
+                }
+            }
         }
     }
 }
@@ -1356,39 +1505,49 @@ function gameLoop(lastTime){
     //read controller
     x = game.controller.left *-1 + game.controller.right;
     y = game.controller.up*-1  + game.controller.down;
+    b = game.controller.buttonPressed;
     game.controller.render();
 
     multplier = 1;
 
-    if (y<0){
-        game.player.direction=NORTH;
-    }else if(x>0){
-        game.player.direction=EAST;
-    }else if(y>0){
-        game.player.direction=SOUTH;
-    }else if(x<0){
-        game.player.direction=WEST;
+
+    if(b){
+        game.player.attack();
     }
 
-    constrained = game.currentRoom.constrainPlayer(
-        game.player.box.x, 
-        game.player.box.y,
-        game.player.box.x + Math.round(x * game.player.speed * multplier * deltaT/1000),
-        game.player.box.y + Math.round(y * game.player.speed * multplier * deltaT/1000)
-    )
-    if (constrained && (game.player.box.x != constrained.x || game.player.box.y != constrained.y)){
-        if (game.player.state!=PLAYERSTATE_WALKING){
-            game.player.state = PLAYERSTATE_WALKING;
-            game.player.sprite.setAnimation(1);
+    if(game.player.state != PLAYERSTATE_WHIPPING){
+        
+        if (y<0){
+            game.player.direction=NORTH;
+        }else if(x>0){
+            game.player.direction=EAST;
+        }else if(y>0){
+            game.player.direction=SOUTH;
+        }else if(x<0){
+            game.player.direction=WEST;
         }
-        game.player.box.x = constrained.x;
-        game.player.box.y = constrained.y;
-    }
-    else {
-        if (game.player.state!=PLAYERSTATE_IDLE){
-            game.player.state = PLAYERSTATE_IDLE;
+
+        constrained = game.currentRoom.constrainPlayer(
+            game.player.box.x, 
+            game.player.box.y,
+            game.player.box.x + Math.round(x * game.player.speed * multplier * deltaT/1000),
+            game.player.box.y + Math.round(y * game.player.speed * multplier * deltaT/1000)
+        )
+        if (constrained && (game.player.box.x != constrained.x || game.player.box.y != constrained.y)){
+            if (game.player.state!=PLAYERSTATE_WALKING){
+                game.player.state = PLAYERSTATE_WALKING;
+                game.player.sprite.setAnimation(1);
+            }
+            game.player.box.x = constrained.x;
+            game.player.box.y = constrained.y;
         }
+        else {
+            if (game.player.state!=PLAYERSTATE_IDLE){
+                game.player.state = PLAYERSTATE_IDLE;
+            }
+        }   
     }
+
     
     //game.player.box.x = constrain(currentroom.box.x+currentRoom.wallHeight, game.player.box.x, currentroom.box.x + currentroom.box.width+);
     
