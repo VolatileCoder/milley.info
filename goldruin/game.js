@@ -266,47 +266,6 @@ function newController(){
             this.buttonPressed = 0;
         }
     };
-    controller.touchEnd = function(e){
-        e.preventDefault(e);
-        
-        button = this.elements[this.elements.length-3];
-        dpad = this.elements[this.elements.length-2];
-        controller = this.elements[this.elements.length-1];
-        
-        r = e.target.getBoundingClientRect();
-     
-        //r.y = r.y - dimensions.infoHeight - dimensions.width
-        touches = Array.from(e.touches);
-        dpadTouched = false;
-        buttonTouched = false;
-        touches.forEach((t)=>{   
-            
-            //console.log(r,t,this.screen);
-            //console.log(t);
-
-
-            x = (((t.clientX - r.x)/r.width))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;
-            y = (((t.clientY - r.y)/r.height))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * dimensions.height;
-            x = x * controller.attr("width");
-            y = y * controller.attr("height") + dimensions.infoHeight + dimensions.width;
-
-            d = dpad.getBBox();
-            
-            if(x>d.x && x<d.x + d.width && y>d.y && y<d.y+d.width){
-                this.up = 0;
-                this.right = 0;
-                this.down =  0;
-                this.left = 0;
-            }
-            
-            b = button.getBBox();
-            if(x>b.x && x<b.x + b.width && y>b.y && y<b.y+b.width){
-               
-             this.buttonPressed = 0;
-            }
-        })
-        
-    };
     controller.render =function(){
         centerY = Math.round((dimensions.height - dimensions.width - dimensions.infoHeight)/2 + dimensions.width + dimensions.infoHeight);
         dPadLeft = Math.round(dimensions.width/4);  
@@ -360,7 +319,8 @@ function newController(){
             e2 = this.screen.drawRect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height-(dimensions.width + dimensions.infoHeight),"#000","#000",game.constants.lineThickness).attr({"opacity":.1})
             e2.touchstart((e)=>{this.touchStartOrMove(e)});
             e2.touchmove((e)=>{this.touchStartOrMove(e)});
-            e2.touchmove((e)=>{this.touchEnd(e)});
+            e2.touchend((e)=>{this.touchStartOrMove(e)});
+            this.elements.push(e2);
         }
 
         butt = this.elements[this.elements.length-3];
