@@ -208,7 +208,7 @@ function newController(){
         elements: [],
         screen: newScreen("controller")
     };
-    controller.dpadTouchStart = function(e){
+    controller.touchStartOrMove = function(e){
         e.preventDefault(e);
         
         button = this.elements[this.elements.length-3];
@@ -266,13 +266,54 @@ function newController(){
             this.buttonPressed = 0;
         }
     };
+    controller.touchEnd = function(e){
+        e.preventDefault(e);
+        
+        button = this.elements[this.elements.length-3];
+        dpad = this.elements[this.elements.length-2];
+        controller = this.elements[this.elements.length-1];
+        
+        r = e.target.getBoundingClientRect();
+     
+        //r.y = r.y - dimensions.infoHeight - dimensions.width
+        touches = Array.from(e.touches);
+        dpadTouched = false;
+        buttonTouched = false;
+        touches.forEach((t)=>{   
+            
+            //console.log(r,t,this.screen);
+            //console.log(t);
+
+
+            x = (((t.clientX - r.x)/r.width))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;
+            y = (((t.clientY - r.y)/r.height))//*game.constants.controllerRadius*2) - game.constants.controllerRadius;// * dimensions.height;
+            x = x * controller.attr("width");
+            y = y * controller.attr("height") + dimensions.infoHeight + dimensions.width;
+
+            d = dpad.getBBox();
+            
+            if(x>d.x && x<d.x + d.width && y>d.y && y<d.y+d.width){
+                this.up = 0;
+                this.right = 0;
+                this.down =  0;
+                this.left = 0;
+            }
+            
+            b = button.getBBox();
+            if(x>b.x && x<b.x + b.width && y>b.y && y<b.y+b.width){
+               
+             this.buttonPressed = 0;
+            }
+        })
+        
+    };
     controller.render =function(){
         centerY = Math.round((dimensions.height - dimensions.width - dimensions.infoHeight)/2 + dimensions.width + dimensions.infoHeight);
         dPadLeft = Math.round(dimensions.width/4);  
         if (this.elements.length ==0){
 
             
-           this.screen.rect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height - dimensions.width - dimensions.infoHeight).attr({"fill":"#181818", "r": 50});
+           this.screen.rect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height - dimensions.width - dimensions.infoHeight).attr({"fill":"#242424", "r": 50});
             color = "#3a3a3a"
             this.elements.push(this.screen.drawEllipse(dPadLeft, centerY, game.constants.controllerRadius, game.constants.controllerRadius,0,0,color,"#000",game.constants.lineThickness));
             color = "#444444"
@@ -317,15 +358,20 @@ function newController(){
             this.elements.push(el);
 
             e2 = this.screen.drawRect(0, dimensions.width + dimensions.infoHeight, dimensions.width, dimensions.height-(dimensions.width + dimensions.infoHeight),"#000","#000",game.constants.lineThickness).attr({"opacity":.1})
-            e2.touchstart((e)=>{this.dpadTouchStart(e)});
-            e2.touchmove((e)=>{this.dpadTouchStart(e)});
-            e2.touchend((e)=>{e.preventDefault(e); game.controller.up = 0; game.controller.right = 0; game.controller.down = 0; game.controller.left = 0; game.controller.buttonPressed = 0});
-            this.elements.push(e2);
+            e2.touchstart((e)=>{this.touchStartOrMove(e)});
+            e2.touchmove((e)=>{this.touchStartOrMove(e)});
+            e2.touchmove((e)=>{this.touchEnd(e)});
         }
+
+        butt = this.elements[this.elements.length-3];
+        
+        butt.attr({fill:this.buttonPressed ? "#600" : "#800"})
+
         el = this.elements[this.elements.length-2];
         //read controller
         x = game.controller.left * -1 + game.controller.right;
         y = game.controller.up * -1  + game.controller.down;
+
         degrees = 0;
         //read state
         if(x == 0 && y == 0){
