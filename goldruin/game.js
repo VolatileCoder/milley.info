@@ -487,12 +487,16 @@ function newPlayerController(){
 function newRandomController(){
     var controller = newControllerBase();
     
-    setInterval(()=>{
-        controller.up = Math.round(Math.random());
-        controller.down = Math.round(Math.random());
-        controller.left = Math.round(Math.random());
-        controller.right = Math.round(Math.random());
-    }, 1000)
+    controller.randomize = function(){
+    
+        this.up = Math.round(Math.random());
+        this.down = Math.round(Math.random());
+        this.left = Math.round(Math.random());
+        this.right = Math.round(Math.random());
+        time = Math.round(Math.random()*1000)+250;
+        setTimeout(()=>{this.randomize()}, time)
+    }
+    controller.randomize();
 
     return controller;
 }
@@ -584,7 +588,7 @@ function newSprite(screen, uri, imageWidth, imageHeight, spriteWidth, spriteHeig
     
             var rect = this._buildClipRect(); 
             if(this.image.height==1600){
-                console.log(trans0, trans1, rect);
+                //console.log(trans0, trans1, rect);
             }
 
             if (this.element ){
@@ -1912,6 +1916,10 @@ newLevel();
 game.currentRoom = getRoom(0,0);
 game.currentRoom.objects.push(game.player);
 game.currentRoom.objects.push(newCaveSpider(newRandomController()));
+
+sp2 = newCaveSpider(newRandomController())
+sp2.box.x = sp2.box.x + 400;
+game.currentRoom.objects.push(sp2);
 
 game.currentRoom.render();
 gameLoop(Date.now());
