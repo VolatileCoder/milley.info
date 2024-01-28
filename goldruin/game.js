@@ -178,7 +178,7 @@ const trig = {
 const dimensions = {
     width: 910, 
     height: 1618,
-    infoHeight: 50,
+    infoHeight: 88,
 };
 
 const palette = {
@@ -577,6 +577,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             frame: 0,
             startTime: Date.now()
         },
+        ready: 1,
         setAnimation: function(index,series){
             if (index!=this.animation.index||series!=this.animation.series){
                 this.animation.index = index;
@@ -600,7 +601,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             var x = Math.round(this.animation.frame * this.size.width) 
             var y = Math.round(this.animation.series * this.size.height)
             var w = this.size.width;
-            var h = this.size.height;
+            var h = this.size.height-1;
             return "" + x + "," + y +"," + w + "," + h;
         },
         _calculateCurrentFrame: function(deltaT) {
@@ -624,7 +625,6 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
     
             if(!this.element){
                 this.element = this.screen.image(this.image.frameset[this.animation.index], 0, 0, this.image.width, this.image.height).attr({opacity:0});
-                console.log("BAM!")
                 this.lastLocation.x = this.location.x;
                 this.lastLocation.y = this.location.y;
                 this.lastLocation.r = this.location.r;
@@ -645,8 +645,8 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
                 //console.log(trans0, trans1, rect);
             }
 
-            if (this.element ){
-                ready = 0
+            if (this.element && this.ready==1){
+                this.ready = 0
                 this.element.attr({opacity:1}).animate({transform:trans0, "clip-rect": rect},0, 'linear',()=>{
                     if (this.element){        
                         this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear',()=>{
@@ -1149,6 +1149,7 @@ function newGame() {
             spriteFamesPerSecond: 10,
             controllerRadius: 175,
             controllerCrossThickness: 70,
+            maxHeartContainers: 25
         },
         //debug: true, 
         isFullScreen: false,
@@ -1998,7 +1999,7 @@ function getEntranceLocation(room, wall){
 function gameLoop(lastTime){
     var startTime = Date.now();
     var deltaT = Math.round(startTime-lastTime);
-    
+    console.log(deltaT);
     //Move objects and collected the dead ones.
     var deadObjects = [];
     game.currentRoom.objects.forEach((o)=>{
@@ -2037,8 +2038,10 @@ function gameLoop(lastTime){
     //Render our controller
     game.player.controller.render();//TODO: find a better way to reference this. 
 
-    window.setTimeout(()=>gameLoop(startTime), 50);
-    
+    renderInfo();
+
+
+    window.setTimeout(()=>gameLoop(startTime),50);
 }
 
 function openNextRoom(direction){
@@ -2078,6 +2081,34 @@ function onOrientationChange(e) {
     }
 }
 
+function renderInfo(){
+    if(!game.infoElements){
+        game.infoElements = {};
+        game.infoElements.hearts = [];
+        for(var i=0; i<game.constants.maxHeartContainers; i++){
+            heart = newSprite(game.screen,images.heartContainer,32,128,32,32, i * 36 + 8,-dimensions.infoHeight + 8)
+            game.infoElements.hearts.push(heart);
+        }
+        game.infoElements.key = newSprite(game.screen, images.keys, 32, 64, 32, 32, 8, -dimensions.infoHeight + 48)
+    }
+    game.infoElements.hearts.forEach((h, i)=>{
+        if(((i + 1) * 10) > game.player.maxHealth){
+            h.setAnimation(0,0);
+        }else{
+            if(((i + 1) * 10) <= game.player.health){
+                h.setAnimation(0,3);
+            } else if (((i + 1) * 10) - 5 <= game.player.health){
+                h.setAnimation(0,2);
+            }    else {
+                h.setAnimation(0,1);
+            }
+        }
+        h.render();
+    })
+    game.infoElements.key.setAnimation(0,game.player.keys);
+    game.infoElements.key.render()
+}
+
 //images
 images = {
     adventurer: [
@@ -2094,6 +2125,12 @@ images = {
     ],
     starburst: [
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAZCAYAAADHXotLAAACC0lEQVRoQ+1aW47DMAhsztDr7uded8+QVaLQdRxgBuxU2dT9qdQ6Bs8DTNXpMV6nITDP87xsPk3TxAahF7IbjnV/CAxCAmrIgBXY/rHu/7Pp/TnTLvlYhwxCIvJ6w9pBSADks8FaUjk7xq1K1lXBYjW1I0MeIvtIuIf8d7Be7kg03EEIqSoWqAMZQfWKGGE8Ift7W/m1vT/XscR9hRySrYsoCfm+xeplDBe4BFjlYKfmaB2wJsQDYhMfTUgvsHbg1wkGwELTrwucACXxRcF1PoZDISn1/oE4LiE7pQlYStLyEQKpflQ9GAIrUMao/S2wQJwXNrWI2HJQlLESN+iQw6E0GwZAcklBykrE2eVv7V+TEogT2p+IAwkxG2GwIXrCcQ9lKIkV4iH/i5NOEWKSElASAlAlpQMZ6oXBKosN56GcQpyHJuRASkPyFjm9Lw5UeSRAQmLqSTpNiHWVjDbyEBlnlkUhYnFLB1Le7pB6Qu89sdczzspFx2kaXlWXeA2ud0uuMiBaQqYdwto2u+51oAIU7bPm/QvX7UjvSQhK0iH+EoSU5bBWjvcdOrda27efLyTOwTkJl5juk59KtBnOiHMZQlAvWg6N1sD+5E3eUiJ7EIJId9x4CUJYpWfXsf2OXefe3hjSByG8uzJOjPQ6tPb2DskCzJZHBLDmau+Z2xOSLXPsc01lTvnP1i+NE/4l1frFKQAAAABJRU5ErkJggg=="
+    ],
+    heartContainer: [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAABACAYAAAATffeWAAABEklEQVRYR+2WURLCMAhEwyH1kh4yTqK0GwLb1DqjH/SzwDYl8EDKxUcuxpcUKJmDkjloffRnvVBrrdreIjKcLrJtTuhgRZitC6gDftUGebb2TrxgPcGSjTkx3G1xKfAq5bN5QP+pkGwF2puwH3PLNRLxTjp1Y/Q70Xu3na0zy1HIA9YLmBcKlJXbWep5vOqOMWDFd3nwAAjddjj1Xz7kAQZrklTEq4upnT2BJnQPyJ0CgAAsEi+RXhIpD6yIFVjiAYqgwCkeqIgKfMSDJtIEkgd70Qwoe0NlGCyMB55t2A8YDygr9IoiHkQ7wgabFBj3g9VEIq2nwXIkYlHvjrZIxJsT4X5gRaIhQ/cDFWET6vf7wRNfy3oImG3W6QAAAABJRU5ErkJggg=="
+    ], 
+    keys: [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgCAYAAAAbifjMAAAAbklEQVRIS2NkoBAwUqifYdQAhtEwYBgNA1A+GuR54f91hv9gZ2ridilWL8A0opcV2AzCMABZM0wDNjGY4SgGEHIyNnnqGgByFkVegPmLokBEDnlCYUIwJQ5BA0gJPLwJiZgkjNUAdI0kB+KAeAEAAng8IZ6jjSoAAAAASUVORK5CYII="
     ]
 }
 game = newGame();
@@ -2102,7 +2139,7 @@ portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 
 game.player = newAdventurer(newInputController());
-game.player.team = HEROIC;
+
 x = game.screen.drawRect(0,0,100,100,"#F0F","#000",3);
 
 clearScreen();//init Screen
@@ -2112,5 +2149,3 @@ game.currentRoom.objects.push(game.player);
 
 game.currentRoom.render();
 gameLoop(Date.now());
-
-
