@@ -1437,8 +1437,8 @@ function generateRoom(x, y){
         console.log({minArea: minArea, maxArea: maxArea, thresholds: thresholds, roomArea: roomArea, numberOfEnemies: numberOfEnemies})
         for(i=0; i<numberOfEnemies; i++){
             enemy = newCaveSpider(newRandomController());
-            enemy.box.x = room.box.x + Math.round(Math.random() * (room.box.width-enemy.box.width));
-            enemy.box.y = room.box.y + Math.round(Math.random() * (room.box.width-enemy.box.width));
+            enemy.box.x = room.box.x + Math.round(Math.random() * (room.box.width - enemy.box.width));
+            enemy.box.y = room.box.y + Math.round(Math.random() * (room.box.height - enemy.box.height));
             //TODO: constrain, somehow?
             room.objects.push(enemy);
         }
