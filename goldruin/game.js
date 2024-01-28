@@ -762,7 +762,7 @@ function newGameObject(){
     
         },
         hurt: function(damage, knockback){
-            if(this.state!=NURT){
+            if(this.state!=HURT){
                 this.health -= damage;
                 if(this.health <= 0){
                     this.health = 0;
