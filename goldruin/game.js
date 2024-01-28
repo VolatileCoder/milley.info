@@ -577,7 +577,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             y: y, 
             r: 0
         },
-        lastLocation: {
+        _lastLocation: {
             x: x,
             y: y, 
             r: 0
@@ -587,6 +587,11 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             series: 0,
             frame: 0,
             startTime: Date.now()
+        },
+        _lastAnimation:{
+            index: -1,
+            series: -1,
+            frame: -1
         },
         ready: 1,
         setAnimation: function(index,series){
@@ -623,32 +628,23 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
         render: function(deltaT){
     
             this.animation.frame = this._calculateCurrentFrame(deltaT);
-            
-            /*
-            if(game.debug){
-                if(!this.debugElement){
-                    this.debugElement = game.screen.rect(this.location.x, this.location.y + dimensions.infoHeight, this.size.width, this.size.height).attr("stroke", "#F0F");
-                    game.screen.onClear(()=>{this.debugElement = null});
-                }
-                this.debugElement.attr({x:this.location.x, y:this.location.y + dimensions.infoHeight});
-            }
-            */
-    
+            forceRender = false
             if(!this.element){
                 this.element = this.screen.image(this.image.frameset[this.animation.index], 0, 0, this.image.width, this.image.height).attr({opacity:0});
-                this.lastLocation.x = this.location.x;
-                this.lastLocation.y = this.location.y;
-                this.lastLocation.r = this.location.r;
+                this._lastLocation.x = this.location.x;
+                this._lastLocation.y = this.location.y;
+                this._lastLocation.r = this.location.r;
                 this.screen.onClear(()=>{this.element = null});
-                this.ready = 1
+                this.ready = 1  
                 this._lastIndex = this.animation.index;
+                forceRender = true
             } 
             if(this._lastIndex != this.animation.index){
                 this.element.attr("src",this.image.frameset[this.animation.index]);
                 this._lastIndex = this.animation.index;
             }
     
-            var trans0 = this._buildTranslation(this.lastLocation.x, this.lastLocation.y, this.lastLocation.r);
+            var trans0 = this._buildTranslation(this._lastLocation.x, this._lastLocation.y, this._lastLocation.r);
             var trans1 = this._buildTranslation(this.location.x, this.location.y, this.location.r);
     
             var rect = this._buildClipRect(); 
@@ -656,20 +652,27 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
                 //console.log(trans0, trans1, rect);
             }
 
-            if (this.element && this.ready==1){
+            frameChanged = (this._lastAnimation.frame != this.animation.frame || this._lastAnimation.index != this.animation.index || this._lastAnimation.series != this.animation.series)
+            positionChanged = (this.location.x!=this._lastLocation.x || this.location.y != this._lastLocation.y || this.location.r != this._lastLocation.r);
+
+            if ((frameChanged || positionChanged || forceRender) && this.element && this.ready==1){
                 this.ready = 0
+                this._lastRect = rect
                 this.element.attr({opacity:1}).animate({transform:trans0, "clip-rect": rect},0, 'linear',()=>{
                     if (this.element){        
                         this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear',()=>{
                             this.ready = 1
                         });
                     }
-                })
+                });
             }   
     
-            this.lastLocation.x = this.location.x;
-            this.lastLocation.y = this.location.y;
-            this.lastLocation.r = this.location.r;
+            this._lastAnimation.frame = this.animation.frame;
+            this._lastAnimation.index = this.animation.index;
+            this._lastAnimation.series = this.animation.series;
+            this._lastLocation.x = this.location.x;
+            this._lastLocation.y = this.location.y;
+            this._lastLocation.r = this.location.r;
             
             return this.element;
         },
@@ -894,7 +897,7 @@ function newAdventurer(controller){
                         this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2 )
                         break;
                     case EAST:
-                        this.whip.element = game.screen.drawRect(this.whip.box.x+10,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2)
+                        this.whip.element = game.screen.drawRect(this.whip.box.x + 10,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2)
                         break;
                     case SOUTH: 
                         this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2)
@@ -904,14 +907,11 @@ function newAdventurer(controller){
                         break;
                     }
             }
-    
-    
         } else {
-            
             if(this.whip.element) this.whip.element.remove();
             this.whip.element = null;
         }
-            //render player sprite
+        //render player sprite
         this.sprite.setAnimation(this.direction, this.state);
         this.sprite.location.x = this.box.x-25;
         this.sprite.location.y = this.box.y-50;
@@ -919,7 +919,6 @@ function newAdventurer(controller){
         if(this.sprite.element){
             this.sprite.element.toFront();
         }
-
     };
     adventurer.remove = function(deltaT){
         if(this.sprite){
@@ -2058,7 +2057,7 @@ function gameLoop(lastTime){
     //Sort List of objects in current room by their y values.
     game.currentRoom.objects.sort((a,b)=>{return a.layer < b.layer ? -1 : a.layer > b.layer ? 1 : a.box.y < b.box.y ? -1 : a.box.y > b.box.y ? 1 : 0;})
 
-    //Render all objects in current room in order. 
+    //Render all objects in current room in order.  
     game.currentRoom.objects.forEach((o)=>o.render(deltaT));
     
     //remove the dead objects.
@@ -2073,7 +2072,7 @@ function gameLoop(lastTime){
     renderInfo();
 
 
-    window.setTimeout(()=>gameLoop(startTime),50);
+    window.setTimeout(()=>gameLoop(startTime),0);
 }
 
 function openNextRoom(direction){
@@ -2092,8 +2091,8 @@ function openNextRoom(direction){
             game.player.box.x = loc.x;
             game.player.box.y = loc.y;
         
-            game.player.sprite.lastLocation.x = loc.x;
-            game.player.sprite.lastLocation.y = loc.y;
+            game.player.sprite._lastLocation.x = loc.x;
+            game.player.sprite._lastLocation.y = loc.y;
             
         
         }
