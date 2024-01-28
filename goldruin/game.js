@@ -762,25 +762,27 @@ function newGameObject(){
     
         },
         hurt: function(damage, knockback){
-            this.health -= damage;
-            if(this.health <= 0){
-                this.health = 0;
-                this.setState(DYING);
-                return;
-            }
-            this.setState(HURT);
-            switch (knockback){
-                case NORTH:
-                    this.box.y -= damage;
-                    break;
-                case EAST:
-                    this.box.x += damage;
-                    break;
-                case SOUTH: 
-                    this.box.y += damage;
-                case WEST:
-                    this.box.x -= damage;
-                    break;
+            if(this.state!=NURT){
+                this.health -= damage;
+                if(this.health <= 0){
+                    this.health = 0;
+                    this.setState(DYING);
+                    return;
+                }
+                this.setState(HURT);
+                switch (knockback){
+                    case NORTH:
+                        this.box.y -= damage;
+                        break;
+                    case EAST:
+                        this.box.x += damage;
+                        break;
+                    case SOUTH: 
+                        this.box.y += damage;
+                    case WEST:
+                        this.box.x -= damage;
+                        break;
+                }
             }
         },
         canAttack: function(){
@@ -1054,7 +1056,7 @@ function newCaveSpider(controller){
     spider.speed = 225;
     spider.health = 20;
     spider.maxHealth = 20;
-    spider.damage = 10;
+    spider.damage = 5;
     spider.attackduration = 500;
     spider.render = function(deltaT){
         if(!this.sprite){
@@ -1999,7 +2001,7 @@ function getEntranceLocation(room, wall){
 function gameLoop(lastTime){
     var startTime = Date.now();
     var deltaT = Math.round(startTime-lastTime);
-    console.log(deltaT);
+    //console.log(deltaT);
     //Move objects and collected the dead ones.
     var deadObjects = [];
     game.currentRoom.objects.forEach((o)=>{
