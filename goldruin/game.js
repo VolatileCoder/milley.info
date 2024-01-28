@@ -95,7 +95,7 @@ function newBox(x, y, w, h) {
             }
             return false;
         },
-        
+
         collidesWith: function(box){
 
                 // Check for overlap along the X axis
@@ -1086,7 +1086,7 @@ function newCaveSpider(controller){
                 o.hurt(this.damage);
                 sb=newStarburst()
                 sb.box = this._attackBox;
-                game.currentRoom.push(sb);
+                game.currentRoom.objects.push(sb);
             }
         });
     };
