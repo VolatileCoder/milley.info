@@ -20,7 +20,6 @@ const ATTACKING = 2;
 const HURT = 3;
 const DYING = 4;
 
-
 const UNALIGNED = 0;
 const HEROIC = 1;
 const DUNGEON = 2;
@@ -30,6 +29,17 @@ const EFFECT = 1;
 
 const PHYSICAL = 0;
 const ETHEREAL = 1;
+
+const RANDOM = -1;
+const NONE = 0;
+const SILVERKEY = 1;
+const GOLDKEY = 2;
+const REDKEY = 3;
+const BLUEKEY = 4;
+const GREENKEY = 5;
+const HEARTCONTAINER = 6;
+const HEART = 7;
+
 
 const SCREEN_WIDTH = window.screen.width;
 const SCREEN_HEIGHT = window.screen.height;
@@ -855,7 +865,7 @@ function newAdventurer(controller){
     adventurer.box.height = 50;
     adventurer.direction = SOUTH; //init facing the player
     adventurer.team = HEROIC;
-    adventurer.keys = 0;
+    adventurer.keys = [];
     adventurer.speed = 150; //in px/sec
     adventurer.damage = 10;
     adventurer.health = 30;
@@ -1271,6 +1281,7 @@ function generateMap(level){
     //level.rooms[level.rooms.length-1].palette.floorColor="#800";
     exitRoom = level.rooms[level.rooms.length-1];
     exitRoom.opened = 0;
+    exitRoom.lock = SILVERKEY;
     exitRoom.exit = 1;
     enemies = [];
     exitRoom.objects.forEach((o)=>{
@@ -1296,8 +1307,8 @@ function generateMap(level){
     }
     //console.log(index);
     //console.log(singleDoorRooms);
-    keyRoom.palette.floorColor = "#880";
-    keyRoom.keys = 1;
+    keyRoom.palette.floorColor = "#C0C0C0";
+    keyRoom.key = SILVERKEY;
 }
 
 function getRoom(x, y){
@@ -1560,9 +1571,8 @@ function newRoom(){
             allowance = Math.round((game.constants.doorWidth/2)+game.constants.doorFrameThickness);
             for(d=0;d<this.doors.length;d++){
                 door = this.doors[d];
-                if(!door.opened && game.player.keys>0 && game.player.box.inside(door.box)){
+                if(!door.opened && game.player.keys.indexOf(door.lock)>-1 && game.player.box.inside(door.box)){
                     door.opened = 1;
-                    game.player.keys--;
                     game.level.findNeighbor(this, door.wall).opened=1;
                     clearScreen();
                     this.render();
@@ -1814,7 +1824,11 @@ function newDoor(room, wall, offset){
             dy3 = y4 - game.constants.doorHeight;
             dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
             
-            this.opened = game.level.findNeighbor(room, this.wall).opened;
+            portalTo = game.level.findNeighbor(room, this.wall);
+            this.opened = portalTo.opened;
+            if(!this.opened){
+                this.lock = portalTo.lock;
+            }
             this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,"000",game.constants.lineThickness));
             //THRESHOLD
 
@@ -1907,14 +1921,14 @@ function newDoor(room, wall, offset){
             this.elements.forEach((element)=>{
                 element.transform(t)
             })
-            /*
+            
             if (game.debug && this.box ){
                 this.box.render("#0FF");
             }
             if (game.debug && this.trip ){
                 this.trip.render("#F00");
             }
-            */
+        
         }
     }
 
@@ -2070,14 +2084,13 @@ function openNextRoom(direction){
             nextRoom.objects.push(game.player);
             game.currentRoom.objects.splice(game.currentRoom.objects.indexOf(game.player),1);
             game.currentRoom = nextRoom;
-            if(game.currentRoom.keys>0){
-                game.player.keys += game.currentRoom.keys;
-                game.currentRoom.keys = 0;
+            if(game.currentRoom.key){
+                game.player.keys.push(game.currentRoom.key);
+                game.currentRoom.key = NONE;
             }
-            //entrance = game.currentRoom.findDoor((direction + 2) % 4);
             loc = getEntranceLocation(nextRoom,(direction + 2) % 4)
-            game.player.box.x = loc.x;//game.currentroom.box.x + game.currentroom.box.width / 2;
-            game.player.box.y = loc.y;//game.currentroom.box.y + game.currentroom.box.height / 2;
+            game.player.box.x = loc.x;
+            game.player.box.y = loc.y;
         
             game.player.sprite.lastLocation.x = loc.x;
             game.player.sprite.lastLocation.y = loc.y;
@@ -2103,11 +2116,14 @@ function renderInfo(){
     if(!game.infoElements){
         game.infoElements = {};
         game.infoElements.hearts = [];
+        game.infoElements.keys = [];
         for(var i=0; i<game.constants.maxHeartContainers; i++){
             heart = newSprite(game.screen,images.heartContainer,32,128,32,32, i * 36 + 8,-dimensions.infoHeight + 8)
             game.infoElements.hearts.push(heart);
         }
-        game.infoElements.key = newSprite(game.screen, images.keys, 32, 64, 32, 32, 8, -dimensions.infoHeight + 48)
+        for(var i=0; i<5; i++){
+            game.infoElements.keys.push(newSprite(game.screen, images.keyIcons, 32, 192, 32, 32, i * 36 + 8, -dimensions.infoHeight + 48))
+        }
     }
     game.infoElements.hearts.forEach((h, i)=>{
         if(((i + 1) * 10) > game.player.maxHealth){
@@ -2121,10 +2137,16 @@ function renderInfo(){
                 h.setAnimation(0,1);
             }
         }
-        h.render();
+        h.render(0);
     })
-    game.infoElements.key.setAnimation(0,game.player.keys);
-    game.infoElements.key.render()
+    game.infoElements.keys.forEach((k, i)=>{
+        if(game.player.keys.length>i){
+            k.setAnimation(0,game.player.keys[i]);
+        }else{
+            k.setAnimation(0,NONE);
+        }
+        k.render(0);
+    })
 }
 
 //images
@@ -2147,8 +2169,8 @@ images = {
     heartContainer: [
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAABACAYAAAATffeWAAABEklEQVRYR+2WURLCMAhEwyH1kh4yTqK0GwLb1DqjH/SzwDYl8EDKxUcuxpcUKJmDkjloffRnvVBrrdreIjKcLrJtTuhgRZitC6gDftUGebb2TrxgPcGSjTkx3G1xKfAq5bN5QP+pkGwF2puwH3PLNRLxTjp1Y/Q70Xu3na0zy1HIA9YLmBcKlJXbWep5vOqOMWDFd3nwAAjddjj1Xz7kAQZrklTEq4upnT2BJnQPyJ0CgAAsEi+RXhIpD6yIFVjiAYqgwCkeqIgKfMSDJtIEkgd70Qwoe0NlGCyMB55t2A8YDygr9IoiHkQ7wgabFBj3g9VEIq2nwXIkYlHvjrZIxJsT4X5gRaIhQ/cDFWET6vf7wRNfy3oImG3W6QAAAABJRU5ErkJggg=="
     ], 
-    keys: [
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgCAYAAAAbifjMAAAAbklEQVRIS2NkoBAwUqifYdQAhtEwYBgNA1A+GuR54f91hv9gZ2ridilWL8A0opcV2AzCMABZM0wDNjGY4SgGEHIyNnnqGgByFkVegPmLokBEDnlCYUIwJQ5BA0gJPLwJiZgkjNUAdI0kB+KAeAEAAng8IZ6jjSoAAAAASUVORK5CYII="
+    keyIcons: [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAABgCAYAAAAU0fKgAAABjklEQVRYR+1YQQ6DMAwLz9kv+vT+Ys/ZBCWQNoY0BAmQ2JEuxnZSL9pAwc8QrKcXgF4P6PVgvEc3vws5599IM6W0yRQecGGbFQhIAchiLkDPGLwCsCij83MBRlohCawrZKJ03vLEnMQHAnjM2x2knhGGAG2h28T7Sfh9acqD4bOdXDAPuLD1BAEpAFnMBegZ7IJFGZ1XDMIAI62QBNYVMlE6b0ky8+CBAB7zdgepZ4S78sBt4v0kZCp5kHY2GbwfzIUqXAGQ3g9EMb+ZmSA29c+7QRlJOhdg2g8iEpb9IGJitR8cbWPLxD0H1wHIDkgvuiWEAdR+4O1CmEEYoJVAueQBJed+sBTqQFDXXwcKv1W+GT2bwWsAizI4PxmgBEIx7pCE9RatIPVMd5hYB8LBNrZM3HNwHYDsgGEe/nkPA+hAcHYhzCAMoANhnkjn/wdE5Y8H/dFAYMGQxVyAnhX4BoC/uEVZn58NMAWC0O+WsNyiiIlVIBxtY8vEPQfXAfRPIM4DxwhvAKhA8HbhAgl/oMsEcHnMNhUAAAAASUVORK5CYII="
     ]
 }
 game = newGame();
