@@ -95,6 +95,7 @@ function newBox(x, y, w, h) {
             }
             return false;
         },
+        
         collidesWith: function(box){
 
                 // Check for overlap along the X axis
@@ -1085,7 +1086,7 @@ function newCaveSpider(controller){
                 o.hurt(this.damage);
                 sb=newStarburst()
                 sb.box = this._attackBox;
-                game.currentRoom.objects.push(sb);
+                game.currentRoom.push(sb);
             }
         });
     };
@@ -2156,7 +2157,6 @@ portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 
 game.player = newAdventurer(newInputController());
-game.player.keys++;
 x = game.screen.drawRect(0,0,100,100,"#F0F","#000",3);
 
 clearScreen();//init Screen
