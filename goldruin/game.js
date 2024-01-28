@@ -1083,6 +1083,9 @@ function newCaveSpider(controller){
         targets.forEach((o)=>{
             if(o.team == opposingTeam){
                 o.hurt(this.damage);
+                sb=newStarburst()
+                sb.box = this._attackBox;
+                game.currentRoom.objects.push(sb);
             }
         });
     };
@@ -1229,13 +1232,14 @@ function newLevel(){
 
 function generateMap(level){
     //generate the first room.
-    enterance = getRoom(0,0);
+    entrance = getRoom(0,0);
     //var x = level.rooms.length;
     while(!level.rooms[level.rooms.length-1].mapped){
         loopRooms = []
         level.rooms.forEach((room)=>{
             if(!room.mapped){
                 loopRooms.push(room);
+                //room.opened=false;
             }
         })
         loopRooms.forEach((room)=>{
@@ -1810,33 +1814,44 @@ function newDoor(room, wall, offset){
             dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
             
             this.opened = game.level.findNeighbor(room, this.wall).opened;
-            this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,this.opened ? "#000" : this.color,"#000",game.constants.lineThickness));
+            this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,"000",game.constants.lineThickness));
+            //THRESHOLD
+
+            x1 = this.offset - game.constants.doorWidth/2 ;
+            y1 = -focus.x + game.constants.lineThickness;
+            x4 = this.offset + game.constants.doorWidth/2;
+            y4 = -focus.x + game.constants.lineThickness;
+            y2 = y1 - game.constants.thresholdDepth;
+            if (x1 > 0){
+                x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;        
+            }else {
+                x2 = x1 - ((trig.cotangent(trig.pointToAngle(y1,x1)) * y2)-x1)/3;
+            }
+            
+            y3 = y4 - game.constants.thresholdDepth;
+            if (x4 < 0){
+                x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;      
+            }else {
+                x3 = x4 - ((trig.cotangent(trig.pointToAngle(y4,x4)) * y3)-x4)/3;
+            }
+            this.elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"90-" +this.room.palette.floorColor+ ":5-#000:95","#000",0));                
         
             
-            if (this.opened){
-                //THRESHOLD
+            if (!this.opened){
+                //DOOR
         
-                x1 = this.offset - game.constants.doorWidth/2 ;
-                y1 = -focus.x + game.constants.lineThickness;
-                x4 = this.offset + game.constants.doorWidth/2;
-                y4 = -focus.x + game.constants.lineThickness;
-                y2 = y1 - game.constants.thresholdDepth;
-                if (x1 > 0){
-                    x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;        
-                }else {
-                    x2 = x1 - ((trig.cotangent(trig.pointToAngle(y1,x1)) * y2)-x1)/3;
-                }
+                x1 = this.offset - game.constants.doorWidth / 2;
+                y1 = -focus.x - game.constants.doorFrameThickness;
+                x4 = this.offset + game.constants.doorWidth / 2;
+                y4 = -focus.x - game.constants.doorFrameThickness;
+                dy2 = y1 - game.constants.doorHeight + game.constants.doorFrameThickness ;
+                dx2 = trig.cotangent(trig.pointToAngle(y1,x1)) * dy2;
+                dy3 = y4 - game.constants.doorHeight + game.constants.doorFrameThickness;
+                dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
+                this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,this.color,game.constants.lineThickness));
+
                 
-                y3 = y4 - game.constants.thresholdDepth;
-                if (x4 < 0){
-                    x3 = trig.cotangent(trig.pointToAngle(y4,x4)) * y3;      
-                }else {
-                    x3 = x4 - ((trig.cotangent(trig.pointToAngle(y4,x4)) * y3)-x4)/3;
-                }
-                this.elements.push(game.screen.drawPoly(x1,y1,x2,y2,x3,y3,x4,y4,offset.x,offset.y,"90-" +this.room.palette.floorColor+ ":5-#000:95","#000",0));                
-            } else {
                 //KEYHOLE
-        
                 x0 = this.offset;
                 y0 = -focus.x;
                 
@@ -1864,8 +1879,8 @@ function newDoor(room, wall, offset){
             
                 for(i=1;i<bars; i++){
                     x0 = (this.offset - game.constants.doorWidth/2) + (game.constants.doorWidth/bars) * i;
-                    y0 = -focus.x - (this.opened ? game.constants.doorFrameThickness : 0) //-this.room.box.width/2;
-                    y1 = y0-game.constants.doorHeight + (this.opened ? game.constants.doorFrameThickness : 0);
+                    y0 = -focus.x - game.constants.doorFrameThickness //-this.room.box.width/2;
+                    y1 = y0-game.constants.doorHeight + game.constants.doorFrameThickness;
                     x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1);                    
                     this.elements.push(game.screen.drawLine(x0, y0, x1, y1, palette.doorBarColor, game.constants.lineThickness));
                  
@@ -2141,7 +2156,7 @@ portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 
 game.player = newAdventurer(newInputController());
-
+game.player.keys++;
 x = game.screen.drawRect(0,0,100,100,"#F0F","#000",3);
 
 clearScreen();//init Screen
