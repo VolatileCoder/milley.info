@@ -39,7 +39,11 @@ const BLUEKEY = 4;
 const GREENKEY = 5;
 const HEARTCONTAINER = 6;
 const HEART = 7;
-
+const COIN = 8;
+const CHALICE = 9;
+const CROWN = 10;
+const SWORD = 11;
+const BEETLE = 12;
 
 const SCREEN_WIDTH = window.screen.width;
 const SCREEN_HEIGHT = window.screen.height;
@@ -65,6 +69,10 @@ function directionToDegress(direction){
         default:
             return 0;
     }
+}
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function getOpposingTeam(team){
@@ -593,6 +601,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             series: -1,
             frame: -1
         },
+        opacity: 1,
         ready: 1,
         setAnimation: function(index,series){
             if (index!=this.animation.index||series!=this.animation.series){
@@ -615,9 +624,9 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
         },
         _buildClipRect: function (){
             var x = Math.round(this.animation.frame * this.size.width) 
-            var y = Math.round(this.animation.series * this.size.height)
+            var y = Math.round(this.animation.series * this.size.height)+1
             var w = this.size.width;
-            var h = this.size.height-1;
+            var h = this.size.height-2;
             return "" + x + "," + y +"," + w + "," + h;
         },
         _calculateCurrentFrame: function(deltaT) {
@@ -648,17 +657,14 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             var trans1 = this._buildTranslation(this.location.x, this.location.y, this.location.r);
     
             var rect = this._buildClipRect(); 
-            if(this.image.height==1600){
-                //console.log(trans0, trans1, rect);
-            }
 
             frameChanged = (this._lastAnimation.frame != this.animation.frame || this._lastAnimation.index != this.animation.index || this._lastAnimation.series != this.animation.series)
             positionChanged = (this.location.x!=this._lastLocation.x || this.location.y != this._lastLocation.y || this.location.r != this._lastLocation.r);
 
             if ((frameChanged || positionChanged || forceRender) && this.element && this.ready==1){
-                this.ready = 0
-                this._lastRect = rect
-                this.element.attr({opacity:1}).animate({transform:trans0, "clip-rect": rect},0, 'linear',()=>{
+                
+                this.ready = 0;
+                this.element.attr({opacity:this.opacity}).animate({transform:trans0, "clip-rect": rect},0, 'linear',()=>{
                     if (this.element){        
                         this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear',()=>{
                             this.ready = 1
@@ -673,7 +679,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             this._lastLocation.x = this.location.x;
             this._lastLocation.y = this.location.y;
             this._lastLocation.r = this.location.r;
-            
+            this.element.toFront();
             return this.element;
         },
         remove: function(){
@@ -740,6 +746,7 @@ function newGameObject(){
     
             if(this.state == IDLE || this.state == WALKING){
                 
+
                 if (input.y<0){
                     this.direction=NORTH;
                 }else if(input.x>0){
@@ -756,8 +763,8 @@ function newGameObject(){
                     multiplier = 1/Math.sqrt(2);
                 }
                 constrained = game.currentRoom.constrain(this,
-                    this.box.x + Math.round(input.x * this.speed * multiplier * deltaT/1000),
-                    this.box.y + Math.round(input.y * this.speed * multiplier * deltaT/1000)
+                    this.box.x + input.x * this.speed/1000 * multiplier * deltaT,
+                    this.box.y + input.y * this.speed/1000 * multiplier * deltaT
                 )
     
                 if (constrained && (this.box.x != constrained.x || this.box.y != constrained.y)){
@@ -839,24 +846,108 @@ function newStarburst(){
             this.sprite.setAnimation(0,0);
              this.sprite.location.r = Math.round(Math.random() * 360);
         }
-        this.sprite.render(deltaT);   
-        if( this.sprite.element){
-            this.sprite.element.toFront();
-
-        }
+        this.sprite.render(deltaT); 
     }
     starburst.move = function(deltaT){
         if(Date.now()-this._stateStart>250){
             this.setState(DEAD);
         }
     }    
-    starburst.remove = function(deltaT){
+    starburst.remove = function(){
         if(this.sprite){
             this.sprite.remove();
             this.sprite = null;
         }
     }
     return starburst;
+}
+
+function newTreasureChest(content){
+    chest = newGameObject();
+    chest.box.width=64;
+    chest.box.height=32;
+    chest.opened = 0;
+    chest.treasureOffset = 0;
+    chest.content = content;
+    chest.elements = [];
+    chest.render = function(deltaT){
+        if(this.elements.length == 0){
+            this.backgroundSprite = newSprite(game.screen,images.chest,64,256,64,64,this.box.x,this.box.y-32);
+            this.elements.push(this.backgroundSprite);
+            this.contentSprite = newSprite(game.screen, images.treasure, 36, 468, 36, 36, this.box.x+14,this.box.y-18)
+            this.elements.push(this.contentSprite);
+            this.foregroundSprite = newSprite(game.screen,images.chest,64,256,64,64,this.box.x,this.box.y-32);
+            this.elements.push(this.foregroundSprite);
+            game.screen.onClear(()=>{this.elements=[]});
+        }
+
+        if(game.debug){
+            this.box.render("#FF0")
+            //this.tripFront.render("#0F0");
+        }
+        
+        if(this.opened){
+            this.foregroundSprite.setAnimation(0,1);
+            this.contentSprite.setAnimation(0, this.content);
+            this.backgroundSprite.setAnimation(0,3);
+            
+            var offset = (100/1000) * deltaT;
+            this.treasureOffset += offset;
+            var opacity = constrain(0,1-(this.treasureOffset/100), 1);
+            this.contentSprite.opacity = opacity;    
+            if(opacity>0){
+                this.contentSprite.location.y -= offset;
+            }else{
+                this.content = NONE 
+            }
+        } else {
+            this.foregroundSprite.setAnimation(0,0);
+            this.contentSprite.setAnimation(0, 0);
+            this.backgroundSprite.setAnimation(0,2);
+        }
+        this.backgroundSprite.render(deltaT);
+        this.contentSprite.render(deltaT);
+        this.foregroundSprite.render(deltaT);
+    }
+    chest.move = function(deltaT){
+        //todo: tripwires, etc
+        if(!this.tripFront){
+            this.tripFront = newBox(this.box.x-game.player.box.width/2, this.box.y+this.box.height, this.box.width + game.player.box.width, game.player.box.height)
+        }
+        if(!this.opened && 
+           (game.player.box.inside(this.tripFront) && game.player.direction==NORTH)
+        ){
+            this.opened = true;
+            if(this.content == RANDOM){
+                if ((game.player.health/game.player.maxHealth) < Math.random()){
+                    this.content = HEART
+                } else {
+                    this.content = Math.round(Math.random() * 5) + HEART;
+                }
+            }
+            if(this.content >= SILVERKEY && this.content <= BLUEKEY){
+                game.player.keys.push(this.content);
+            } else if (this.content == HEART){
+                game.player.health=constrain(0, game.player.health + 10, game.player.maxHealth);
+            } else if (this.content == HEARTCONTAINER){
+                game.player.maxHealth += 10;
+                game.player.health = game.player.maxHealth;
+            } else {
+                game.player.gold += (this.content - HEART ) * 100;
+            }
+        }
+    }
+    chest.remove = function(){
+        if(this.backgroundSprite){
+            this.backgroundSprite.remove();
+            this.backgroundSprite=null;
+        }
+        if(this.foregroundSprite){
+            this.foregroundSprite.remove();
+            this.foregroundSprite=null;
+        }
+    }
+    return chest;
 }
 
 function newAdventurer(controller){
@@ -869,14 +960,16 @@ function newAdventurer(controller){
     adventurer.direction = SOUTH; //init facing the player
     adventurer.team = HEROIC;
     adventurer.keys = [];
+    adventurer.gold = 0; //in px/sec
     adventurer.speed = 150; //in px/sec
     adventurer.damage = 10;
     adventurer.health = 30;
     adventurer.maxHealth = 30;
     adventurer._attackDuration = 250;
+    adventurer._attackCooldown = 750;
     adventurer.whip = {
         thickness: 5,
-        length: 150
+        length: 200
     }
 
 
@@ -916,9 +1009,6 @@ function newAdventurer(controller){
         this.sprite.location.x = this.box.x-25;
         this.sprite.location.y = this.box.y-50;
         this.sprite.render(deltaT);
-        if(this.sprite.element){
-            this.sprite.element.toFront();
-        }
     };
     adventurer.remove = function(deltaT){
         if(this.sprite){
@@ -975,7 +1065,7 @@ function newAdventurer(controller){
         var distance = this.whip.length * 2;
         var collidingWith = null;
         game.currentRoom.objects.forEach((obj)=>{
-            if(obj!=this && obj.plane==PHYSICAL){
+            if(obj!=this && obj.plane==PHYSICAL && obj.team == getOpposingTeam(this.team)){
                 objDistance = this.box.distance(obj.box);
                 if(this.whip.box.collidesWith(obj.box) && objDistance < distance){
                     collidingWith = obj;
@@ -1067,7 +1157,8 @@ function newCaveSpider(controller){
     spider.health = 20;
     spider.maxHealth = 20;
     spider.damage = 5;
-    spider.attackduration = 500;
+    spider._attackDuration = 500;
+    spider._attackCooldown = 1500;
     spider.render = function(deltaT){
         if(!this.sprite){
             this.sprite = newSprite(game.screen, images.caveSpider, 800, 500, 100, 100, 0, 0);
@@ -1080,9 +1171,6 @@ function newCaveSpider(controller){
         this.sprite.location.y = this.box.y-40;
         this.sprite.setAnimation(this.direction, this.state);
         this.sprite.render(deltaT);
-        if(this.sprite.element){
-            this.sprite.element.toFront();
-        }
     };
     spider.attack = function(){
         if(this.state != ATTACKING){
@@ -1292,7 +1380,6 @@ function generateMap(level){
         exitRoom.objects.splice(exitRoom.objects.indexOf(e),1);
     })
     
-
     var singleDoorRooms = [];
     level.rooms.forEach((room)=>{
         if(room.doors.length == 1 && room.opened == 1){
@@ -1304,10 +1391,20 @@ function generateMap(level){
         index = Math.round((singleDoorRooms.length-1) * Math.random());
         keyRoom = singleDoorRooms[index]
     }
-    //console.log(index);
-    //console.log(singleDoorRooms);
-    keyRoom.palette.floorColor = "#C0C0C0";
-    keyRoom.key = SILVERKEY;
+    chest = newTreasureChest(SILVERKEY);
+    chest.box.x = keyRoom.box.center().x - chest.box.width/2;
+    chest.box.y = keyRoom.box.center().y - chest.box.height/2;
+    keyRoom.objects.push(chest);
+
+    singleDoorRooms.forEach((r)=>{
+        if(r!=keyRoom && r!=exitRoom){
+            chest = newTreasureChest(RANDOM);
+            chest.box.x = keyRoom.box.center().x - chest.box.width/2;
+            chest.box.y = keyRoom.box.center().y - chest.box.height/2;
+            r.objects.push(chest); 
+        }
+    });
+
 }
 
 function getRoom(x, y){
@@ -1323,13 +1420,20 @@ function generateRoom(x, y){
     room.palette.floorColor = game.level.palette.floorColor;
     room.palette.clipColor = game.level.palette.clipColor;
     room.palette.wallColor = game.level.palette.wallColor;
-    
+
+
     room.box.width = Math.round((((game.constants.roomMaxWidthInBricks - game.constants.roomMinWidthInBricks) * Math.random()) + game.constants.roomMinWidthInBricks)) * game.constants.brickWidth;
     room.box.height = Math.round((((game.constants.roomMaxHeightInBricks - game.constants.roomMinHeightInBricks) * Math.random()) + game.constants.roomMinHeightInBricks)) * game.constants.brickWidth;
-    
     //center by default
     room.box.x = Math.round((dimensions.width - room.box.width - room.wallHeight*2) / 2) + room.wallHeight;
     room.box.y = Math.round((dimensions.width - room.box.height - room.wallHeight*2) / 2) + room.wallHeight;
+    // if (x==0 && y==0){
+    //     room.box.x=105;
+    //     room.box.y=330;
+    //     room.box.width=700;
+    //     room.box.height=316.5;
+    // }
+    
 
     //force doors
     for(wall = 0; wall<4; wall++){
@@ -2123,6 +2227,11 @@ function renderInfo(){
         for(var i=0; i<5; i++){
             game.infoElements.keys.push(newSprite(game.screen, images.keyIcons, 32, 192, 32, 32, i * 36 + 8, -dimensions.infoHeight + 48))
         }
+        game.screen.circle(dimensions.width-20,64,10).attr({"fill":"#ffd700", "stroke":"#FFF", "stroke-width": 3});
+        text = game.screen.text(dimensions.width-40,64,"1,000,000")
+        text.attr({ "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"});
+        game.infoElements.goldElement = text
+        game.screen.onClear(()=>{game.infoElements=null});
     }
     game.infoElements.hearts.forEach((h, i)=>{
         if(((i + 1) * 10) > game.player.maxHealth){
@@ -2145,7 +2254,9 @@ function renderInfo(){
             k.setAnimation(0,NONE);
         }
         k.render(0);
-    })
+    });
+    
+    game.infoElements.goldElement.attr("text",numberWithCommas(game.player.gold));
 }
 
 //images
@@ -2170,6 +2281,12 @@ images = {
     ], 
     keyIcons: [
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAABgCAYAAAAU0fKgAAABjklEQVRYR+1YQQ6DMAwLz9kv+vT+Ys/ZBCWQNoY0BAmQ2JEuxnZSL9pAwc8QrKcXgF4P6PVgvEc3vws5599IM6W0yRQecGGbFQhIAchiLkDPGLwCsCij83MBRlohCawrZKJ03vLEnMQHAnjM2x2knhGGAG2h28T7Sfh9acqD4bOdXDAPuLD1BAEpAFnMBegZ7IJFGZ1XDMIAI62QBNYVMlE6b0ky8+CBAB7zdgepZ4S78sBt4v0kZCp5kHY2GbwfzIUqXAGQ3g9EMb+ZmSA29c+7QRlJOhdg2g8iEpb9IGJitR8cbWPLxD0H1wHIDkgvuiWEAdR+4O1CmEEYoJVAueQBJed+sBTqQFDXXwcKv1W+GT2bwWsAizI4PxmgBEIx7pCE9RatIPVMd5hYB8LBNrZM3HNwHYDsgGEe/nkPA+hAcHYhzCAMoANhnkjn/wdE5Y8H/dFAYMGQxVyAnhX4BoC/uEVZn58NMAWC0O+WsNyiiIlVIBxtY8vEPQfXAfRPIM4DxwhvAKhA8HbhAgl/oMsEcHnMNhUAAAAASUVORK5CYII="
+    ],
+    chest: [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAACACAYAAABqZmsaAAACX0lEQVR4Xu2bO07EMBCGNyUd0rZ0VFyAnvNwHs5DzwWo6GhXoqMMchRHtnfG83K0kfi3irTz+P2N10nG3ul048904/wnCAABEAABicA8aKFi8/QEzK8vZzb/2/ul+k5hS+biBMwP57vu4L8vv9X3SvurfJSA7shzVguBxqfK2QoQR56DWQk0flveKwG9WpbMPQSS/+pHClChj5SAKkVJQI0/BfKWoPBdclcCtPgLlFtVHL5+AW39swqtiHIeVAQsq978WVtPTxbvxTZGIAnISfN1mIAlAEXA4h8mQAEPC5DW8zLp//4Z7rUOpLjq5XiPe8EiQDsPvHNg9Tvm3fAYJTAvqD4HtgS+cAEv6bE8EFrnCgEgAAIgAAIgAAIgQLZouNdv3SMGb5Ve3Ya1aCJihvQHIgJWX/QHYgTQH/C+Hbfd0kP1CY/xcor+gLHVZu4V9+4FyxwYsMRqQqA/sFHCExEIgAAIgAAIgAAIgAAIgAAIgAAIgICXANfIMMczO6wv9jNzmM0cj3LYu01T5SQFaBtVmmZQadM2qLYzfU2g5TDT6F0TardEFPD8eL9o+/j6OeVr7ahLn3RtEbC1bBOFUoQ2ebIr/bjkHAFWgJaCdvQmAdpStOXq4e8JCJVBi98lQCqDBb9JgOWXkG0l/JKAqgyWX0C27c3+bCOt3eoTlpxAavUrbUUBnpETPmyenoDw6LOQHgVOwND7gXUlHJpcmpA4P1DtnA6a8dowsd1z/L+A4qx9lmTPkGj3jVNy79nywtc/B1IQnB/wEhA3r7XzwDsH8P8CsQTadTRot90C/gBLxNqQAb9CEwAAAABJRU5ErkJggg=="
+    ],
+    treasure: [
+        "data:image/png;base64,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"
     ]
 }
 game = newGame();
