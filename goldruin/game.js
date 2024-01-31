@@ -1345,12 +1345,11 @@ function clearScreen(){
 
 }
 
-function newLevel(complexity){
+function newLevel(levelNumber){
     //TODO: Refactor
     level = {
-        number: 0,
-        doorCount: 0,
-        maxRooms: 10,
+        number: levelNumber,
+        world:0,
         rooms:[], 
         palette: {
             clipColor:"#642",
@@ -1413,9 +1412,18 @@ function newLevel(complexity){
             extents.push(wMost);
             return extents;
         },
-        _init: function(complexity){
-            maxRegion = BLUEKEY;
+        _init: function(){
             //complexity math
+            roomsPerRegion = 0 
+            if(this.number <= 23){
+                roomsPerRegion = (((this.number % 4) + 1) * 5) + 5;
+                maxRegion = Math.floor(this.number/4);
+            } else {
+                roomsPerRegion = (((this.number - 24) + 1) * 5) + 25;
+                maxRegion = BLUEKEY
+            }
+            this.world =  Math.floor(this.number/4) + 1;
+            hasBoss = (levelNumber % 4 == 3);
 
             //build map
             for(var region = NONE;region <= maxRegion; region++){
@@ -1455,7 +1463,6 @@ function newLevel(complexity){
                     entrance.opened = false;
                     entrance.lock = region;
                     entrance.region = region;
-                    entrance.mapped = 0;
                     
                     extent.doors.push(newDoor(this,extent,direction, 0));
                     entrance.doors.push(newDoor(this,entrance,(direction + 2) % 4, 0));
@@ -1464,7 +1471,7 @@ function newLevel(complexity){
                 entrance.region = region;
                 regionRooms.push(entrance); 
                 
-                while(regionRooms.length<level.maxRooms){
+                while(regionRooms.length < roomsPerRegion){
                     seedRoom = randomEntry(regionRooms);
                     seedDirection = Math.round(4 * Math.random()) % 4;
                     if(seedRoom.findDoor(seedDirection)==null){
@@ -1504,9 +1511,54 @@ function newLevel(complexity){
 
 
             }
+            
+            var exitRoom;
+            var maxKey;
+            if(this.number <= 19){
+                var extents = this.extents();
+                    
+                //pick a random direction
+                var direction = Math.round(4 * Math.random()) % 4;
+         
+
+                var extent = extents[direction];
+                switch(direction){
+                    case NORTH:
+                        exitRoom = this.getRoom(extent.x, extent.y - 1);
+                        break;
+                    case EAST:
+                        exitRoom = this.getRoom(extent.x + 1, extent.y);
+                        break;
+                    case SOUTH:
+                        exitRoom = this.getRoom(extent.x, extent.y + 1);
+                        break;
+                    case WEST:
+                        exitRoom = this.getRoom(extent.x - 1, extent.y);
+                        break;
+                }
+                //regionRooms.push(entrance);
+
+                
+
+                //TODO: Lock entrance if not starting position.
+                exitRoom.opened = false;
+                maxKey = maxRegion + 1;
+                exitRoom.lock = maxKey;
+                exitRoom.region = maxKey;
+                extent.doors.push(newDoor(this,extent,direction, 0));
+                exitRoom.doors.push(newDoor(this,exitRoom,(direction + 2) % 4, 0));
+              
+            } else {
+                var extents = this.extents();   
+                exitRoom = randomEntry(filter(extents,(r)=>{return r.doors.length==1 && r.region == maxRegion}))
+                maxKey = maxRegion;
+            }
+
+            exitRoom.exit = 1;
 
             //jitter rooms
             for(var i=0;i<level.rooms.length;i++){
+                
                 room = level.rooms[i];
                 room.jittered = true;
                 if(i == 0){
@@ -1622,13 +1674,16 @@ function newLevel(complexity){
             this.rooms.forEach((r)=>{r.doors.forEach((d)=>d.stabilize())});
             //set exit
 
-            var exitRoom = randomEntry(filter(this.rooms,(r)=>{return r.doors.length==1 && r.region == maxRegion}))
-            exitRoom.exit = 1;
+
             //pepper with keys
-            for(var key = BLUEKEY; key>NONE; key--){
-                var keyroom = randomEntry(filter(this.rooms,(r)=>{return r.region < key}))
+            for(var key = maxKey; key>NONE; key--){
+                var keyroom = randomEntry(filter(this.rooms,(r)=>{return r.region < key && r.doors.length == 1 && !r.exit}));
+                if (keyroom == null){
+                    keyroom = randomEntry(filter(this.rooms,(r)=>{return r.region < key && !r.exit}));    
+                }
                 var chest = newTreasureChest(key);
                 keyroom.spawn(chest);
+                keyroom.keyroom = true;
             }
             
             //this.rooms[0].spawn(newTreasureChest(SWORD))
@@ -1639,15 +1694,19 @@ function newLevel(complexity){
             thresholds = Math.round((maxArea-minArea) / 4);
             
             this.rooms.forEach((r,i)=>{
-                if(i!=0){
+                if(i!=0 && !r.exit){
                     roomArea = r.box.width * r.box.height;
-                    numberOfObjects = Math.round((roomArea-minArea) / thresholds)
-
-                    for(i=0; i<Math.round(numberOfObjects * Math.random()); i++){
+                    maxNumberOfObjects = Math.round((roomArea-minArea) / thresholds)
+                    minNumberOfObjects = Math.round(Math.round((roomArea-minArea) / thresholds)/2)
+                    enemies = constrain(minNumberOfObjects, Math.round(maxNumberOfObjects * Math.random()), maxNumberOfObjects)
+                    for(i=0; i<enemies; i++){
                         r.spawn(newCaveSpider(newRandomController()));
                     }
-                    
-                    for(i=0; i<Math.round(numberOfObjects * Math.random()); i++){
+                    chests = constrain(minNumberOfObjects, Math.round(maxNumberOfObjects * Math.random()), maxNumberOfObjects)
+                    for(i=0; i<chests; i++){
+                        r.spawn(newTreasureChest(RANDOM));
+                    }
+                    if(chests == 0 && r.doors.length == 1 && !r.keyroom){
                         r.spawn(newTreasureChest(RANDOM));
                     }
                 }
@@ -1656,7 +1715,7 @@ function newLevel(complexity){
         }
     };
 
-    level._init(complexity);
+    level._init();
     
 
     //generateMap(game.level);
@@ -2554,7 +2613,7 @@ portrait = window.matchMedia("(orientation: portrait)");
 portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 
-game.level =  newLevel(1),
+game.level =  newLevel(0),
 
 clearScreen();//init Screen
 game.currentRoom = game.level.getRoom(0,0);
