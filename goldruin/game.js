@@ -885,7 +885,6 @@ function newGameObject(){
             console.warn("unimpelmented: remove()");
             this.box.remove();
         }
-
     }
 }
 
@@ -942,10 +941,10 @@ function newTreasureChest(content){
 
         if(game.debug){
             this.box.render("#FF0")
-            this.tripFront.render("#0F0");
-            this.tripWest.render("#0F0");
-            this.tripEast.render("#0F0");
-            this.tripBack.render("#0F0");
+            if (this.tripFront) this.tripFront.render("#0F0");
+            if (this.tripWest) this.tripWest.render("#0F0");
+            if (this.tripEast) this.tripEast.render("#0F0");
+            if (this.tripBack) this.tripBack.render("#0F0");
        
         }
         
@@ -1023,6 +1022,90 @@ function newTreasureChest(content){
         }
     }
     return chest;
+}
+
+function newInvisibleObject(){
+    io = newGameObject();
+    io.render = function(deltaT){
+        if(game.debug){
+            this.box.render("#F0F");
+        }
+    }
+    io.remove = function(){}
+    io.move = function(){}
+    return io;
+}
+function newExit(){
+    exit = newGameObject();
+    exit.box.width = constants.doorWidth;
+    exit.box.height = constants.brickWidth * 4;
+    exit.plane = ETHEREAL;
+    exit.elements = [];
+    exit.invisibleObjects = [];
+    
+    exit.render = function(deltaT){
+        if (this.elements.length==0){
+            
+            exitHeight = constants.brickWidth * 3;
+
+            this.elements.push(game.screen.drawRect(this.box.x - constants.doorFrameThickness, this.box.y + dimensions.infoHeight,  (constants.doorWidth + constants.doorFrameThickness*2),  this.box.height, palette.doorFrame, "#000", constants.lineThickness));
+            this.elements.push(game.screen.drawRect(this.box.x, this.box.y + dimensions.infoHeight + constants.doorFrameThickness, this.box.width,  this.box.height - constants.doorFrameThickness, "#000", "#000", constants.lineThickness));
+            steps = 6;
+            
+            for(step = steps; step>0; step--){
+                stepWidth = constants.doorWidth - step * 4;
+                stepThickness = constants.brickHeight+2 - step
+                this.elements.push(game.screen.drawRect(this.box.center().x - stepWidth/2, dimensions.infoHeight + (this.box.y + this.box.height)-stepThickness*step,  stepWidth,  stepThickness, "#888", "#000", constants.lineThickness).attr({opacity:(steps-step)/steps}));
+            }
+            
+            game.screen.onClear(()=>{this.elements=[]});
+        }
+        if(game.debug){
+            this.box.render("#0FF")
+            //this.tripBox.render("#F80");
+        }
+    };
+
+    exit.move = function(deltaT){
+        if(exit.invisibleObjects.length==0){
+            
+            io = newInvisibleObject();
+            io.box.x = this.box.x - constants.doorFrameThickness;
+            io.box.y = this.box.y;
+            io.box.height = this.box.height;
+            io.box.width = constants.doorFrameThickness;
+            game.currentRoom.objects.push(io);
+            exit.invisibleObjects.push(io);
+
+            io = newInvisibleObject();
+            io.box.x = this.box.x + constants.doorWidth;
+            io.box.y = this.box.y;
+            io.box.height = this.box.height;
+            io.box.width = constants.doorFrameThickness;
+            game.currentRoom.objects.push(io);
+            exit.invisibleObjects.push(io);
+            
+            io = newInvisibleObject();
+            io.box.x = this.box.x;
+            io.box.y = this.box.y;
+            io.box.width = this.box.width;
+            io.box.height = constants.doorFrameThickness;
+            game.currentRoom.objects.push(io);
+            exit.invisibleObjects.push(io);
+        }
+        if (!this.tripBox){
+            this.tripBox = newBox(this.box.x, this.box.y + constants.doorFrameThickness * 2, this.box.width, this.box.height/2);
+        }
+        if(game.player.box.inside(this.tripBox)){
+            game.level = newLevel(game.level.number + 1);
+            game.currentRoom = game.level.rooms[0];
+            game.currentRoom.spawn(game.player);
+            game.player.keys = [];
+            clearScreen();
+            game.currentRoom.render();
+        }
+    };
+    return exit;
 }
 
 function newAdventurer(controller){
@@ -1310,6 +1393,8 @@ function newCaveSpider(controller){
     return spider;
 }
 
+
+
 function newGame() {
     return {
         //debug: true,        
@@ -1553,6 +1638,8 @@ function newLevel(levelNumber){
                 exitRoom = randomEntry(filter(extents,(r)=>{return r.doors.length==1 && r.region == maxRegion}))
                 maxKey = maxRegion;
             }
+            exitRoom.box.width = constants.roomMaxWidthInBricks * constants.brickWidth;
+            exitRoom.box.height = constants.roomMaxHeightInBricks * constants.brickWidth;
 
             exitRoom.exit = 1;
 
@@ -1670,10 +1757,14 @@ function newLevel(levelNumber){
                     }
                 }
             }
-            
+        
+
             this.rooms.forEach((r)=>{r.doors.forEach((d)=>d.stabilize())});
             //set exit
-
+            exit = newExit()
+            exit.box.x = exitRoom.box.width/2 - exit.box.width/2
+            exit.box.y = exitRoom.box.height/2 - exit.box.height/2
+            exitRoom.objects.push(exit);
 
             //pepper with keys
             for(var key = maxKey; key>NONE; key--){
@@ -1712,6 +1803,7 @@ function newLevel(levelNumber){
                 }
             })
             
+            this.rooms[0].palette.floorColor="#064";
         }
     };
 
@@ -1810,13 +1902,13 @@ function regionColor(region){
 }
 
 function drawMap(screen,level){
-    roomSize=10;
-    roomMargin=1;
-    extents = level.extents();
+    var roomSize=10;
+    var roomMargin=1;
+    var extents = level.extents();
     level.rooms.forEach((r)=>{
-        extentRoom = (extents.indexOf(r) > -1)
-        centerX = dimensions.width/2 + r.x * (roomSize + roomMargin * 2);
-        centerY = dimensions.width/2 + r.y * (roomSize + roomMargin * 2);
+        var extentRoom = (extents.indexOf(r) > -1)
+        var centerX = dimensions.width/2 + r.x * (roomSize + roomMargin * 2);
+        var centerY = dimensions.width/2 + r.y * (roomSize + roomMargin * 2);
         screen.drawRect(centerX-roomSize/2,centerY-roomSize/2, roomSize, roomSize, r.x==0 && r.y==0 ? "#00FF88" : regionColor(r.region), extentRoom ? "#fff": "#000",1);
         r.doors.forEach((d)=>{
             switch(d.wall){
@@ -1918,27 +2010,8 @@ function newRoom(x,y){
             //render doors
             this.doors.forEach((door)=>door.render());
 
-            centerX = this.box.x + this.box.width/2
-            centerY = this.box.y + this.box.height/2
-
-            //TODO: move exit to become an object?
-            if(this.exit){
-                //render exit
-
-                exitWidth = constants.doorWidth;
-                exitHeight = constants.brickWidth * 2;
-
-                game.screen.drawRect(centerX - (exitWidth + constants.doorFrameThickness*2)/2, centerY -  (exitHeight + constants.doorFrameThickness)/2,  (exitWidth + constants.doorFrameThickness*2),  (exitHeight + constants.doorFrameThickness), palette.doorFrame, "#000", constants.lineThickness);
-                game.screen.drawRect(centerX - exitWidth/2, (centerY - exitHeight/2)+constants.doorFrameThickness/2,  exitWidth,  exitHeight, "#000", "#000", constants.lineThickness);
-
-                steps = 6;
-                for(step = steps; step>0; step--){
-                    stepWidth = exitWidth - step * 4;
-                    stepThickness = constants.brickHeight+2 - step
-                    game.screen.drawRect(centerX - stepWidth/2, (centerY + exitHeight/2)+constants.doorFrameThickness/2-stepThickness*step,  stepWidth,  stepThickness, "#888", "#000", constants.lineThickness).attr({opacity:(steps-step)/steps});
-                //break;
-                }
-            }
+            var centerX = this.box.x + this.box.width/2
+            var centerY = this.box.y + this.box.height/2
 
         },
         findDoor: function(wall){
@@ -1960,7 +2033,7 @@ function newRoom(x,y){
             
             //constrain against all other objects
             this.objects.forEach((gameObject2)=>{
-                if(gameObject!=gameObject2){
+                if(gameObject!=gameObject2 && gameObject2.plane == PHYSICAL){
                     if(constrained.collidesWith(gameObject2.box)){
                         //revert to original
                         constrained.resolveCollision(gameObject2.box);
@@ -2550,6 +2623,9 @@ function renderInfo(){
         text = game.screen.text(dimensions.width-40,64,"1,000,000")
         text.attr({ "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"});
         game.infoElements.goldElement = text
+        text = game.screen.text(dimensions.width/2,64,"Level 1-1")
+        text.attr({ "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "middle"});
+        game.infoElements.levelElement = text
         game.screen.onClear(()=>{game.infoElements=null});
     }
     game.infoElements.hearts.forEach((h, i)=>{
@@ -2576,6 +2652,7 @@ function renderInfo(){
     });
     
     game.infoElements.goldElement.attr("text",numberWithCommas(game.player.gold));
+    game.infoElements.levelElement.attr("text","Level " + game.level.world + "-" + ((game.level.number % 4) + 1));
 }
 
 //images
@@ -2617,8 +2694,7 @@ game.level =  newLevel(0),
 
 clearScreen();//init Screen
 game.currentRoom = game.level.getRoom(0,0);
-game.currentRoom.objects.push(game.player);
-
+game.currentRoom.spawn(game.player);
 //drawMap(game.screen,game.level);
 
 game.currentRoom.render();
