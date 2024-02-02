@@ -93,6 +93,18 @@ function directionToDegress(direction){
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+function msToTime(duration) {
+    var milliseconds = Math.floor((duration % 1000) / 100),
+      seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60),
+      hours = Math.floor((duration / (1000 * 60 * 60)));
+  
+    hours = hours > 0 ? ((hours < 10) ? "0" + hours + ":" : hours + ":") : "";
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+  
+    return hours + minutes + ":" + seconds + "." + milliseconds;
+  }
 
 function getOpposingTeam(team){
     switch(team){
@@ -263,6 +275,115 @@ function any(array, fun){
     return false;
 }
 
+function newStatistics(title){
+    return {
+        damageDealt: 0,
+        damageReceived: 0,
+        goldCollected: 0,
+        keysCollected:0,
+        keysSpawned: 0,
+        heartsCollected:0,
+        chestsSpawned:0,
+        chestsOpened:0,
+        enemiesKilled: 0,
+        enemiesSpawned:0,
+        caveSpidersSpawned: 0,
+        caveSpidersKilled: 0,
+        doorsUnlocked:0,
+        doorsSpawned:0,
+        roomsVisited:0,
+        roomsSpawned:0,
+        timeSpent:0,
+        add: function(s){
+            this.damageDealt += s.damageDealt;
+            this.damageReceived += s.damageReceived;
+            this.goldCollected += s.goldCollected;
+            this.keysCollected += s.keysCollected;
+            this.keysSpawned += s.keysSpawned;
+            this.heartsCollected += s.heartsCollected;
+            this.chestsSpawned += s.chestsSpawned;
+            this.chestsOpened += s.chestsOpened;
+            this.enemiesKilled += s.enemiesKilled;
+            this.enemiesSpawned += s.enemiesSpawned;
+            this.caveSpidersSpawned += s.caveSpidersSpawned;
+            this.caveSpidersKilled += s.caveSpidersKilled;
+            this.doorsUnlocked += s.doorsUnlocked;
+            this.doorsSpawned += s.doorspawned;
+            this.roomsVisited += s.roomsVisited;
+            this.roomsSpawned += s.roomsSpawned;
+            this.timeSpent += s.timeSpent;
+        },
+        finalizeLevelStats: function(){
+            this.roomsVisited = filter(game.level.rooms,(r)=>{return r.visited}).length
+            this.roomsSpawned = game.level.rooms.length
+        },
+        render:function(title, box){
+            this.finalizeLevelStats();
+            var y = box.y + 32;
+            var title = game.screen.text(box.center().x, y,title)
+            title.attr({ "font-size": "48px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "middle", "font-weight": "bold"});
+
+            var x1 = box.x + 25;
+            var x2 = box.x + box.width - 25;
+            var indent = 32;
+            attrHeaderLeft = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start"};
+            attrHeaderRight = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"};
+            
+            attrStatLeft = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start"};
+            attrStatRight = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"};
+            
+            y += 64;
+            var stat = game.screen.text(x1, y, "TIME SPENT:").attr(attrHeaderLeft);
+            stat = game.screen.text(x2, y,  msToTime(this.timeSpent)).attr(attrHeaderRight);
+            
+
+            y += 64;
+            stat = game.screen.text(x1, y, "ROOMS DISCOVERED:").attr(attrHeaderLeft);
+            stat = game.screen.text(x2, y,  numberWithCommas(this.roomsVisited) + " / " + numberWithCommas(this.roomsSpawned)).attr(attrHeaderRight);
+            
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"DOORS UNLOCKED:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.doorsUnlocked) + " / " + numberWithCommas(this.doorsSpawned)).attr(attrStatRight);
+
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"KEYS COLLECTED:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.keysCollected) + " / " + numberWithCommas(this.keysSpawned)).attr(attrStatRight);
+
+            y += 64;
+            stat = game.screen.text(x1, y,"CHESTS OPENED:").attr(attrHeaderLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.chestsOpened) + " / " + numberWithCommas(this.chestsSpawned)).attr(attrHeaderRight);
+            
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"GOLD COLLECTED:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.goldCollected)).attr(attrStatRight);
+
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"HEARTS COLLECTED:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.heartsCollected)).attr(attrStatRight);
+
+            y += 64;
+            stat = game.screen.text(x1, y,"ENEMIES KILLED:").attr(attrHeaderLeft)
+            stat = game.screen.text(x2, y, numberWithCommas(this.enemiesKilled) + " / " + numberWithCommas(this.enemiesSpawned)).attr(attrHeaderRight)
+
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"DAMAGE DEALT:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.damageDealt)).attr(attrStatRight);
+
+            y += 48;
+            stat = game.screen.text(x1 + indent, y,"DAMAGE RECEIVED:").attr(attrStatLeft);
+            stat = game.screen.text(x2, y, numberWithCommas(this.damageReceived)).attr(attrStatRight);
+
+            if(this.caveSpidersSpawned>0){       
+                y += 48;
+                stat = game.screen.text(x1 + indent, y,"SPIDERS SQUASHED:").attr(attrStatLeft);
+                stat = game.screen.text(x2, y, numberWithCommas(this.caveSpidersKilled) + " / " + numberWithCommas(this.caveSpidersSpawned)).attr(attrStatRight);
+            }
+
+ 
+        }
+
+    }    
+}
 
 function newScreen(domElementId){
     var screen = Raphael(domElementId, dimensions.width, dimensions.height);
@@ -843,6 +964,9 @@ function newGameObject(){
         hurt: function(damage, knockback){
             if(this.state!=HURT){
                 this.health -= damage;
+                if(this == game.player){
+                    game.level.statistics.damageReceived += damage;
+                }
                 if(this.health <= 0){
                     this.health = 0;
                     this.setState(DYING);
@@ -886,6 +1010,18 @@ function newGameObject(){
             this.box.remove();
         }
     }
+}
+
+function newInvisibleObject(){
+    io = newGameObject();
+    io.render = function(deltaT){
+        if(game.debug){
+            this.box.render("#F0F");
+        }
+    }
+    io.remove = function(){}
+    io.move = function(){}
+    return io;
 }
 
 function newStarburst(){
@@ -992,6 +1128,7 @@ function newTreasureChest(content){
            (game.player.box.inside(this.tripBack) && game.player.direction==SOUTH)
         )){
             this.opened = true;
+            game.level.statistics.chestsOpened++;
             if(this.content == RANDOM){
                 if ((game.player.health/game.player.maxHealth) < Math.random()){
                     this.content = HEART
@@ -1001,13 +1138,17 @@ function newTreasureChest(content){
             }
             if(this.content >= SILVERKEY && this.content <= BLUEKEY){
                 game.player.keys.push(this.content);
+                game.level.statistics.keysCollected++;
             } else if (this.content == HEART){
                 game.player.health=constrain(0, game.player.health + 10, game.player.maxHealth);
+                game.level.statistics.heartsCollected++;
             } else if (this.content == HEARTCONTAINER){
                 game.player.maxHealth += 10;
                 game.player.health = game.player.maxHealth;
             } else {
-                game.player.gold += (this.content - HEART ) * 100;
+                goldValue = (this.content - HEART ) * 100;
+                game.player.gold += goldValue;
+                game.level.statistics.goldCollected += goldValue;
             }
         }
     }
@@ -1024,17 +1165,6 @@ function newTreasureChest(content){
     return chest;
 }
 
-function newInvisibleObject(){
-    io = newGameObject();
-    io.render = function(deltaT){
-        if(game.debug){
-            this.box.render("#F0F");
-        }
-    }
-    io.remove = function(){}
-    io.move = function(){}
-    return io;
-}
 function newExit(){
     exit = newGameObject();
     exit.box.width = constants.doorWidth;
@@ -1097,14 +1227,12 @@ function newExit(){
             this.tripBox = newBox(this.box.x, this.box.y + constants.doorFrameThickness * 2, this.box.width, this.box.height/2);
         }
         if(game.player.box.inside(this.tripBox)){
-            game.level = newLevel(game.level.number + 1);
-            game.currentRoom = game.level.rooms[0];
-            game.currentRoom.spawn(game.player);
-            game.player.keys = [];
-            clearScreen();
-            game.currentRoom.render();
+            this.tripped();
         }
     };
+    exit.tripped= function(){
+       exitLevel();
+    }
     return exit;
 }
 
@@ -1246,6 +1374,7 @@ function newAdventurer(controller){
                 sb = newStarburst();
                 game.currentRoom.objects.push(sb);
                 collidingWith.hurt(this.damage, this.direction);
+                game.level.statistics.damageDealt += this.damage;
                 switch(this.direction){
                     case NORTH:
                         this.whip.box.reset (
@@ -1388,18 +1517,26 @@ function newCaveSpider(controller){
             this.box.remove();
         }
     };
+    spider._hurt = spider.hurt;
+    spider.hurt = function(damage, knockback){
+        startHealth=this.health;
+        this._hurt(damage,knockback);
+        if(startHealth>0 && this.health==0){
+            game.level.statistics.caveSpidersKilled++;
+            game.level.statistics.enemiesKilled++;
+        }
+    }
 
     
     return spider;
 }
-
-
 
 function newGame() {
     return {
         //debug: true,        
         screen: newScreen("main"),
         player: newAdventurer(newInputController()),
+        statistics: newStatistics()
     };
 }
 
@@ -1441,6 +1578,7 @@ function newLevel(levelNumber){
             wallColor: "#864",
             floorColor: "#048",    
         },
+        statistics: newStatistics(),
         findRoom: function(x,y){
             for(i=0;i<this.rooms.length;i++){
                 if(this.rooms[i].x==x && this.rooms[i].y==y){
@@ -1499,7 +1637,8 @@ function newLevel(levelNumber){
         },
         _init: function(){
             //complexity math
-            roomsPerRegion = 0 
+            var defaultOffset = constants.doorWidth + constants.brickWidth + constants.doorFrameThickness * 3;
+            var roomsPerRegion = 0 
             if(this.number <= 23){
                 roomsPerRegion = (((this.number % 4) + 1) * 5) + 5;
                 maxRegion = Math.floor(this.number/4);
@@ -1508,7 +1647,7 @@ function newLevel(levelNumber){
                 maxRegion = BLUEKEY
             }
             this.world =  Math.floor(this.number/4) + 1;
-            hasBoss = (levelNumber % 4 == 3);
+            var hasBoss = (levelNumber % 4 == 3);
 
             //build map
             for(var region = NONE;region <= maxRegion; region++){
@@ -1518,6 +1657,7 @@ function newLevel(levelNumber){
                 this.doorCount = 0;
                 if(this.rooms.length==0){
                     entrance = this.getRoom(0,0)//TODO: move to level
+             
                 } else {
                     extents = this.extents();
                     
@@ -1558,6 +1698,10 @@ function newLevel(levelNumber){
                 
                 while(regionRooms.length < roomsPerRegion){
                     seedRoom = randomEntry(regionRooms);
+                    if (seedRoom == regionRooms[0] && seedRoom.doors.length == 3)
+                    {
+                        continue;
+                    }
                     seedDirection = Math.round(4 * Math.random()) % 4;
                     if(seedRoom.findDoor(seedDirection)==null){
                         neighbor = this.findNeighbor(seedRoom,seedDirection);
@@ -1583,11 +1727,11 @@ function newLevel(levelNumber){
                             }
                             regionRooms.push(neighbor);
                         }else{
-                            if(neighbor.region!=region){
+                            if(neighbor.region!=region || neighbor == regionRooms[0]){
                                 continue
                             }
                         }
-                        
+    
                         neighbor.region = region;   
                         seedRoom.doors.push(newDoor(this,seedRoom,seedDirection, 0));
                         neighbor.doors.push(newDoor(this,neighbor,(seedDirection + 2) % 4, 0));
@@ -1605,7 +1749,6 @@ function newLevel(levelNumber){
                 //pick a random direction
                 var direction = Math.round(4 * Math.random()) % 4;
          
-
                 var extent = extents[direction];
                 switch(direction){
                     case NORTH:
@@ -1623,21 +1766,21 @@ function newLevel(levelNumber){
                 }
                 //regionRooms.push(entrance);
 
-                
-
-                //TODO: Lock entrance if not starting position.
+                //Lock entrance if not starting position.
                 exitRoom.opened = false;
                 maxKey = maxRegion + 1;
                 exitRoom.lock = maxKey;
                 exitRoom.region = maxKey;
                 extent.doors.push(newDoor(this,extent,direction, 0));
                 exitRoom.doors.push(newDoor(this,exitRoom,(direction + 2) % 4, 0));
+                this.statistics.doorsSpawned++;
               
             } else {
                 var extents = this.extents();   
                 exitRoom = randomEntry(filter(extents,(r)=>{return r.doors.length==1 && r.region == maxRegion}))
                 maxKey = maxRegion;
             }
+            //TODO: size reasonably, randomize
             exitRoom.box.width = constants.roomMaxWidthInBricks * constants.brickWidth;
             exitRoom.box.height = constants.roomMaxHeightInBricks * constants.brickWidth;
 
@@ -1772,13 +1915,17 @@ function newLevel(levelNumber){
                 if (keyroom == null){
                     keyroom = randomEntry(filter(this.rooms,(r)=>{return r.region < key && !r.exit}));    
                 }
+                if (keyroom.keyroom){//already a keyroom, try again
+                    key++;
+                    continue;
+                }
                 var chest = newTreasureChest(key);
                 keyroom.spawn(chest);
                 keyroom.keyroom = true;
+                level.statistics.keysSpawned++;
+                level.statistics.chestsSpawned++;
             }
             
-            //this.rooms[0].spawn(newTreasureChest(SWORD))
-        
             //pepper with random treasure chests & enemies
             minArea = constants.roomMinHeightInBricks * constants.roomMinWidthInBricks * constants.brickWidth * constants.brickWidth;
             maxArea = constants.roomMaxHeightInBricks * constants.roomMaxHeightInBricks * constants.brickWidth * constants.brickWidth ;
@@ -1792,26 +1939,117 @@ function newLevel(levelNumber){
                     enemies = constrain(minNumberOfObjects, Math.round(maxNumberOfObjects * Math.random()), maxNumberOfObjects)
                     for(i=0; i<enemies; i++){
                         r.spawn(newCaveSpider(newRandomController()));
+                        this.statistics.caveSpidersSpawned++;
+                        this.statistics.enemiesSpawned++;
                     }
                     chests = constrain(minNumberOfObjects, Math.round(maxNumberOfObjects * Math.random()), maxNumberOfObjects)
                     for(i=0; i<chests; i++){
-                        r.spawn(newTreasureChest(RANDOM));
+                        if (!r.keyroom){
+                            r.spawn(newTreasureChest(RANDOM));
+                            this.statistics.chestsSpawned++;
+                        }
                     }
                     if(chests == 0 && r.doors.length == 1 && !r.keyroom){
                         r.spawn(newTreasureChest(RANDOM));
+                        this.statistics.chestsSpawned++;
                     }
                 }
             })
             
-            this.rooms[0].palette.floorColor="#064";
+            var startingRoom = this.rooms[0];
+            startingRoom.palette.floorColor="#064";
+            
+
+
+            var direction = !any(startingRoom.doors,(d)=>{return d.wall==NORTH}) ? NORTH :
+                            !any(startingRoom.doors,(d)=>{return d.wall==EAST}) ? EAST :
+                            !any(startingRoom.doors,(d)=>{return d.wall==WEST}) ? WEST :
+                            SOUTH;
+
+
+            var entranceDoor = newDoor(level, startingRoom, direction, 0)
+            entranceDoor.atmosphere = levelNumber == 0 ? "90-#000:50-#FFe:95" : "#000";
+            entranceDoor.forceBars = true;
+            entranceDoor.isEntrance = true;
+            
+            entranceDoor.stabilize();
+            this.rooms[0].doors.push(entranceDoor)
         }
     };
 
     level._init();
     
-
     //generateMap(game.level);
     return level;
+}
+
+function exitLevel(){
+    var r = newRoom();
+    //r.wallHeight = 3 * constants.brickHeight
+    r.box.x = r.wallHeight;
+    r.palette.clipColor = "#000"
+    r.box.width = 3 * constants.brickWidth;
+    r.box.height = constants.roomMaxHeightInBricks * constants.brickWidth;
+    
+    r.box.y = Math.round((dimensions.width - room.box.height - room.wallHeight*2) / 2) + room.wallHeight;
+    var exit = new newExit()
+    exit.box.x = r.box.center().x - exit.box.width / 2 ;
+    exit.box.y = r.wallHeight + constants.doorFrameThickness * 2;
+    exit.tripped = function(){
+        warpTo(game.level.number + 1);
+    }
+    r.objects.push(exit);
+    var entrance = newDoor(level, room, SOUTH, 0);
+    entrance.forceBars = true;
+    r.doors.push(entrance);
+    game.player.box.x = r.box.center().x - game.player.box.width/2;
+    game.player.box.y = r.box.height;
+    
+    game.player.sprite._lastLocation.x =  game.player.box.x;
+    game.player.sprite._lastLocation.y = game.player.box.y;
+    game.player.direction = NORTH;
+    r.objects.push(game.player);
+    clearScreen();
+    r.render();
+    game.screen.drawRect(r.x)
+    game.currentRoom = r;
+    statsBox = newBox(r.box.x + r.box.width + r.wallHeight * 2, dimensions.infoHeight, dimensions.width - (r.box.x + r.box.width + r.wallHeight * 2), dimensions.width)
+    game.level.statistics.render("LEVEL COMPLETE!", statsBox);
+}
+
+function warpTo(levelNumber){
+    game.level = newLevel(levelNumber);
+    game.level.start = Date.now();
+    startingRoom = game.level.rooms[0];
+    startingRoom.visited = 1;
+    game.currentRoom = startingRoom;
+    entrance = filter(startingRoom.doors, (d)=>{return d.isEntrance})[0];
+    switch (entrance.wall){
+        case NORTH:
+            game.player.box.x = entrance.box.center().x - game.player.box.width/2;
+            game.player.box.y = entrance.box.y+entrance.box.height - game.player.box.height;
+            game.player.direction = SOUTH;
+            break;
+        case EAST:
+            game.player.box.x = entrance.box.center().x;
+            game.player.box.y = entrance.box.center().y - game.player.box.height/2;
+            game.player.direction = WEST;
+            break;
+        case SOUTH:
+            game.player.box.x = entrance.box.center().x - game.player.box.width/2;
+            game.player.box.y = entrance.box.y;
+            game.player.direction = NORTH;
+            break;
+        case WEST:
+            game.player.box.x = entrance.box.center().x;
+            game.player.box.y = entrance.box.center().y - game.player.box.height/2;
+            game.player.direction = EAST;
+            break;
+    }
+    game.currentRoom.objects.push(game.player);
+    game.player.keys = [];
+    clearScreen();
+    game.currentRoom.render();
 }
 
 function generateMap(level){
@@ -1901,7 +2139,9 @@ function regionColor(region){
     return "#864";
 }
 
-function drawMap(screen,level){
+function drawMap(){
+    var screen = game.screen;
+    var level = game.level;
     var roomSize=10;
     var roomMargin=1;
     var extents = level.extents();
@@ -2049,10 +2289,11 @@ function newRoom(x,y){
                 door = this.doors[d];
                 if(!door.opened && game.player.keys.indexOf(door.lock)>-1 && game.player.box.inside(door.box)){
                     door.opened = 1;
+                    game.level.statistics.doorsUnlocked++;
                     game.level.findNeighbor(this, door.wall).opened=1;
                     clearScreen();
                     this.render();
-                } else if(!door.opened) {
+                } else if(!door.opened || door.forceBars) {
                     return constrained;
                 }
                 switch(door.wall){  
@@ -2272,7 +2513,9 @@ function newDoor(level, room, wall, offset){
         room: room,
         wall: wall % 4,
         color: palette.doorDefaultColor,
+        atmosphere: "#000",
         offset: offset, 
+        forceBars: false,
         render: function(){
             //clear previous rendering
             if(this.elements && this.elements.length>0){
@@ -2313,15 +2556,18 @@ function newDoor(level, room, wall, offset){
             dy3 = y4 - constants.doorHeight;
             dx3 = trig.cotangent(trig.pointToAngle(y4,x4)) * dy3;
             
+            this.opened = 1;
             portalTo = level.findNeighbor(room, this.wall);
-            if(portalTo!=null){
+            if(portalTo){
                 this.opened = portalTo.opened;
                 if(!this.opened){
                     this.lock = portalTo.lock;
                     this.color = regionColor(portalTo.region);
                 }
             }
-            this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,"000",constants.lineThickness));
+            
+            this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,"#000",constants.lineThickness));
+            this.elements.push(game.screen.drawPoly(x1+10,y1,dx2+10,dy2,dx3-10,dy3,x4-10,y4,offset.x,offset.y,this.atmosphere,constants.lineThickness));
             //THRESHOLD
 
             x1 = this.offset - constants.doorWidth/2 ;
@@ -2380,7 +2626,7 @@ function newDoor(level, room, wall, offset){
                 
             }
         
-            if(this.room.barred){
+            if(this.room.barred || this.forceBars){
                 
                 bars = 5;
             
@@ -2389,6 +2635,8 @@ function newDoor(level, room, wall, offset){
                     y0 = -focus.x - constants.doorFrameThickness //-this.room.box.width/2;
                     y1 = y0-constants.doorHeight + constants.doorFrameThickness;
                     x1 = (trig.cotangent(trig.pointToAngle(y0,x0)) * y1);                    
+                    
+                    this.elements.push(game.screen.drawLine(x0, y0, x1, y1, "#000", constants.lineThickness*3));
                     this.elements.push(game.screen.drawLine(x0, y0, x1, y1, palette.doorBarColor, constants.lineThickness));
                  
                 }
@@ -2526,6 +2774,11 @@ function getEntranceLocation(room, wall){
 function gameLoop(lastTime){
     var startTime = Date.now();
     var deltaT = Math.round(startTime-lastTime);
+    if(deltaT>1000) deltaT == 1000;
+    if(game.level){
+        game.level.statistics.timeSpent+=deltaT;
+    }
+
     //console.log(deltaT);
     //Move objects and collected the dead ones.
     var deadObjects = [];
@@ -2574,8 +2827,8 @@ function gameLoop(lastTime){
 function openNextRoom(direction){
     if(game.currentRoom.findDoor(direction)){
         nextRoom = game.level.findNeighbor(game.currentRoom, direction);
-        
         if(nextRoom.opened){
+            nextRoom.visited = 1;
             nextRoom.objects.push(game.player);
             game.currentRoom.objects.splice(game.currentRoom.objects.indexOf(game.player),1);
             game.currentRoom = nextRoom;
@@ -2586,11 +2839,8 @@ function openNextRoom(direction){
             loc = getEntranceLocation(nextRoom,(direction + 2) % 4)
             game.player.box.x = loc.x;
             game.player.box.y = loc.y;
-        
             game.player.sprite._lastLocation.x = loc.x;
             game.player.sprite._lastLocation.y = loc.y;
-            
-        
         }
         clearScreen();
         game.currentRoom.render();
@@ -2689,13 +2939,8 @@ game = newGame();
 portrait = window.matchMedia("(orientation: portrait)");
 portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
-
-game.level =  newLevel(0),
-
-clearScreen();//init Screen
-game.currentRoom = game.level.getRoom(0,0);
-game.currentRoom.spawn(game.player);
+warpTo(0);
 //drawMap(game.screen,game.level);
-
-game.currentRoom.render();
 gameLoop(Date.now());
+
+//exitLevel();
