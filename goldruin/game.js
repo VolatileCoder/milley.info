@@ -1258,7 +1258,6 @@ function newExit(){
         }
         if(game.player.box.inside(this.tripBox)){
             this.tripped();
-            game.player.sprite.scale = 1;
         }
     };
     exit.tripped= function(){
@@ -2053,6 +2052,7 @@ function exitLevel(){
     
     game.player.sprite._lastLocation.x =  game.player.box.x;
     game.player.sprite._lastLocation.y = game.player.box.y;
+    game.player.sprite.scale = 1;
     game.player.direction = NORTH;
     r.objects.push(game.player);
     
@@ -2100,6 +2100,10 @@ function warpTo(levelNumber){
             break;
     }
     game.currentRoom.objects.push(game.player);
+    
+    if(game.player.sprite){
+        game.player.sprite.scale = 1;
+    }
     game.player.move(0);
     game.player.direction = direction;
     game.player.keys = [];
