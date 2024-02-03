@@ -1,3 +1,7 @@
+
+const PAUSED = 0;
+const RUNNING = 1;
+
 const NORTH = 0;
 const EAST = 1;
 const SOUTH = 2;
@@ -319,70 +323,88 @@ function newStatistics(title){
         },
         render:function(title, box){
             this.finalizeLevelStats();
-            var y = box.y + 32;
+            var y = box.y + dimensions.infoHeight + 64;
             var title = game.screen.text(box.center().x, y,title)
             title.attr({ "font-size": "48px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "middle", "font-weight": "bold"});
 
-            var x1 = box.x + 25;
-            var x2 = box.x + box.width - 25;
-            var indent = 32;
-            attrHeaderLeft = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start"};
-            attrHeaderRight = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"};
+            var x1 = box.x + 40;
+            var x2 = box.x + box.width - 40;
+            var indent = 40;
+            attrHeaderLeft = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start", opacity:0};
+            attrHeaderRight = { "font-size": "32px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end", opacity:0};
             
-            attrStatLeft = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start"};
-            attrStatRight = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end"};
+            attrStatLeft = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "start", opacity:0};
+            attrStatRight = { "font-size": "24px", "font-family": "monospace", "fill": "#FFF", "text-anchor": "end", opacity:0};
             
-            y += 64;
-            var stat = game.screen.text(x1, y, "TIME SPENT:").attr(attrHeaderLeft);
-            stat = game.screen.text(x2, y,  msToTime(this.timeSpent)).attr(attrHeaderRight);
-            
+            stats=[];
 
             y += 64;
-            stat = game.screen.text(x1, y, "ROOMS DISCOVERED:").attr(attrHeaderLeft);
-            stat = game.screen.text(x2, y,  numberWithCommas(this.roomsVisited) + " / " + numberWithCommas(this.roomsSpawned)).attr(attrHeaderRight);
+            stats.push(game.screen.text(x1, y, "TIME SPENT:").attr(attrHeaderLeft));
+            stats.push(game.screen.text(x2, y,  msToTime(this.timeSpent)).attr(attrHeaderRight));
             
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"DOORS UNLOCKED:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.doorsUnlocked) + " / " + numberWithCommas(this.doorsSpawned)).attr(attrStatRight);
-
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"KEYS COLLECTED:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.keysCollected) + " / " + numberWithCommas(this.keysSpawned)).attr(attrStatRight);
 
             y += 64;
-            stat = game.screen.text(x1, y,"CHESTS OPENED:").attr(attrHeaderLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.chestsOpened) + " / " + numberWithCommas(this.chestsSpawned)).attr(attrHeaderRight);
+            stats.push(game.screen.text(x1, y, "ROOMS DISCOVERED:").attr(attrHeaderLeft));
+            stats.push(game.screen.text(x2, y,  numberWithCommas(this.roomsVisited) + " / " + numberWithCommas(this.roomsSpawned)).attr(attrHeaderRight));
             
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"GOLD COLLECTED:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.goldCollected)).attr(attrStatRight);
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"DOORS UNLOCKED:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.doorsUnlocked) + " / " + numberWithCommas(this.doorsSpawned)).attr(attrStatRight));
 
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"HEARTS COLLECTED:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.heartsCollected)).attr(attrStatRight);
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"KEYS COLLECTED:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.keysCollected) + " / " + numberWithCommas(this.keysSpawned)).attr(attrStatRight));
 
             y += 64;
-            stat = game.screen.text(x1, y,"ENEMIES KILLED:").attr(attrHeaderLeft)
-            stat = game.screen.text(x2, y, numberWithCommas(this.enemiesKilled) + " / " + numberWithCommas(this.enemiesSpawned)).attr(attrHeaderRight)
+            stats.push(game.screen.text(x1, y,"CHESTS OPENED:").attr(attrHeaderLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.chestsOpened) + " / " + numberWithCommas(this.chestsSpawned)).attr(attrHeaderRight));
+            
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"GOLD COLLECTED:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.goldCollected)).attr(attrStatRight));
 
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"DAMAGE DEALT:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.damageDealt)).attr(attrStatRight);
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"HEARTS COLLECTED:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.heartsCollected)).attr(attrStatRight));
 
-            y += 48;
-            stat = game.screen.text(x1 + indent, y,"DAMAGE RECEIVED:").attr(attrStatLeft);
-            stat = game.screen.text(x2, y, numberWithCommas(this.damageReceived)).attr(attrStatRight);
+            y += 64;
+            stats.push(game.screen.text(x1, y,"ENEMIES KILLED:").attr(attrHeaderLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.enemiesKilled) + " / " + numberWithCommas(this.enemiesSpawned)).attr(attrHeaderRight));
+
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"DAMAGE DEALT:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.damageDealt)).attr(attrStatRight));
+
+            y += 40;
+            stats.push(game.screen.text(x1 + indent, y,"DAMAGE RECEIVED:").attr(attrStatLeft));
+            stats.push(game.screen.text(x2, y, numberWithCommas(this.damageReceived)).attr(attrStatRight));
 
             if(this.caveSpidersSpawned>0){       
-                y += 48;
-                stat = game.screen.text(x1 + indent, y,"SPIDERS SQUASHED:").attr(attrStatLeft);
-                stat = game.screen.text(x2, y, numberWithCommas(this.caveSpidersKilled) + " / " + numberWithCommas(this.caveSpidersSpawned)).attr(attrStatRight);
+                y += 40;
+                stats.push(game.screen.text(x1 + indent, y,"SPIDERS SQUASHED:").attr(attrStatLeft));
+                stats.push(game.screen.text(x2, y, numberWithCommas(this.caveSpidersKilled) + " / " + numberWithCommas(this.caveSpidersSpawned)).attr(attrStatRight));
             }
+
+            var ms = 0;
+            stats.forEach((s,i)=>{
+                if(i % 2 == 0){
+                    ms += 100;
+                }
+                setTimeout(()=>{s.animate({opacity:1},250)}, ms);
+            });
 
  
         }
 
     }    
+}
+
+function fadeTo(color, callback){
+    game.screen.drawRect(0,dimensions.infoHeight,dimensions.width, dimensions.width, color, color, 0).attr({opacity: 0}).animate({opacity:1}, 350, null, callback);
+}
+
+function fadeInFrom(color, callback){
+    game.screen.drawRect(0,dimensions.infoHeight,dimensions.width, dimensions.width, color, color, 0).attr({opacity: 1}).animate({opacity:0}, 350, null, callback);
 }
 
 function newScreen(domElementId){
@@ -769,6 +791,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             y: y, 
             r: 0
         },
+        scale: 1,
         animation: {
             index: 0,
             series: 0,
@@ -791,9 +814,12 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             }
         },
         _buildTranslation: function (x, y, r){
-            var tx = Math.round(x - this.animation.frame * this.size.width);
-            var ty = Math.round(y - this.animation.series *  this.size.height) + dimensions.infoHeight;
+            var tx = Math.round(x * (1/this.scale) - this.animation.frame * this.size.width);
+            var ty = Math.round(y * (1/this.scale) - this.animation.series *  this.size.height) + dimensions.infoHeight;
             var t = "t" + tx + "," + ty 
+            if(this.scale!=1){
+                t="s"+this.scale +","+this.scale+",0,0" + t;
+            }
             if(r == 0){
                 return t
             }
@@ -1203,7 +1229,7 @@ function newExit(){
             io.box.x = this.box.x - constants.doorFrameThickness;
             io.box.y = this.box.y;
             io.box.height = this.box.height;
-            io.box.width = constants.doorFrameThickness;
+            io.box.width = constants.doorFrameThickness*2;
             game.currentRoom.objects.push(io);
             exit.invisibleObjects.push(io);
 
@@ -1224,14 +1250,23 @@ function newExit(){
             exit.invisibleObjects.push(io);
         }
         if (!this.tripBox){
-            this.tripBox = newBox(this.box.x, this.box.y + constants.doorFrameThickness * 2, this.box.width, this.box.height/2);
+            this.tripBox = newBox(this.box.x, this.box.y + constants.doorFrameThickness * 3, this.box.width, this.box.height/2);
+        }
+        if(game.player.box.inside(this.box)){
+            game.player.sprite.scale= constrain(.85,Math.round(((game.player.box.y - this.box.y) * 100 / this.box.height))/100 +.25,1);
+
         }
         if(game.player.box.inside(this.tripBox)){
             this.tripped();
+            game.player.sprite.scale = 1;
         }
     };
     exit.tripped= function(){
-       exitLevel();
+       game.state = PAUSED;
+       setTimeout(()=>{
+        fadeTo("#000", exitLevel);
+       },50);
+       //exitLevel();
     }
     return exit;
 }
@@ -1292,8 +1327,8 @@ function newAdventurer(controller){
         }
         //render player sprite
         this.sprite.setAnimation(this.direction, this.state);
-        this.sprite.location.x = this.box.x-25;
-        this.sprite.location.y = this.box.y-50;
+        this.sprite.location.x = (this.box.x - 25) ;
+        this.sprite.location.y = (this.box.y - 50) ;
         this.sprite.render(deltaT);
     };
     adventurer.remove = function(deltaT){
@@ -1536,7 +1571,8 @@ function newGame() {
         //debug: true,        
         screen: newScreen("main"),
         player: newAdventurer(newInputController()),
-        statistics: newStatistics()
+        statistics: newStatistics(),
+        state: RUNNING
     };
 }
 
@@ -1996,7 +2032,17 @@ function exitLevel(){
     exit.box.x = r.box.center().x - exit.box.width / 2 ;
     exit.box.y = r.wallHeight + constants.doorFrameThickness * 2;
     exit.tripped = function(){
-        warpTo(game.level.number + 1);
+        game.state = PAUSED;
+        setTimeout(()=>{  
+            fadeTo("#000",()=>{
+                warpTo(game.level.number + 1);
+                game.currentRoom.objects.forEach((o)=>o.render(0));
+                fadeInFrom("#000",()=>{
+                    game.state = RUNNING;
+                })
+            });
+        },50);
+      
     }
     r.objects.push(exit);
     var entrance = newDoor(level, room, SOUTH, 0);
@@ -2009,12 +2055,18 @@ function exitLevel(){
     game.player.sprite._lastLocation.y = game.player.box.y;
     game.player.direction = NORTH;
     r.objects.push(game.player);
+    
     clearScreen();
     r.render();
     game.screen.drawRect(r.x)
     game.currentRoom = r;
-    statsBox = newBox(r.box.x + r.box.width + r.wallHeight * 2, dimensions.infoHeight, dimensions.width - (r.box.x + r.box.width + r.wallHeight * 2), dimensions.width)
-    game.level.statistics.render("LEVEL COMPLETE!", statsBox);
+    game.currentRoom.objects.forEach((o)=>o.render(0));
+    statsBox = newBox(r.box.x + r.box.width + r.wallHeight, 0, dimensions.width - (r.box.x + r.box.width + r.wallHeight), dimensions.width);
+    fadeInFrom("#000", ()=>{
+        
+        game.state = RUNNING;
+        game.level.statistics.render("LEVEL COMPLETE!", statsBox);
+    });
 }
 
 function warpTo(levelNumber){
@@ -2024,29 +2076,32 @@ function warpTo(levelNumber){
     startingRoom.visited = 1;
     game.currentRoom = startingRoom;
     entrance = filter(startingRoom.doors, (d)=>{return d.isEntrance})[0];
+    direction=NORTH;
     switch (entrance.wall){
         case NORTH:
             game.player.box.x = entrance.box.center().x - game.player.box.width/2;
             game.player.box.y = entrance.box.y+entrance.box.height - game.player.box.height;
-            game.player.direction = SOUTH;
+            direction = SOUTH;
             break;
         case EAST:
             game.player.box.x = entrance.box.center().x;
             game.player.box.y = entrance.box.center().y - game.player.box.height/2;
-            game.player.direction = WEST;
+            direction = WEST;
             break;
         case SOUTH:
             game.player.box.x = entrance.box.center().x - game.player.box.width/2;
             game.player.box.y = entrance.box.y;
-            game.player.direction = NORTH;
+            direction = NORTH;
             break;
         case WEST:
             game.player.box.x = entrance.box.center().x;
             game.player.box.y = entrance.box.center().y - game.player.box.height/2;
-            game.player.direction = EAST;
+            direction = EAST;
             break;
     }
     game.currentRoom.objects.push(game.player);
+    game.player.move(0);
+    game.player.direction = direction;
     game.player.keys = [];
     clearScreen();
     game.currentRoom.render();
@@ -2775,52 +2830,54 @@ function gameLoop(lastTime){
     var startTime = Date.now();
     var deltaT = Math.round(startTime-lastTime);
     if(deltaT>1000) deltaT == 1000;
-    if(game.level){
-        game.level.statistics.timeSpent+=deltaT;
+    if(game.state == RUNNING){
+            
+        if(game.level){
+            game.level.statistics.timeSpent+=deltaT;
+        }
+
+        //console.log(deltaT);
+        //Move objects and collected the dead ones.
+        var deadObjects = [];
+        game.currentRoom.objects.forEach((o)=>{
+            if(o.state != DYING || o.state != DEAD){
+                o.move(deltaT);
+            }
+            if(o.state == DEAD){
+                deadObjects.push(o);
+            }
+        });
+        
+        barred = 0;
+        game.currentRoom.objects.forEach((o)=>{
+            if(o.team == DUNGEON && o.state != DYING && o.state != DEAD){
+                barred = 1;
+            }
+        });
+        if(game.currentRoom.barred!=barred){
+            console.log({barred:barred})
+            game.currentRoom.barred = barred;
+            game.currentRoom.render();
+        }
+
+        //Sort List of objects in current room by their y values.
+        game.currentRoom.objects.sort((a,b)=>{return a.layer < b.layer ? -1 : a.layer > b.layer ? 1 : a.box.y < b.box.y ? -1 : a.box.y > b.box.y ? 1 : 0;})
+
+        //Render all objects in current room in order.  
+        game.currentRoom.objects.forEach((o)=>o.render(deltaT));
+        
+        //remove the dead objects.
+        deadObjects.forEach((o)=>{
+            game.currentRoom.objects.splice(game.currentRoom.objects.indexOf(o),1)
+            o.remove();
+        });
+
     }
-
-    //console.log(deltaT);
-    //Move objects and collected the dead ones.
-    var deadObjects = [];
-    game.currentRoom.objects.forEach((o)=>{
-        if(o.state != DYING || o.state != DEAD){
-            o.move(deltaT);
-        }
-        if(o.state == DEAD){
-            deadObjects.push(o);
-        }
-    });
-    
-    barred = 0;
-    game.currentRoom.objects.forEach((o)=>{
-        if(o.team == DUNGEON && o.state != DYING && o.state != DEAD){
-            barred = 1;
-        }
-    });
-    if(game.currentRoom.barred!=barred){
-        console.log({barred:barred})
-        game.currentRoom.barred = barred;
-        game.currentRoom.render();
-    }
-
-    //Sort List of objects in current room by their y values.
-    game.currentRoom.objects.sort((a,b)=>{return a.layer < b.layer ? -1 : a.layer > b.layer ? 1 : a.box.y < b.box.y ? -1 : a.box.y > b.box.y ? 1 : 0;})
-
-    //Render all objects in current room in order.  
-    game.currentRoom.objects.forEach((o)=>o.render(deltaT));
-    
-    //remove the dead objects.
-    deadObjects.forEach((o)=>{
-        game.currentRoom.objects.splice(game.currentRoom.objects.indexOf(o),1)
-        o.remove();
-    });
 
     //Render our controller
     game.player.controller.render();//TODO: find a better way to reference this. 
-
+    
     renderInfo();
-
-
     window.setTimeout(()=>gameLoop(startTime),0);
 }
 
@@ -2941,6 +2998,12 @@ portrait.addEventListener("change", onOrientationChange)
 onOrientationChange(window.matchMedia("(orientation: portrait)"));
 warpTo(0);
 //drawMap(game.screen,game.level);
+/*
+exit = newExit()
+exit.box.x = 500
+exit.box.y=250
+game.level.rooms[0].objects.push(exit)
+*/
 gameLoop(Date.now());
 
 //exitLevel();
