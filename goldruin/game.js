@@ -108,7 +108,7 @@ function msToTime(duration) {
     seconds = (seconds < 10) ? "0" + seconds : seconds;
   
     return hours + minutes + ":" + seconds + "." + milliseconds;
-  }
+}
 
 function getOpposingTeam(team){
     switch(team){
@@ -759,6 +759,39 @@ function newRandomController(){
             }
         });
 
+        forObject.getObjectsInView().forEach((o)=>{
+            if(o.team == opposingTeam){
+                diffX = Math.abs(forObject.box.center().x - o.box.center().x);
+                diffY = Math.abs(forObject.box.center().y - o.box.center().y);
+                if(Math.abs(diffY-diffX)>25){
+                        
+                    if(diffY > diffX){     
+                        this.left = 0;
+                        this.right = 0;
+                        if(forObject.box.center().y>o.box.center().y){
+                            this.up = 1;
+                            this.down = 0;
+                        }else{
+                            this.up = 0;
+                            this.down = 1;
+                        }
+                    }else{
+                        this.up = 0;
+                        this.down = 0;
+                        if(forObject.box.center().x>o.box.center().x){
+                            this.left = 1;
+                            this.right = 0;
+                        }else{
+                            this.left = 0;
+                            this.right = 1;
+                        }
+                        
+                    }
+                    
+                }
+            }
+        });
+
         return {
             x: this.left * -1 + this.right,
             y: this.up * -1  + this.down,
@@ -1022,6 +1055,9 @@ function newGameObject(){
         },
         attack: function(){
             console.warn("unimplemented: attack()");
+        },
+        getObjectsInView: function(){
+            return [];
         },
         getObjectsInRangeOfAttack: function(){
             console.warn("unimpelmented: getObjectsInRangeOfAttack()");
@@ -1289,7 +1325,7 @@ function newAdventurer(controller){
     adventurer._attackCooldown = 750;
     adventurer.whip = {
         thickness: 5,
-        length: 200
+        length: 175
     }
 
 
@@ -1470,6 +1506,7 @@ function newCaveSpider(controller){
     var spider = newGameObject();
     spider.box.x = Math.round(dimensions.width / 2)-100;
     spider.box.y = Math.round(dimensions.width / 2)-100;
+    spider.box.height = 75;
     spider.box.width = 75;
     spider.team = DUNGEON;
     spider.direction = EAST;
@@ -1480,6 +1517,29 @@ function newCaveSpider(controller){
     spider.damage = 5;
     spider._attackDuration = 500;
     spider._attackCooldown = 1500;
+    spider._move = spider.move;
+    spider.move= function (deltaT){
+        this._move(deltaT);
+        switch(this.direction){
+            case NORTH:
+                this.box.width = 75;
+                this.box.height = 50;
+                break;
+            case WEST:
+                this.box.width = 75;
+                this.box.height = 50;
+                break;
+            case SOUTH:
+                this.box.width = 75;
+                this.box.height = 60;
+                break;
+            case EAST:
+                this.box.width = 75;
+                this.box.height = 50;
+                break;
+                        
+        }
+    };
     spider.render = function(deltaT){
         if(!this.sprite){
             this.sprite = newSprite(game.screen, images.caveSpider, 800, 500, 100, 100, 0, 0);
@@ -1489,7 +1549,7 @@ function newCaveSpider(controller){
         } 
         
         this.sprite.location.x = this.box.x-15;
-        this.sprite.location.y = this.box.y-40;
+        this.sprite.location.y = this.box.y-(this.direction== SOUTH ? 20 : 40);
         this.sprite.setAnimation(this.direction, this.state);
         this.sprite.render(deltaT);
     };
@@ -1508,6 +1568,50 @@ function newCaveSpider(controller){
             }
         });
     };
+    spider.getObjectsInView=function(){
+        //initialize the view box
+        if(!this._viewBox){
+            this._viewBox = newBox(0,0,50,50);
+        }
+        //reposition the view box
+        switch(this.direction){
+            case NORTH:
+                this._viewBox.height = 500;
+                this._viewBox.width = 200;
+                this._viewBox.x = this.box.center().x - this._viewBox.width/2;
+                this._viewBox.y = this.box.y + this.box.height - this._viewBox.height
+                break;
+            case EAST:    
+                this._viewBox.width = 500;
+                this._viewBox.height = 200;
+                this._viewBox.x = this.box.x;
+                this._viewBox.y = this.box.center().y - this._viewBox.height/2
+                break;
+            case SOUTH:
+                this._viewBox.height = 500;
+                this._viewBox.width = 200;
+                this._viewBox.x = this.box.center().x - this._viewBox.width/2;
+                this._viewBox.y = this.box.y 
+                break;
+            case WEST:
+                this._viewBox.width = 500;
+                this._viewBox.height = 200;
+                this._viewBox.x = this.box.x + this.box.width - this._viewBox.width;
+                this._viewBox.y = this.box.center().y - this._viewBox.height/2
+                break;
+        }
+        if (game.debug){
+            this._viewBox.render("#FF0");
+        }
+        inView = [];
+        game.currentRoom.objects.forEach((o)=>{
+            if(o.box.collidesWith(this._viewBox)){
+                inView.push(o);
+            }
+        })
+
+        return inView;
+    }
     spider.getObjectsInRangeOfAttack = function(){
         //initialize the attack box
         if(!this._attackBox){
@@ -1600,7 +1704,7 @@ function clearScreen(){
 
     var gameElement = game.screen.rect(0, 0, dimensions.width, dimensions.height).attr({"fill":"#080808"});
 
-}
+}   
 
 function newLevel(levelNumber){
     //TODO: Refactor
