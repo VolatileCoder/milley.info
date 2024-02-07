@@ -1725,9 +1725,11 @@ function newCaveSpider(controller){
             this.sprite.remove();
         }
         if(spider.bitePlayer){
+            spider.bitePlayer.stop();
             spider.bitePlayer.dispose();
         }
         if(spider.walkPlayer){
+            spider.walkPlayer.stop();
             spider.walkPlayer.dispose();
         } 
         if(game.debug){
@@ -2330,6 +2332,7 @@ function startGame(){
     game.player.maxHealth = 30;
     game.player.health = game.player.maxHealth;
     game.player.state = IDLE;
+    game.player.gold = 0;
     warpTo(0);
     game.currentRoom.render(0);
     game.player.render(0);
@@ -2343,6 +2346,7 @@ function gameOver(){
     game.state = PAUSED;
     setTimeout(()=>{
         fadeTo(SCREENBLACK,()=>{
+            game.currentRoom.objects.forEach((o)=>{o.remove();});
             game.player.sprite.location.x = 250;
             game.player.sprite.location.y = -16;
             game.player.sprite._lastLocation.x = game.player.sprite.location.x;
@@ -2364,7 +2368,7 @@ function waitForAttack(callback){
     }
     setTimeout(()=>{waitForAttack(callback)},50);
 }
-
+/*
 function generateMap(level){
     //generate the first room.
     var entrance = getRoom(0,0);
@@ -2435,7 +2439,7 @@ function generateMap(level){
     });
 
 }
-
+*/
 function regionColor(region){
     switch (region){
         case SILVERKEY:
@@ -2483,6 +2487,26 @@ function drawMap(){
     });
 }
 
+tiles=[];
+for(var i=0; i<100; i++){
+    switch(Math.round(Math.random()*7)%7){
+        case 0:
+            tiles.push("#444444");
+        case 1:
+            tiles.push("#484848");
+        case 2:
+            tiles.push("#404040");
+        case 3:
+            tiles.push("#4A4A4A");
+        case 4:
+            tiles.push("#484444");
+        case 5:
+            tiles.push("#444448");
+        case 6:
+            tiles.push("#444844");
+    }
+}
+
 function newRoom(x,y){
     room =  { 
         x:x, //map address
@@ -2500,7 +2524,8 @@ function newRoom(x,y){
             wallColor: "#864",
             floorColor: "#048",    
         },
-        render: function(){    
+        tileSeed: Math.floor(Math.random()*100),
+        render: function(){
             //render clip area
             game.screen.rect(
                 0, 
@@ -2556,6 +2581,17 @@ function newRoom(x,y){
                 fill: this.palette.floorColor,
                 "stroke-width": constants.lineThickness
             })
+            var t = this.tileSeed;
+            var tileWidth = (constants.brickWidth);
+            for(var r=0; r<this.box.height;r+=tileWidth){
+                for(var c=0; c<this.box.width;c+=tileWidth){
+
+                    var x = c + this.box.x;
+                    var y = r + this.box.y + dimensions.infoHeight;
+                    game.screen.drawRect(x, y, c + tileWidth > this.box.width ? c + tileWidth - this.box.width : tileWidth , r + tileWidth > this.box.height ? tileWidth + r - this.box.height : tileWidth , tiles[t],"#000",1.5).attr({opacity:.25});
+                    t = (t+1) % tiles.length;
+                }   
+            }
 
             //render each wall
             renderBricks(this)
@@ -2603,6 +2639,7 @@ function newRoom(x,y){
                 if(!door.opened && game.player.keys.indexOf(door.lock)>-1 && game.player.box.inside(door.box)){
                     door.opened = 1;
                     game.level.statistics.doorsUnlocked++;
+                    sfx.roomOpened();
                     game.level.findNeighbor(this, door.wall).opened=1;
                     clearScreen();
                     this.render();
@@ -2616,7 +2653,7 @@ function newRoom(x,y){
                             constrained.y = y2;
                             if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
-                                return null;
+                                return newBox(game.player.box.x+1, game.player.box.y+1,game.player.box.width, game.player.box.height);
                             }
                         }
                         break;
@@ -2628,7 +2665,7 @@ function newRoom(x,y){
                             constrained.x = x2;
                             if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
-                                return null;
+                                return newBox(game.player.box.x+1, game.player.box.y+1,game.player.box.width, game.player.box.height);
                             }
                         }
                         break;
@@ -2638,7 +2675,7 @@ function newRoom(x,y){
                             constrained.y = y2;
                             if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
-                                return null;
+                                return newBox(game.player.box.x+1, game.player.box.y+1,game.player.box.width, game.player.box.height);
                             }
                         }
                         break
@@ -2648,7 +2685,7 @@ function newRoom(x,y){
                             constrained.x = x2;
                             if (game.player.box.collidesWith(door.trip)){
                                 openNextRoom(door.wall);
-                                return null;
+                                return newBox(game.player.box.x+1, game.player.box.y+1,game.player.box.width, game.player.box.height);
                             }
                         }
                         break;
@@ -3113,7 +3150,11 @@ function gameLoop(lastTime){
             }
         });
         if(game.currentRoom.barred!=barred){
-            console.log({barred:barred})
+            if(barred){
+                sfx.roomBarred()
+            }else{
+                sfx.roomOpened()    
+            }
             game.currentRoom.barred = barred;
             game.currentRoom.render();
         }
@@ -3153,10 +3194,6 @@ function openNextRoom(direction){
             nextRoom.objects.push(game.player);
             game.currentRoom.objects.splice(game.currentRoom.objects.indexOf(game.player),1);
             game.currentRoom = nextRoom;
-            if(game.currentRoom.key){
-                game.player.keys.push(game.currentRoom.key);
-                game.currentRoom.key = NONE;
-            }
             loc = getEntranceLocation(nextRoom,(direction + 2) % 4)
             game.player.box.x = loc.x;
             game.player.box.y = loc.y;
@@ -3321,6 +3358,7 @@ sfx = {
             spider.walkPlayer = new Tone.Player("mp3/spiderwalk.mp3").toDestination();
             // play as soon as the buffer is loaded
             spider.walkPlayer.loop = true;
+            spider.walkPlayer.volume.value = -15;
             spider.walkPlayer.autostart = true;    
         }
     },
@@ -3332,6 +3370,22 @@ sfx = {
             // play as soon as the buffer is loaded
             this.spiderDeathPlayer.autostart = true;    
         }
+    },
+    roomBarred: function(){
+        if(this.roomPlayer){
+            this.roomPlayer.stop();
+            this.roomPlayer.dispose();
+        } 
+        this.roomPlayer = new Tone.Player("mp3/roombarred.mp3").toDestination();
+        this.roomPlayer.autostart = true;    
+    },
+    roomOpened:function(){
+        if(this.roomPlayer){
+            this.roomPlayer.stop();
+            this.roomPlayer.dispose();
+        } 
+        this.roomPlayer = new Tone.Player("mp3/roomopen.mp3").toDestination();
+        this.roomPlayer.autostart = true;    
     }
 }
 
@@ -3359,6 +3413,8 @@ music = {
                 this.player.volume.value-=7;
                 setTimeout(()=>{music.fadeOut(callback)}, 75);
             }else {
+                
+                this.player.stop();
                 if(callback){
                     callback();
                 }
@@ -3376,7 +3432,7 @@ music = {
     },
     exitLevel: function(){
         this.fadeOut(()=>{
-            this.play("mp3/exitLevel.mp3", false)
+            this.play("mp3/exitLevel.mp3", true)
         })
     },
     death: function(){
