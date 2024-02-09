@@ -230,6 +230,58 @@ function constrain (min, val, max){
     return val;
 }
 
+function right(str,chr)
+{
+    return str.substr(str.length-chr,str.length)
+}
+
+function hexToRGB(hexColor){
+    if(hexColor.length==6 || hexColor.length == 3){
+        hexColor = "#" + hexColor
+    }
+    red="00";
+    green = "00";
+    blue = "00"
+    if(hexColor.length == 4){
+        red = hexColor.substring(1,2);
+        red += red;
+        green = hexColor.substring(2,3);
+        green += green;
+        blue = hexColor.substring(3,4);
+        blue += blue;
+    }
+    if(hexColor.length == 7){
+        red = hexColor.substring(1,3);
+        green = hexColor.substring(3,5);
+        blue = hexColor.substring(5,7);
+    }
+
+    return {
+        r: parseInt(red,16),
+        g: parseInt(green,16),
+        b: parseInt(blue,16)
+    }
+}
+
+function rgbToHex(rgb){
+    hex="#"
+    hex += right("0" + rgb.r.toString(16),2);
+    hex += right("0" + rgb.g.toString(16),2);
+    hex += right("0" + rgb.b.toString(16),2);
+    return hex;
+}
+
+function calculateAlpha(backgroundHex, foregroundHex, foregroundOpacity){
+    //alpha * new + (1 - alpha) * old
+    backgroundRGB = hexToRGB(backgroundHex);
+    foregroundRGB = hexToRGB(foregroundHex);
+    return rgbToHex({
+        r: Math.round(foregroundRGB.r * foregroundOpacity + (1-foregroundOpacity) * backgroundRGB.r),
+        g: Math.round(foregroundRGB.g * foregroundOpacity + (1-foregroundOpacity) * backgroundRGB.g),
+        b: Math.round(foregroundRGB.b * foregroundOpacity + (1-foregroundOpacity) * backgroundRGB.b)
+    });
+}
+
 const trig = {
     degreesToRadians: function (angle){
         return (angle % 360) / 360 * 2 * Math.PI
@@ -929,6 +981,9 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
     
             var rect = this._buildClipRect(); 
 
+            if(rect.indexOf("N")!=-1||rect.indexOf("-")!=-1){
+                console.warn("Clip Rect Not Valid:" + rect);
+            }
             frameChanged = (this._lastAnimation.frame != this.animation.frame || this._lastAnimation.index != this.animation.index || this._lastAnimation.series != this.animation.series)
             positionChanged = (this.location.x!=this._lastLocation.x || this.location.y != this._lastLocation.y || this.location.r != this._lastLocation.r);
 
@@ -936,6 +991,10 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
                 
                 this.ready = 0;
                 this.element.attr({opacity:this.opacity}).animate({transform:trans0, "clip-rect": rect},0, 'linear',()=>{
+                    
+                    if(rect.indexOf("N")!=-1||rect.indexOf("-")!=-1){
+                        throw "temp"
+                    }
                     if (this.element){        
                         this.element.animate({transform:trans1, "clip-rect": rect}, deltaT, 'linear',()=>{
                             this.ready = 1
@@ -2491,19 +2550,19 @@ tiles=[];
 for(var i=0; i<100; i++){
     switch(Math.round(Math.random()*7)%7){
         case 0:
-            tiles.push("#444444");
+            tiles.push("#555555");
         case 1:
-            tiles.push("#484848");
+            tiles.push("#575757");
         case 2:
-            tiles.push("#404040");
+            tiles.push("#646464");
         case 3:
-            tiles.push("#4A4A4A");
+            tiles.push("#555555");
         case 4:
-            tiles.push("#484444");
+            tiles.push("#575454");
         case 5:
-            tiles.push("#444448");
+            tiles.push("#545457");
         case 6:
-            tiles.push("#444844");
+            tiles.push("#545754");
     }
 }
 
@@ -2582,13 +2641,21 @@ function newRoom(x,y){
                 "stroke-width": constants.lineThickness
             })
             var t = this.tileSeed;
-            var tileWidth = (constants.brickWidth);
+            var tileWidth = (constants.brickWidth*.66);
             for(var r=0; r<this.box.height;r+=tileWidth){
                 for(var c=0; c<this.box.width;c+=tileWidth){
 
                     var x = c + this.box.x;
                     var y = r + this.box.y + dimensions.infoHeight;
-                    game.screen.drawRect(x, y, c + tileWidth > this.box.width ? c + tileWidth - this.box.width : tileWidth , r + tileWidth > this.box.height ? tileWidth + r - this.box.height : tileWidth , tiles[t],"#000",1.5).attr({opacity:.25});
+                    var w = tileWidth;
+                    var h = tileWidth;
+                    if(c+w>this.box.width){
+                        w = this.box.width - c;
+                    }
+                    if(r+h>this.box.height){
+                        h = this.box.height - r;
+                    }
+                    game.screen.drawRect(x, y, w, h , calculateAlpha(this.palette.floorColor,tiles[t],.25),"#000",1.5)//.attr({opacity:.25});
                     t = (t+1) % tiles.length;
                 }   
             }
@@ -2640,9 +2707,9 @@ function newRoom(x,y){
                     door.opened = 1;
                     game.level.statistics.doorsUnlocked++;
                     sfx.roomOpened();
+                    door.render();
                     game.level.findNeighbor(this, door.wall).opened=1;
-                    clearScreen();
-                    this.render();
+                    
                 } else if(!door.opened || door.forceBars) {
                     return constrained;
                 }
@@ -2918,12 +2985,12 @@ function newDoor(level, room, wall, offset){
             
             this.elements.push(game.screen.drawPoly(x1,y1,dx2,dy2,dx3,dy3,x4,y4,offset.x,offset.y,"#000",constants.lineThickness));
             this.elements.push(game.screen.drawPoly(x1+10,y1,dx2+10,dy2,dx3-10,dy3,x4-10,y4,offset.x,offset.y,this.atmosphere,constants.lineThickness));
-            //THRESHOLD
 
+            //THRESHOLD
             x1 = this.offset - constants.doorWidth/2 ;
-            y1 = -focus.x + constants.lineThickness;
+            y1 = -focus.x + constants.lineThickness - 3;
             x4 = this.offset + constants.doorWidth/2;
-            y4 = -focus.x + constants.lineThickness;
+            y4 = -focus.x + constants.lineThickness - 3;
             y2 = y1 - constants.thresholdDepth;
             if (x1 > 0){
                 x2 = trig.cotangent(trig.pointToAngle(y1,x1)) * y2;        
@@ -3156,7 +3223,8 @@ function gameLoop(lastTime){
                 sfx.roomOpened()    
             }
             game.currentRoom.barred = barred;
-            game.currentRoom.render();
+
+            game.currentRoom.doors.forEach((d)=>{d.render();});
         }
 
         //Sort List of objects in current room by their y values.
