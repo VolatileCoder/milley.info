@@ -2705,10 +2705,10 @@ function newRoom(x,y){
                 door = this.doors[d];
                 if(!door.opened && game.player.keys.indexOf(door.lock)>-1 && game.player.box.inside(door.box)){
                     door.opened = 1;
+                    game.level.findNeighbor(this, door.wall).opened=1;
                     game.level.statistics.doorsUnlocked++;
                     sfx.roomOpened();
                     door.render();
-                    game.level.findNeighbor(this, door.wall).opened=1;
                     
                 } else if(!door.opened || door.forceBars) {
                     return constrained;
