@@ -2237,7 +2237,7 @@ function newLevel(levelNumber){
             })
             
             var startingRoom = this.rooms[0];
-            startingRoom.palette.floorColor="#064";
+            //startingRoom.palette.floorColor="#064";
             
 
 
@@ -2581,7 +2581,7 @@ function newRoom(x,y){
         palette: {
             clipColor:"#642",
             wallColor: "#864",
-            floorColor: "#048",    
+            floorColor: "#753"//"#048",    
         },
         tileSeed: Math.floor(Math.random()*100),
         render: function(){
@@ -2641,7 +2641,7 @@ function newRoom(x,y){
                 "stroke-width": constants.lineThickness
             })
             var t = this.tileSeed;
-            var tileWidth = (constants.brickWidth*.66);
+            var tileWidth = (constants.brickWidth*1.2);
             for(var r=0; r<this.box.height;r+=tileWidth){
                 for(var c=0; c<this.box.width;c+=tileWidth){
 
@@ -2655,7 +2655,7 @@ function newRoom(x,y){
                     if(r+h>this.box.height){
                         h = this.box.height - r;
                     }
-                    game.screen.drawRect(x, y, w, h , calculateAlpha(this.palette.floorColor,tiles[t],.25),"#000",1.5)//.attr({opacity:.25});
+                    game.screen.drawRect(x, y, w, h , calculateAlpha(this.palette.floorColor,tiles[t],.25),calculateAlpha(this.palette.floorColor,"#000",.25),1.5)//.attr({opacity:.25});
                     t = (t+1) % tiles.length;
                 }   
             }
@@ -3473,7 +3473,7 @@ music = {
         // play as soon as the buffer is loaded
         this.player.loop = loop;
         this.player.autostart = true;
-        this.player.volume.value = -10;
+        this.player.volume.value = -12;
     },
     fadeOut: function(callback){
         if(this.player){
@@ -3492,11 +3492,9 @@ music = {
         }
     },
     explore: function(){
-        this.fadeOut();
-        /*
         this.fadeOut(()=>{
             this.play("mp3/exploration.mp3", true)
-        })*/
+        })
     },
     exitLevel: function(){
         this.fadeOut(()=>{
