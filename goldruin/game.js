@@ -2555,7 +2555,6 @@ function titleScreen(){
                         clearInterval(interval);
                         fadeTo("#FFF",()=>{
                             startGame();
-                            exitLevel();
                         })
                     });
                 });
