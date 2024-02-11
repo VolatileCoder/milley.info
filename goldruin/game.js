@@ -1881,6 +1881,7 @@ function newTorch(){
     return torch;
 
 }
+
 function newTorchLight(torch){
     var torchLight = newGameObject();
     torchLight.torch = torch
@@ -2437,13 +2438,26 @@ function exitLevel(){
     r.doors.push(entrance);
     game.player.box.x = r.box.center().x - game.player.box.width/2;
     game.player.box.y = r.box.height;
-    
     game.player.sprite._lastLocation.x =  game.player.box.x;
     game.player.sprite._lastLocation.y = game.player.box.y;
     game.player.sprite.scale = 1;
     game.player.speed = 150;
     game.player.direction = NORTH;
     r.objects.push(game.player);
+
+    var wTorch = newTorch();
+    wTorch.wall = WEST;
+    wTorch.box.x = room.box.x - room.wallHeight / 2;
+    wTorch.box.y = dimensions.width * 2 / 3
+    r.objects.push(wTorch);
+    r.objects.push(newTorchLight(wTorch));
+
+    var eTorch = newTorch();
+    eTorch.wall = EAST;
+    eTorch.box.x = room.box.x + room.box.width + room.wallHeight / 2;
+    eTorch.box.y = dimensions.width  / 3
+    r.objects.push(eTorch);
+    r.objects.push(newTorchLight(eTorch));
     
     clearScreen();
     r.render();
@@ -2541,6 +2555,7 @@ function titleScreen(){
                         clearInterval(interval);
                         fadeTo("#FFF",()=>{
                             startGame();
+                            exitLevel();
                         })
                     });
                 });
@@ -3647,11 +3662,7 @@ titleScreen ();
 gameLoop(Date.now());
 
 //drawMap(game.screen,game.level);
-/*
-exit = newExit()
-exit.box.x = 500
-exit.box.y=250
-game.level.rooms[0].objects.push(exit)
-*/
+
+
 
 //exitLevel();
