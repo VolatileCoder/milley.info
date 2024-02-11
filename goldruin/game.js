@@ -1299,6 +1299,9 @@ function newTreasureChest(content){
                 game.level.statistics.keysCollected++;
             } else if (this.content == HEART){
                 game.player.health=constrain(0, game.player.health + 10, game.player.maxHealth);
+                if(game.player.health>=15){
+                    sfx.lowHealth(false)
+                }
                 game.level.statistics.heartsCollected++;
             } else if (this.content == HEARTCONTAINER){
                 game.player.maxHealth += 10;
@@ -1427,6 +1430,9 @@ function newAdventurer(controller){
     adventurer._hurt = adventurer.hurt;
     adventurer.hurt = function(damage, knockback){
         this._hurt(damage, knockback);
+        if(this.health<15){
+            sfx.lowHealth(true);
+        }
         if(this.state == DYING){
             this.direction = SOUTH;
             sfx.playerdeath();
@@ -3481,6 +3487,21 @@ sfx = {
         // play as soon as the buffer is loaded
         this.treasurePlayer.autostart = true;
                
+    },
+    lowHealth: function(start){
+        if (start && !this.lowHealthPlayer){
+            uri = "mp3/heart.mp3"; 
+            this.lowHealthPlayer = new Tone.Player(uri).toDestination();
+            this.lowHealthPlayer.volume = 20;
+            // play as soon as the buffer is loaded
+            this.lowHealthPlayer.loop = true;
+            this.lowHealthPlayer.autostart = true;
+        }
+        if(!start && this.lowHealthPlayer){
+            this.lowHealthPlayer.stop();
+            this.lowHealthPlayer.dispose();
+            this.lowHealthPlayer=null;
+        }
     },
     whip: function(){
         if(this.whipPlayer){
