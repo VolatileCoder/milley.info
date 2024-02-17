@@ -2448,11 +2448,11 @@ function newLevel(levelNumber){
                 maxKey = maxRegion;
             }
             //TODO: size reasonably, randomize
-            minWidth = constants.roomMinWidthInBricks + Math.round(constants.doorWidth / constants.brickWidth) * 2
-            minHeight = constants.roomMinHeightInBricks + 4 * 2
+            //minWidth = constants.roomMinWidthInBricks
+            //minHeight = constants.roomMinHeightInBricks
             
-            exitRoom.box.width = Math.floor((Math.random() * (constants.roomMaxWidthInBricks - minWidth)) + minWidth) * constants.brickWidth;
-            exitRoom.box.height = Math.floor((Math.random() * (constants.roomMaxHeightInBricks - minHeight)) + minHeight) * constants.brickWidth;
+            //exitRoom.box.width = Math.floor((Math.random() * (constants.roomMaxWidthInBricks - minWidth)) + minWidth) * constants.brickWidth;
+            //exitRoom.box.height =constants.brickWidth;//Math.floor((Math.random() * (constants.roomMaxHeightInBricks - minHeight)) + minHeight) * constants.brickWidth;
 
             exitRoom.exit = 1;
 
@@ -2575,8 +2575,8 @@ function newLevel(levelNumber){
             this.rooms.forEach((r)=>{r.doors.forEach((d)=>d.stabilize())});
             //set exit
             exit = newExit();
-            exit.box.x = exitRoom.box.width/2 - exit.box.width/2
-            exit.box.y = exitRoom.box.height/2 - exit.box.height/2
+            exit.box.x = exitRoom.box.x + exitRoom.box.width/2 - exit.box.width/2
+            exit.box.y = exitRoom.box.y + exitRoom.box.height/2 - exit.box.height/2
             exitRoom.objects.push(exit);
 
             //pepper with keys
@@ -2834,6 +2834,7 @@ function warpTo(levelNumber){
     music.explore();
     game.level = newLevel(levelNumber);
     game.level.start = Date.now();
+    
     startingRoom = game.level.rooms[0];
     startingRoom.visited = 1;
     game.currentRoom = startingRoom;
@@ -2861,6 +2862,7 @@ function warpTo(levelNumber){
             direction = EAST;
             break;
     }
+    
     game.currentRoom.objects.push(game.player);
     
     if(game.player.sprite){
