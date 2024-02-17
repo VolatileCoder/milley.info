@@ -3789,11 +3789,8 @@ function renderInfo(){
 }
 
 sfx = {
-    play: function(url){
-
-    },
     walk: function(start){
-        if(this.walkPlayer){
+        if(this.walkPlayer && this.walkPlayer.loaded){
             if(start){
                 this.walkPlayer.start();
             }else{
@@ -3808,7 +3805,7 @@ sfx = {
         }
     },
     openChest: function(){
-        if(this.chestPlayer){
+        if(this.chestPlayer && this.chestPlayer.loaded){
             this.chestPlayer.start();
         }else{
             this.chestPlayer = new Tone.Player("mp3/chest.mp3").toDestination();
@@ -3889,7 +3886,7 @@ sfx = {
         this.deathPlayer.autostart = true;
     },
     spiderbite: function(spider){
-        if(spider.bitePlayer){
+        if(spider.bitePlayer && spider.bitePlayer.loaded){
             spider.bitePlayer.start();
         } else {
             spider.bitePlayer = new Tone.Player("mp3/spiderbite.mp3").toDestination();
@@ -3898,7 +3895,7 @@ sfx = {
         }
     },
     spiderwalk: function(spider, walk){
-        if(spider.walkPlayer){
+        if(spider.walkPlayer && spider.walkPlayer.loaded){
             if (walk){
                 spider.walkPlayer.start();
             } else {
@@ -3913,7 +3910,7 @@ sfx = {
         }
     },
     spiderDeath: function(){
-        if(this.spiderDeathPlayer){
+        if(this.spiderDeathPlayer && this.spiderDeathPlayer.loaded){
             this.spiderDeathPlayer.start();
         } else {
             this.spiderDeathPlayer = new Tone.Player("mp3/spiderdeath.mp3").toDestination();
@@ -3922,7 +3919,7 @@ sfx = {
         }
     },
     skeletonwalk: function(skeleton, walk){
-        if(skeleton.walkPlayer){
+        if(skeleton.walkPlayer && skeleton.walkPlayer.loaded){
             if (walk){
                 skeleton.walkPlayer.start();
             } else {
@@ -3937,7 +3934,7 @@ sfx = {
         }
     },
     skeletonattack: function(skeleton){
-        if(skeleton.attackPlayer){
+        if(skeleton.attackPlayer && skeleton.attackPlayer.loaded){
             skeleton.attackPlayer.start();
         } else {
             skeleton.attackPlayer = new Tone.Player("mp3/skeletonattack.mp3").toDestination();
@@ -3947,7 +3944,7 @@ sfx = {
         }
     },
     skeletonDeath: function(){
-        if(this.skeletonDeathPlayer){
+        if(this.skeletonDeathPlayer && this.skeletonDeathPlayer.loaded){
             this.skeletonDeathPlayer.start();
         } else {
             this.skeletonDeathPlayer = new Tone.Player("mp3/skeletondeath.mp3").toDestination();
@@ -3972,7 +3969,7 @@ sfx = {
         this.roomPlayer.autostart = true;    
     },
     floorSpikes: function(spike){
-        if(spike.spikesPlayer && spike.spikesPlayer.buffer){
+        if(spike.spikesPlayer && spike.spikesPlayer.loaded){
             spike.spikesPlayer.start();
         }else{
             spike.spikesPlayer = new Tone.Player("mp3/floorspikes.mp3").toDestination();
