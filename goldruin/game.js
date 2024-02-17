@@ -1365,6 +1365,7 @@ function newFloorSpikes(offsetT){
         }else if(this.state ==1 && Date.now()-this._stateStart > 1000){
             //ATTACK!
             this.setState(ATTACKING);
+            sfx.floorSpikes(this);
             this.box.width = 62;
             this.box.height = 58;
             game.currentRoom.objects.forEach((o)=>{
@@ -1405,6 +1406,9 @@ function newFloorSpikes(offsetT){
         if(this.sprite){
             this.sprite.remove();
             this.sprite = null;
+        }
+        if(this.spikesPlayer){
+            this.spikesPlayer.dispose();
         }
     }
     return floorSpikes;
@@ -2830,7 +2834,6 @@ function exitLevel(){
 }
 
 function warpTo(levelNumber){
-    
     music.explore();
     game.level = newLevel(levelNumber);
     game.level.start = Date.now();
@@ -2862,12 +2865,13 @@ function warpTo(levelNumber){
             direction = EAST;
             break;
     }
-    
+
     game.currentRoom.objects.push(game.player);
     
     if(game.player.sprite){
         game.player.sprite.scale = 1;
     }
+
     game.player.speed = 150;
     game.player.move(0);
     game.player.direction = direction;
@@ -3966,6 +3970,16 @@ sfx = {
         } 
         this.roomPlayer = new Tone.Player("mp3/roomopen.mp3").toDestination();
         this.roomPlayer.autostart = true;    
+    },
+    floorSpikes: function(spike){
+        if(spike.spikesPlayer && spike.spikesPlayer.buffer){
+            spike.spikesPlayer.start();
+        }else{
+            spike.spikesPlayer = new Tone.Player("mp3/floorspikes.mp3").toDestination();
+            // play as soon as the buffer is loaded
+            spike.spikesPlayer.volume.value = -10;
+            spike.spikesPlayer.autostart = true;
+        }
     }
 }
 
