@@ -73,7 +73,7 @@ var constants =  {
     roomMaxWidthInBricks: 15,
     roomMaxHeightInBricks: 15, 
     spriteFamesPerSecond: 10,
-    controllerRadius: 175,
+    controllerRadius: 210,
     controllerCrossThickness: 70,
     maxHeartContainers: 25
 };
@@ -987,8 +987,14 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
             {
                 forceRender = true
             }
+            var trans0 = this._buildTranslation(this._lastLocation.x, this._lastLocation.y, this._lastLocation.r);
+            var trans1 = this._buildTranslation(this.location.x, this.location.y, this.location.r);
+    
+            var rect = this._buildClipRect(); 
+
             if(!this.element){
-                this.element = this.screen.image(this.image.frameset[this.animation.index], 0, 0, this.image.width, this.image.height).attr({opacity:0});
+                this.element = this.screen.image(this.image.frameset[this.animation.index], 0, 0, this.image.width, this.image.height).attr({opacity:0, "clip-rect": rect, transform:trans1});
+                trans0 = trans1;
                 this._lastLocation.x = this.location.x;
                 this._lastLocation.y = this.location.y;
                 this._lastLocation.r = this.location.r;
@@ -1002,10 +1008,7 @@ function newSprite(screen, frameset, imageWidth, imageHeight, spriteWidth, sprit
                 this._lastIndex = this.animation.index;
             }
     
-            var trans0 = this._buildTranslation(this._lastLocation.x, this._lastLocation.y, this._lastLocation.r);
-            var trans1 = this._buildTranslation(this.location.x, this.location.y, this.location.r);
-    
-            var rect = this._buildClipRect(); 
+
          
             frameChanged = (this._lastAnimation.frame != this.animation.frame || this._lastAnimation.index != this.animation.index || this._lastAnimation.series != this.animation.series)
             positionChanged = (this.location.x!=this._lastLocation.x || this.location.y != this._lastLocation.y || this.location.r != this._lastLocation.r);
@@ -1492,7 +1495,6 @@ function newExit(){
     return exit;
 }
 
-
 function newAdventurer(controller){
     var adventurer = newGameCharacter();
     adventurer.controller = controller;
@@ -1528,6 +1530,7 @@ function newAdventurer(controller){
         framestart = Date.now()
         if(!this.sprite){
             this.sprite = newSprite(game.screen, images.adventurer, 800, 500, 100, 100, 0, 0);
+            console.log("adventurer !this.sprite")
         }
         if(game.debug){
             this.box.render("#FF0");
@@ -2003,33 +2006,12 @@ function newKingCobra(controller){
         if(!this._viewBox){
             this._viewBox = newBox(0,0,50,50);
         }
-        //reposition the view box
-        switch(this.direction){
-            case NORTH:
-                this._viewBox.height = 500;
-                this._viewBox.width = 200;
-                this._viewBox.x = this.box.center().x - this._viewBox.width/2;
-                this._viewBox.y = this.box.y + this.box.height - this._viewBox.height
-                break;
-            case EAST:    
-                this._viewBox.width = 500;
-                this._viewBox.height = 200;
-                this._viewBox.x = this.box.x;
-                this._viewBox.y = this.box.center().y - this._viewBox.height/2
-                break;
-            case SOUTH:
-                this._viewBox.height = 500;
-                this._viewBox.width = 200;
-                this._viewBox.x = this.box.center().x - this._viewBox.width/2;
-                this._viewBox.y = this.box.y 
-                break;
-            case WEST:
-                this._viewBox.width = 500;
-                this._viewBox.height = 200;
-                this._viewBox.x = this.box.x + this.box.width - this._viewBox.width;
-                this._viewBox.y = this.box.center().y - this._viewBox.height/2
-                break;
-        }
+
+        this._viewBox.height = 500;
+        this._viewBox.width = 500;
+        this._viewBox.x = this.box.center().x - this._viewBox.width/2;
+        this._viewBox.y = this.box.center().y - this._viewBox.height/2;
+
         if (game.debug){
             this._viewBox.render("#FF0");
         }
@@ -2105,13 +2087,6 @@ function newKingCobra(controller){
     return snake;
 }
 
-
-function newPlayer(character){
-    character.keys = [];
-    character.gold = 0; 
-    return character;
-}
-
 function newSwordSkeleton(controller){
     var skeleton = newGameCharacter();
     skeleton.box.x = Math.round(dimensions.width / 2)-100;
@@ -2130,9 +2105,9 @@ function newSwordSkeleton(controller){
     skeleton._move = skeleton.move;
     skeleton.move= function (deltaT){
         if(!this.sprite || this.sprite.animation.frame>4){
-            this.speed = 10;
+            this.speed = 60;
         } else {
-            this.speed = 50;
+            this.speed = 4;
         }
 
         if(this.sprite && this.state == ATTACKING && !this.attacked && this.sprite.animation.frame==3){
@@ -2296,6 +2271,13 @@ function newSwordSkeleton(controller){
 
     
     return skeleton;
+}
+
+function newPlayer(character){
+    character.keys = [];
+    character.gold = 0; 
+    character.team = HEROIC;
+    return character;
 }
 
 function newTorch(){
@@ -4028,7 +4010,7 @@ sfx = {
         }else{
             this.chestPlayer = new Tone.Player("mp3/chest.mp3").toDestination();
             // play as soon as the buffer is loaded
-            this.walkPlayer.volume.value = -10;
+            this.chestPlayer.volume.value = -10;
             this.chestPlayer.autostart = true;
         }
     },
