@@ -1492,6 +1492,7 @@ function newExit(){
     return exit;
 }
 
+
 function newAdventurer(controller){
     var adventurer = newGameCharacter();
     adventurer.controller = controller;
@@ -1501,8 +1502,6 @@ function newAdventurer(controller){
     adventurer.box.height = 50;
     adventurer.direction = SOUTH; //init facing the player
     adventurer.team = HEROIC;
-    adventurer.keys = [];
-    adventurer.gold = 0; //in px/sec
     adventurer.speed = 150; //in px/sec
     adventurer.damage = 10;
     adventurer.health = 30;
@@ -1912,12 +1911,12 @@ function newKingCobra(controller){
     var snake = newGameCharacter();
     snake.box.x = Math.round(dimensions.width / 2)-100;
     snake.box.y = Math.round(dimensions.width / 2)-100;
-    snake.box.height = 75;
-    snake.box.width = 75;
+    snake.box.height = 50;
+    snake.box.width = 50;
     snake.team = DUNGEON;
     snake.direction = EAST;
     snake.controller = controller;
-    snake.speed = 90;
+    snake.speed = 85;
     snake.health = 20;
     snake.maxHealth = 20;
     snake.damage = 5;
@@ -1927,19 +1926,11 @@ function newKingCobra(controller){
     snake.move= function (deltaT){
         var state1 = this.state;
         this._move(deltaT);
-        if(this.state!=state1){
-            switch(this.state){
-                case WALKING: 
-                    sfx.spiderwalk(this, true);
-                    break;
-                default:
-                    sfx.spiderwalk(this,false)
-            }
-        }
+        /*
         switch(this.direction){
             case NORTH:
-                this.box.width = 25;
-                this.box.height = 80;
+                this.hitbox.width = 25;
+                this.hit.height = 80;
                 break;
             case WEST:
                 this.box.width = 95;
@@ -1955,6 +1946,7 @@ function newKingCobra(controller){
                 break;
                         
         }
+        */
     };
     snake.render = function(deltaT){
         if(!this.sprite){
@@ -1966,19 +1958,19 @@ function newKingCobra(controller){
         
         switch(this.direction){
             case NORTH:
-                this.sprite.location.x = this.box.x-40;
-                this.sprite.location.y = this.box.y-20;
+                this.sprite.location.x = this.box.x-25;
+                this.sprite.location.y = this.box.y-25;
                 break;
             case WEST:
                 this.sprite.location.x = this.box.x-10;
                 this.sprite.location.y = this.box.y-30;
                 break;
             case SOUTH:
-                this.sprite.location.x = this.box.x-35;
-                this.sprite.location.y = this.box.y;
+                this.sprite.location.x = this.box.x-25;
+                this.sprite.location.y = this.box.y-10;
                 break;
             case EAST:
-                this.sprite.location.x = this.box.x;
+                this.sprite.location.x = this.box.x-40;
                 this.sprite.location.y = this.box.y-30;
                 break;
                         
@@ -1989,7 +1981,7 @@ function newKingCobra(controller){
     };
     snake.attack = function(){
         if(this.state != ATTACKING){
-            sfx.spiderbite(this);
+            sfx.snakeBite(this);
             this.setState(ATTACKING);
         }
         opposingTeam = getOpposingTeam(this.team)
@@ -2093,10 +2085,7 @@ function newKingCobra(controller){
             snake.bitePlayer.stop();
             snake.bitePlayer.dispose();
         }
-        if(snake.walkPlayer){
-            snake.walkPlayer.stop();
-            snake.walkPlayer.dispose();
-        } 
+       
         if(game.debug){
             this.box.remove();
         }
@@ -2108,12 +2097,19 @@ function newKingCobra(controller){
         if(startHealth>0 && this.health<=0){
             game.level.statistics.caveSpidersKilled++;
             game.level.statistics.enemiesKilled++;
-            sfx.spiderDeath();
+            sfx.snakeDeath();
         }
     }
 
     
     return snake;
+}
+
+
+function newPlayer(character){
+    character.keys = [];
+    character.gold = 0; 
+    return character;
 }
 
 function newSwordSkeleton(controller){
@@ -2413,7 +2409,7 @@ function newGame() {
     return {
         //debug: true,        
         screen: newScreen("main"),
-        player: newAdventurer(newInputController()),
+        player: newPlayer(newAdventurer(newInputController())),
         statistics: newStatistics(),
         state: RUNNING
     };
@@ -4138,6 +4134,26 @@ sfx = {
             this.spiderDeathPlayer = new Tone.Player("mp3/spiderdeath.mp3").toDestination();
             // play as soon as the buffer is loaded
             this.spiderDeathPlayer.autostart = true;    
+        }
+    },
+    snakeBite: function(snake){
+        if(snake.bitePlayer && snake.bitePlayer.loaded){
+            snake.bitePlayer.start();
+        } else {
+            snake.bitePlayer = new Tone.Player("mp3/snakehiss.mp3").toDestination();
+            // play as soon as the buffer is loaded
+            
+            snake.bitePlayer.volume.value = -10;
+            snake.bitePlayer.autostart = true;    
+        }
+    },
+    snakeDeath: function(){
+        if(this.snakeDeathPlayer && this.snakeDeathPlayer.loaded){
+            this.snakeDeathPlayer.start();
+        } else {
+            this.snakeDeathPlayer = new Tone.Player("mp3/snakedeath.mp3").toDestination();
+            // play as soon as the buffer is loaded
+            this.snakeDeathPlayer.autostart = true;    
         }
     },
     skeletonwalk: function(skeleton, walk){
