@@ -380,6 +380,8 @@ function newStatistics(title){
         caveSpidersKilled: 0,
         swordSkeletonsSpawned: 0,
         swordSkeletonsKilled: 0,
+        kingCobrasSpawned: 0,
+        kingCobrasKilled: 0,
         doorsUnlocked:0,
         doorsSpawned:0,
         roomsVisited:0,
@@ -400,6 +402,8 @@ function newStatistics(title){
             this.caveSpidersKilled += s.caveSpidersKilled;
             this.swordSkeletonsSpawned += s.swordSkeletonsSpawned;
             this.swordSkeletonsKilled += s.swordSkeletonsKilled;
+            this.kingCobrasSpawned += s.kingCobrasSpawned;
+            this.kingCobrasKilled += s.kingCobrasKilled;
             this.doorsUnlocked += s.doorsUnlocked;
             this.doorsSpawned += s.doorsSpawned;
             this.roomsVisited += s.roomsVisited;
@@ -434,7 +438,6 @@ function newStatistics(title){
             stats.push(game.screen.text(x1, y, "TIME SPENT:").attr(attrHeaderLeft));
             stats.push(game.screen.text(x2, y,  msToTime(this.timeSpent)).attr(attrHeaderRight));
             
-
             y += 64;
             stats.push(game.screen.text(x1, y, "ROOMS DISCOVERED:").attr(attrHeaderLeft));
             stats.push(game.screen.text(x2, y,  numberWithCommas(this.roomsVisited) + " / " + numberWithCommas(this.roomsSpawned)).attr(attrHeaderRight));
@@ -480,6 +483,11 @@ function newStatistics(title){
                 y += 40;
                 stats.push(game.screen.text(x1 + indent, y,"SKELETONS SMASHED:").attr(attrStatLeft));
                 stats.push(game.screen.text(x2, y, numberWithCommas(this.swordSkeletonsKilled) + " / " + numberWithCommas(this.swordSkeletonsSpawned)).attr(attrStatRight));
+            }
+            if(this.kingCobrasSpawned>0){       
+                y += 40;
+                stats.push(game.screen.text(x1 + indent, y,"SNAKES STOMPED:").attr(attrStatLeft));
+                stats.push(game.screen.text(x2, y, numberWithCommas(this.kingCobrasKilled) + " / " + numberWithCommas(this.kingCobrasSpawned)).attr(attrStatRight));
             }
 
             var ms = 0;
@@ -2077,7 +2085,7 @@ function newKingCobra(controller){
         startHealth=this.health;
         this._hurt(damage,knockback);
         if(startHealth>0 && this.health<=0){
-            game.level.statistics.caveSpidersKilled++;
+            game.level.statistics.kingCobrasKilled++;
             game.level.statistics.enemiesKilled++;
             sfx.snakeDeath();
         }
@@ -2540,13 +2548,14 @@ function newLevel(levelNumber){
 
                     
 
-                    //TODO: Lock entrance if not starting position.
+                    // Lock entrance if not starting position.
                     entrance.opened = false;
                     entrance.lock = region;
                     entrance.region = region;
                     
                     extent.doors.push(newDoor(this,extent,direction, 0));
                     entrance.doors.push(newDoor(this,entrance,(direction + 2) % 4, 0));
+                    this.statistics.doorsSpawned++;
                 }
 
                 entrance.region = region;
@@ -2810,7 +2819,7 @@ function newLevel(levelNumber){
                                 break;
                             case 2:
                                 r.spawn(newKingCobra(newRandomController()));
-                                this.statistics.caveSpidersSpawned++;
+                                this.statistics.kingCobrasSpawned++;
                                 break;
                         }
                         
