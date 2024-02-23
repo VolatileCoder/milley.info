@@ -2651,6 +2651,7 @@ function newLevel(levelNumber){
             
             //exitRoom.box.width = Math.floor((Math.random() * (constants.roomMaxWidthInBricks - minWidth)) + minWidth) * constants.brickWidth;
             //exitRoom.box.height =constants.brickWidth;//Math.floor((Math.random() * (constants.roomMaxHeightInBricks - minHeight)) + minHeight) * constants.brickWidth;
+            exitRoom.box.height = constrain((constants.roomMinHeightInBricks+2) *constants.brickWidth, exitRoom.box.height, constants.roomMaxHeightInBricks * constants.brickWidth)
 
             exitRoom.exit = 1;
 
