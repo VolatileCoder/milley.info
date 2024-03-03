@@ -1595,22 +1595,26 @@ function newAdventurer(controller){
             if(!this.whip.element && framestart - this.sprite.animation.startTime > 100){
                 switch(this.direction){
                     case NORTH:
-                        this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2 )
+                        this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2 );
                         break;
                     case EAST:
-                        this.whip.element = game.screen.drawRect(this.whip.box.x + 10,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2)
+                        this.whip.element = game.screen.drawRect(this.whip.box.x + 10,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight+1, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2);
+                        this.whip.shadow = game.screen.drawRect(this.whip.box.x + 24.5, this.whip.box.y+46.5 + dimensions.infoHeight, Math.abs(this.whip.box.width-24), 4, "#000","#000",0).attr({"opacity":.5});
                         break;
                     case SOUTH: 
-                        this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2)
+                        this.whip.element = game.screen.drawRect(Math.round(this.whip.box.x + this.whip.box.width/2)-2, this.whip.box.y + dimensions.infoHeight, 3, this.whip.box.height, "#624a2e","#000", 2);
                         break;
                     case WEST:
-                        this.whip.element = game.screen.drawRect(this.whip.box.x,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2)
+                        this.whip.element = game.screen.drawRect(this.whip.box.x,  Math.round(this.whip.box.y + this.whip.box.height/2)-2 + dimensions.infoHeight, Math.abs(this.whip.box.width-10), 3, "#624a2e","#000", 2);
+                        this.whip.shadow = game.screen.drawRect(this.whip.box.x, this.whip.box.y+50.75 + dimensions.infoHeight, Math.abs(this.whip.box.width-22), 4, "#000","#000",0).attr({"opacity":.5});
                         break;
                     }
             }
         } else {
             if(this.whip.element) this.whip.element.remove();
             this.whip.element = null;
+            if(this.whip.shadow) this.whip.shadow.remove();
+            this.whip.shadow = null;
         }
 
         //render player sprite
